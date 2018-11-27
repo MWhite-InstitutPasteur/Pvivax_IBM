@@ -10,7 +10,7 @@ This section provides details about how to build the model on different operatin
 ### On your laptop
 Under UNIX/Linux, use GCC 7+ (I know for sure it'll fail with GCC 4 because of syntaxical errors with '\<' and '\>' signs).
 
-````bash
+```bash
 g++ -O3 -o Pv_model Source.cpp com.cpp linpack.cpp randlib.cpp
 ```
 
