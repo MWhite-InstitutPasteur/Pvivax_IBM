@@ -2932,7 +2932,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if( (PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0) )
+					if( (PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0) )
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
@@ -3118,7 +3118,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if ((PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0))
+					if ((PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0))
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
@@ -3291,7 +3291,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if ((PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0))
+					if ((PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0))
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
