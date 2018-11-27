@@ -2607,7 +2607,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		{
 			cout << "LLIN distribution" << endl;
 
-			QQ = phi_inv(INTVEN->LLIN_cover[m], 0.0, sqrt(1.0 + theta->sig_round_LLIN*theta->sig_round_LLIN));
+			try 
+			{
+				QQ = phi_inv(INTVEN->LLIN_cover[m], 0.0, sqrt(1.0 + theta->sig_round_LLIN*theta->sig_round_LLIN));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
@@ -2638,7 +2646,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		{
 			cout << "IRS distribution" << endl;
 
-			QQ = phi_inv(INTVEN->IRS_cover[m], 0.0, sqrt(1.0 + theta->sig_round_IRS*theta->sig_round_IRS));
+			try 
+			{
+				QQ = phi_inv(INTVEN->IRS_cover[m], 0.0, sqrt(1.0 + theta->sig_round_IRS*theta->sig_round_IRS));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
@@ -2771,7 +2787,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 			theta->MDA_BS_BSeff   = INTVEN->MDA_BS_BSeff[m];
 			theta->MDA_BS_BSproph = INTVEN->MDA_BS_BSproph[m];
 
-			QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			try 
+			{
+				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
@@ -2816,7 +2840,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 			theta->MDA_PQ_preg_risk   = INTVEN->MDA_PQ_preg_risk[m];
 			theta->MDA_PQ_low_age     = INTVEN->MDA_PQ_low_age[m];
 
-			QQ = phi_inv(theta->MDA_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			try 
+			{
+				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
@@ -2959,7 +2991,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 			theta->MSAT_PQ_preg_risk   = INTVEN->MSAT_PQ_preg_risk[m];
 			theta->MSAT_PQ_low_age     = INTVEN->MSAT_PQ_low_age[m];
 
-			QQ = phi_inv(theta->MSAT_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			try 
+			{
+				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
@@ -3140,7 +3180,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 			theta->SSAT_PQ_preg_risk   = INTVEN->SSAT_PQ_preg_risk[m];
 			theta->SSAT_PQ_low_age     = INTVEN->SSAT_PQ_low_age[m];
 
-			QQ = phi_inv(theta->SSAT_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			try 
+			{
+				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+			}
+			catch (const char* e)
+			{
+				std::cerr << e << std::endl;
+				exit (1);
+			}
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
@@ -3338,9 +3386,17 @@ int CH_sample(double *xx, int nn)
 
 double phi_inv(double pp, double mu, double sigma)
 {
-	if (pp <= 0.0 || pp >= 1.0)
+	if (pp < 0.0 || pp > 1.0)
 	{
-		throw("bad vlaue of pp (coverage) in erfinv");
+		throw("bad vlaue of pp (coverage) in phi_inv");
+	}
+	else if (pp == 0.0) 
+	{
+		return -std::numeric_limits<double>::infinity();
+	}
+	else if (pp == 1.0)
+	{
+		return std::numeric_limits<double>::infinity();
 	}
 
 	double cc[] = { 2.515517, 0.802853, 0.010328 };
