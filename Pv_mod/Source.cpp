@@ -3073,7 +3073,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 					/////////////////////////////////////////////////////////////////////
 					// Was there PQ overtreatment?
 
-					if ((PQ_treat == 1) && (POP->people[n].Hyp = 0))
+					if ((PQ_treat == 1) && (POP->people[n].Hyp == 0))
 					{
 						POP->people[n].PQ_overtreat = 1;
 					}
@@ -3238,7 +3238,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 					/////////////////////////////////////////////////////////////////////
 					// Was there PQ overtreatment?
 
-					if ((PQ_treat == 1) && (POP->people[n].Hyp = 0))
+					if ((PQ_treat == 1) && (POP->people[n].Hyp == 0))
 					{
 						POP->people[n].PQ_overtreat = 1;
 					}
