@@ -2842,7 +2842,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			try 
 			{
-				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+				QQ = phi_inv(theta->MDA_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
 			}
 			catch (const char* e)
 			{
@@ -2993,7 +2993,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			try 
 			{
-				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+				QQ = phi_inv(theta->MSAT_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
 			}
 			catch (const char* e)
 			{
@@ -3182,7 +3182,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			try 
 			{
-				QQ = phi_inv(theta->MDA_BS_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
+				QQ = phi_inv(theta->SSAT_PQ_BScover, 0.0, sqrt(1.0 + theta->sig_round_MDA*theta->sig_round_MDA));
 			}
 			catch (const char* e)
 			{
