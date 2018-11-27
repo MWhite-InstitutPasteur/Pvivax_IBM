@@ -1,0 +1,6 @@
+.vs/
+Output/
+Release/
+*.vcxproj*
+*.sln
+IB_mod_batch.bat
