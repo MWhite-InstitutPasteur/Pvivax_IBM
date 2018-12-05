@@ -7,6 +7,8 @@
 ///  Institut Pasteur                                                     ///
 ///  michael.white@pasteur.fr                                             ///
 ///                                                                       ///
+///  With contributions from Dr Thomas Obadia                             /// 
+///                                                                       ///
 ///  Please feel free to use and modify if you wish. However,             ///
 ///  please provide appropriate acknowledgement and get in touch          ///
 ///  if you have any questions. This is not necessarily the               ///
@@ -538,6 +540,14 @@ public:
 
 	//////////////////////////////////////////////////////////
 	// 0.2.9. Person-specific intervention access parameter
+	//
+	// Note that while there are 9 interventions in total, 2 of these are
+	// are related to first-line treatment. Therefore there are N_int = 6
+	// 'pulsed' interventions, i.e. those distributed by campaigns where 
+	// access will be an issue. 
+	//
+	// Of course there will be differential access to first-line treatment,
+	// but that's a story for another day.
 
 	double zz_int[N_int];
 
@@ -2591,8 +2601,6 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 	bool BS_effective;
 	bool PQ_treat;
 	bool PQ_effective;
-	//bool PQ_overtreat;
-	//bool PQ_overtreat_9m;
 
 	bool MSAT_pos;
 	bool SSAT_pos;
@@ -2781,13 +2789,10 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 					if (genunf(0.0, 1.0) < theta->MDA_BS_BSeff)
 					{
-						if (gennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
-						{
-							if (POP->people[n].S == 1) {     POP->people[n].S = 0;     POP->people[n].P = 1; }
-							if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1; }
-							if (POP->people[n].I_LM == 1) {  POP->people[n].I_LM = 0;  POP->people[n].P = 1; }
-							if (POP->people[n].I_D == 1) {   POP->people[n].I_D = 0;   POP->people[n].T = 1; }
-						}
+						if (POP->people[n].S == 1    ) { POP->people[n].S = 0;     POP->people[n].P = 1; }
+						if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1; }
+						if (POP->people[n].I_LM == 1 ) { POP->people[n].I_LM = 0;  POP->people[n].P = 1; }
+						if (POP->people[n].I_D == 1  ) { POP->people[n].I_D = 0;   POP->people[n].T = 1; }
 					}
 				}
 			}
@@ -2820,7 +2825,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[4], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
@@ -2828,7 +2833,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 					BS_effective = 0;
 
-					if (genunf(0.0, 1.0) < theta->SSAT_PQ_BSeff)
+					if (genunf(0.0, 1.0) < theta->MDA_PQ_BSeff)
 					{
 						BS_effective = 1;
 					}
@@ -2839,7 +2844,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 					PQ_treat = 0;
 
-					if( genunf(0.0, 1.0) < theta->MSAT_PQ_PQavail )
+					if( genunf(0.0, 1.0) < theta->MDA_PQ_PQavail )
 					{
 						PQ_treat = 1;
 					}
@@ -2900,7 +2905,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if( (PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0) )
+					if( (PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0) )
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
@@ -2963,7 +2968,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[5], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
@@ -3005,7 +3010,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 					BS_effective = 0;
 
-					if (genunf(0.0, 1.0) < theta->SSAT_PQ_BSeff)
+					if (genunf(0.0, 1.0) < theta->MSAT_PQ_BSeff)
 					{
 						BS_effective = 1;
 					}
@@ -3078,7 +3083,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if ((PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0))
+					if ((PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0))
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
@@ -3144,12 +3149,13 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[6], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
 
 					POP->people[n].ACT_treat = 1;
+
 
 					/////////////////////////////////////////////////////
 					// Is blood-stage treatment effective
@@ -3222,11 +3228,11 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 					/////////////////////////////////////////////////////////////////////
 					// Is PQ effective?
 
-					PQ_effective = 1;
+					PQ_effective = 0;
 
-					if( genunf(0.0, 1.0) > theta->SSAT_PQ_PQeff )
+					if( genunf(0.0, 1.0) < theta->SSAT_PQ_PQeff )
 					{
-						PQ_effective = 0;
+						PQ_effective = 1;
 					}
 
 					if( (theta->SSAT_PQ_CYP2D6_risk == 1) && (POP->people[n].CYP2D6 == 1) )
@@ -3243,7 +3249,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].PQ_overtreat = 1;
 					}
 
-					if ((PQ_treat == 1) && (POP->people[n].T_last_BS < 270.0))
+					if ((PQ_treat == 1) && (POP->people[n].T_last_BS > 270.0))
 					{
 						POP->people[n].PQ_overtreat_9m = 1;
 					}
@@ -5486,9 +5492,9 @@ void individual::state_mover(params theta, double lam_bite)
 
 				if( genunf(0.0, 1.0) < theta.treat_BSeff )
 				{
+					S = 0;
 					T = 1;
 				}
-				S = 0;
 
 
 				I_PCR_new = 1;
@@ -5536,14 +5542,14 @@ void individual::state_mover(params theta, double lam_bite)
 					/////////////////////////////////////////////////////////////////////
 					// Is PQ effective?
 
-					PQ_effective = 1;
+					PQ_effective = 0;
 
-					if (genunf(0.0, 1.0) > theta.PQ_treat_PQeff)
+					if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 					{
 						PQ_effective = 0;
 					}
 
-					if ((theta.MSAT_PQ_CYP2D6_risk == 1) && (CYP2D6 == 1))
+					if ((theta.PQ_treat_CYP2D6_risk == 1) && (CYP2D6 == 1))
 					{
 						PQ_effective = 0;
 					}
@@ -5739,9 +5745,9 @@ void individual::state_mover(params theta, double lam_bite)
 
 				if (genunf(0.0, 1.0) < theta.treat_BSeff)
 				{
+					I_PCR = 0;
 					T = 1;
 				}
-				I_PCR = 0;
 
 
 				I_PCR_new = 1;
@@ -5789,14 +5795,14 @@ void individual::state_mover(params theta, double lam_bite)
 					/////////////////////////////////////////////////////////////////////
 					// Is PQ effective?
 
-					PQ_effective = 1;
+					PQ_effective = 0;
 
-					if (genunf(0.0, 1.0) > theta.PQ_treat_PQeff)
+					if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 					{
-						PQ_effective = 0;
+						PQ_effective = 1;
 					}
 
-					if ((theta.MSAT_PQ_CYP2D6_risk == 1) && (CYP2D6 == 1))
+					if ((theta.PQ_treat_CYP2D6_risk == 1) && (CYP2D6 == 1))
 					{
 						PQ_effective = 0;
 					}
@@ -5957,9 +5963,10 @@ void individual::state_mover(params theta, double lam_bite)
 
 				if (genunf(0.0, 1.0) < theta.treat_BSeff)
 				{
+					I_LM = 0;
 					T = 1;
 				}
-				I_LM = 0;
+
 
 
 				I_PCR_new = 1;
@@ -6007,14 +6014,14 @@ void individual::state_mover(params theta, double lam_bite)
 					/////////////////////////////////////////////////////////////////////
 					// Is PQ effective?
 
-					PQ_effective = 1;
+					PQ_effective = 0;
 
-					if (genunf(0.0, 1.0) > theta.PQ_treat_PQeff)
+					if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 					{
-						PQ_effective = 0;
+						PQ_effective = 1;
 					}
 
-					if ((theta.MSAT_PQ_CYP2D6_risk == 1) && (CYP2D6 == 1))
+					if ((theta.PQ_treat_CYP2D6_risk == 1) && (CYP2D6 == 1))
 					{
 						PQ_effective = 0;
 					}

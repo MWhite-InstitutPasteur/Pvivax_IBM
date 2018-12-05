@@ -201,6 +201,10 @@ border=c("black", "green", "blue", "red") )
 ## PANEL 8: Primaquine overtreatment
 
 plot(x=OUTPUT$time/365, y=OUTPUT$PQ_overtreat/OUTPUT$N_pop, type='l', ylim=c(0,1),
-xlab="time (years)", ylab="", main="Mean number of hypnozoite batches per person")
+xlab="time (years)", ylab="", main="Primaquine over-treatment")
 
 points(x=OUTPUT$time/365, y=OUTPUT$PQ_overtreat_9m/OUTPUT$N_pop, type='l', col="red")
+
+
+
+
