@@ -2,15 +2,16 @@
 This is the C++ source code for the _Plasmodium vivax_ transmission model developed by Dr. Michael WHITE (<mwhite@pasteur.fr>). This model has been first described in [White _et al._, 2018](dx.doi.org/10.1038/s41467-018-05860-8).
 
 Briefly, it is a mixture of individual-based (humans) and compartmental models (mosquitoes), where _P. vivax_ infection in humans can lead to the introduction of hypnozoites (dormant stage of the parasite foudn in the liver). These hypnozoites then cause relapses through a stochastic process. The following figure summarises the different compartment.
-[model](../blob/master/resources/model_compartments.png)
+
+![model](../blob/master/resources/model_compartments.png)
 
 This model also allows for simulating public health interventions. Currently implemented interventions are:
-..* LLINs: Distirbution of long-lasting insecticide nets, along with the progressive decay of the insecticide agent.
-..* IRS: Distribution and usage of insecticide-repellant spray, along with the progressive decay of insecticide agent.
-..* MDA (BS): Mass drug administration of bloodstage drug, e.g. artemisinin-combined therapy (ACT). This kind of MDA will clear bloodstage infections but will preserve the current hypnozoite reservoir.
-..* MDA (BS+PQ): Mass drug administration of both bloodstage (ACT) and hypnozoidicidal drug (Primaquine/Tafenoquine). This will clear ongoing bloodstage infections as well as dormant liver stages. Depending on options, administration of hypnozoidicidal drugs may be subject to restrictions (e.g. in G6PD-deficient individuals, pregnant women and infants).
-..* MSAT (BS+PQ): Mass screen-and-treat for current bloodstage infection, where people screened positive are treated with a bloodstage drug and a hypnozoidicidal drug, when it is safe to do so (_ie_ again exlucding G6PD-deficient individuals, pregnant women and infants)
-..* SSAT (BS+PQ): Serological screen-and-treat procedure, where the presence/absence of hypnozoites is assessed through the proxy of a recent bloodstage infection. This method uses ongoing developments of serological markers for a recent exposure to _P. vivax_. Individuals are screened and those who are thought the have had a bloodstage infections in the preceding 9 months are treated with hypnozoidicidal (again, when safety conditions are met). All individuals are given bloodstage drugs.
+* LLINs: Distirbution of long-lasting insecticide nets, along with the progressive decay of the insecticide agent.
+* IRS: Distribution and usage of insecticide-repellant spray, along with the progressive decay of insecticide agent.
+* MDA (BS): Mass drug administration of bloodstage drug, e.g. artemisinin-combined therapy (ACT). This kind of MDA will clear bloodstage infections but will preserve the current hypnozoite reservoir.
+* MDA (BS+PQ): Mass drug administration of both bloodstage (ACT) and hypnozoidicidal drug (Primaquine/Tafenoquine). This will clear ongoing bloodstage infections as well as dormant liver stages. Depending on options, administration of hypnozoidicidal drugs may be subject to restrictions (e.g. in G6PD-deficient individuals, pregnant women and infants).
+* MSAT (BS+PQ): Mass screen-and-treat for current bloodstage infection, where people screened positive are treated with a bloodstage drug and a hypnozoidicidal drug, when it is safe to do so (_ie_ again exlucding G6PD-deficient individuals, pregnant women and infants)
+* SSAT (BS+PQ): Serological screen-and-treat procedure, where the presence/absence of hypnozoites is assessed through the proxy of a recent bloodstage infection. This method uses ongoing developments of serological markers for a recent exposure to _P. vivax_. Individuals are screened and those who are thought the have had a bloodstage infections in the preceding 9 months are treated with hypnozoidicidal (again, when safety conditions are met). All individuals are given bloodstage drugs.
 
 It should be noted that all these interventions can be tweaked with numerous parameters, such as  intervention coverage, drug efficiency, screening procedure (sensitivity and specifity).
 
