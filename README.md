@@ -63,7 +63,9 @@ TODO: write (more) about mosquito parameters
 ### Intervention parameters
 The [Intervention file generator](../Intervention_file_generator.R) R script will produce an intervention file where each column corresponds to a time where an intervention (or different combinations of interventions) is enforced.
 
-It should be noted that this file has changed format between the [legacy branch](../Intervention_file_generator.R) and the [master branch](../Intervention_file_generator.R). The legacy version of the model used a row-based format, where each row corresponded to an intervention time. In the master branch, the newly-introduced format is column-based, as described in the previous paragraph. There are also more parameters, and not necessarily in the same order, in the master branch. __Therefore, intervention parameters files are not interchangeable.__
+It should be noted that this file has changed format between the [legacy branch](https://gitlab.pasteur.fr/mwhite/pv_mod/tree/legacy/Intervention_file_generator.R) and the [master branch](https://gitlab.pasteur.fr/mwhite/pv_mod/tree/master/Intervention_file_generator.R). The legacy version of the model used a row-based format, where each row corresponded to an intervention time. In the master branch, the newly-introduced format is column-based, as described in the previous paragraph. There are also more parameters, and not necessarily in the same order, in the master branch. 
+
+__Therefore, intervention parameters files are not interchangeable.__
 
 ### Run the model
 The following line will run the model using input files provided in this repository, assuming the model has been built in `Pv_mod/Pv_model.o` as described above:
