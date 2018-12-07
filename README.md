@@ -3,7 +3,7 @@ This is the C++ source code for the _Plasmodium vivax_ transmission model develo
 
 Briefly, it is a mixture of individual-based (humans) and compartmental models (mosquitoes), where _P. vivax_ infection in humans can lead to the introduction of hypnozoites (dormant stage of the parasite foudn in the liver). These hypnozoites then cause relapses through a stochastic process. The following figure summarises the different compartment.
 
-![model](../blob/master/resources/model_compartments.png)
+![model](../resources/model_compartments.png)
 
 This model also allows for simulating public health interventions. Currently implemented interventions are:
 * LLINs: Distirbution of long-lasting insecticide nets, along with the progressive decay of the insecticide agent.
@@ -17,10 +17,10 @@ It should be noted that all these interventions can be tweaked with numerous par
 
 ## What's in this repo ?
 There are two (main) branches to this GitLab repository :
-..* [Master](../blob/master/), where the latest model developments are usually merged. This is the more up-to-date version of the model.
-..* [Legacy](../blob/legacy), containing the version of the model that was initially developed and used in the abovementioned research paper. This branch is no longer actively maintained and much of the code has been refactored, especially in respect to treatment pathways.
+* [Master](https://gitlab.pasteur.fr/mwhite/pv_mod/tree/master/), where the latest model developments are usually merged. This is the more up-to-date version of the model.
+* [Legacy](https://gitlab.pasteur.fr/mwhite/pv_mod/tree/legacy), containing the version of the model that was initially developed and used in the abovementioned research paper. This branch is no longer actively maintained and much of the code has been refactored, especially in respect to treatment pathways.
 
-The actual model code is found in the Pv\_mod folder, in the [Source.cpp](../blob/master/Pv_mod/Source.cpp) file. Numerical optimisation routines are found in the same directory, in different C++ source and header files.
+The actual model code is found in the Pv\_mod folder, in the [Source.cpp](../Pv_mod/Source.cpp) file. Numerical optimisation routines are found in the same directory, in different C++ source and header files.
 The root of this repository contains example of model parameter files, as well as some R code to visualize model outputs.
 
 ## Build the model
@@ -61,9 +61,9 @@ The three species considered in this model are _An. farauti_, _An. pucntulatus_ 
 TODO: write (more) about mosquito parameters
 
 ### Intervention parameters
-The [Intervention file generator](../blob/master/Intervention_file_generator.R) R script will produce an intervention file where each column corresponds to a time where an intervention (or different combinations of interventions) is enforced.
+The [Intervention file generator](../Intervention_file_generator.R) R script will produce an intervention file where each column corresponds to a time where an intervention (or different combinations of interventions) is enforced.
 
-It should be noted that this file has changed format between the [legacy branch](../blob/legacy/Intervention_file_generator.R) and the [master branch](../blob/master/Intervention_file_generator.R). The legacy version of the model used a row-based format, where each row corresponded to an intervention time. In the master branch, the newly-introduced format is column-based, as described in the previous paragraph. There are also more parameters, and not necessarily in the same order, in the master branch. __Therefore, intervention parameters files are not interchangeable.__
+It should be noted that this file has changed format between the [legacy branch](../Intervention_file_generator.R) and the [master branch](../Intervention_file_generator.R). The legacy version of the model used a row-based format, where each row corresponded to an intervention time. In the master branch, the newly-introduced format is column-based, as described in the previous paragraph. There are also more parameters, and not necessarily in the same order, in the master branch. __Therefore, intervention parameters files are not interchangeable.__
 
 ### Run the model
 The following line will run the model using input files provided in this repository, assuming the model has been built in `Pv_mod/Pv_model.o` as described above:
@@ -75,7 +75,7 @@ The output will be written to `model_output.txt`.
 ## Explore model output
 Model output is provided in a text-based format, where each row represent a time step and columns corespond to model parameters. As such, the _i_-th line and _j_-th column will provide the value of parameter _j_ at time step _i_. The model simulates daily events, so that each line corresponds to a different day, with initial value of `365*date_start`.
 
-The burn-in period (10 years) is dropped from model output, as well as some summary statistics that are not relevant for most uses. These can be further explored in section 1.11 of [Source.cpp, around line 1711](../blob/master/Pv_mod/Source.cpp#L1711) (at the time of writing this ReadMe), where sections are commented out by default for the sake of making the output files a bit smaller.
+The burn-in period (10 years) is dropped from model output, as well as some summary statistics that are not relevant for most uses. These can be further explored in section 1.11 of [Source.cpp, around line 1711](../Pv_mod/Source.cpp#L1711) (at the time of writing this ReadMe), where sections are commented out by default for the sake of making the output files a bit smaller.
 
 ### Summary statistics
 TODO: write about `Output_overview.R` script
