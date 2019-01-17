@@ -1,5 +1,5 @@
 
-OUTPUT <- read.table("Output\\model_output.txt")
+OUTPUT <- read.table("./model_output.txt")
 
 N_spec = 3
 

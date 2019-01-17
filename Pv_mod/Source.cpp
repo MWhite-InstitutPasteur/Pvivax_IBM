@@ -1732,7 +1732,10 @@ int main(int argc, char** argv)
 
 		for (int g = 0; g < N_spec; g++)
 		{
+			// Write only compartments S, E and I in mosquitoes
 			for (int k = 3; k < N_M_comp; k++)
+			// Write all compartments in mosquitoes
+			// for (int k = 0; k < N_M_comp; k++)
 			{
 				output_Stream << PNG_sim.yM_t[i][g][k] << "\t";
 			}
@@ -1743,14 +1746,31 @@ int main(int argc, char** argv)
 			output_Stream << PNG_sim.prev_all[i][k] << "\t";
 		}
 
+		// Write output for age categories U5 and U10
+		/*for (int k = 0; k<10; k++)
+		{
+			output_Stream << PNG_sim.prev_U5[i][k] << "\t";
+		}
+
+		for (int k = 0; k<10; k++)
+		{
+			output_Stream << PNG_sim.prev_U10[i][k] << "\t";
+		}*/
+
 		output_Stream << PNG_sim.EIR_t[i] << "\t";
 		output_Stream << PNG_sim.LLIN_cov_t[i] << "\t";
 		output_Stream << PNG_sim.IRS_cov_t[i] << "\t";
 		output_Stream << PNG_sim.ACT_treat_t[i] << "\t";
 		output_Stream << PNG_sim.PQ_treat_t[i] << "\t";
+		// Write number of pregnant women
+		// output_Stream << PNG_sim.pregnant_t[i] << "\t";
 
 		output_Stream << PNG_sim.PQ_overtreat_t[i] << "\t";
 		output_Stream << PNG_sim.PQ_overtreat_9m_t[i] << "\t";
+
+		// Write A_par_mean_t and A_clin_mean_t
+		/*output_Stream << PNG_sim.A_par_mean_t[i] << "\t";
+		output_Stream << PNG_sim.A_clin_mean_t[i] << "\t";*/
 
 		output_Stream << endl;
 	}
