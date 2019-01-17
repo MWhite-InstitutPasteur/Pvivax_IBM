@@ -577,7 +577,7 @@ public:
 	///////////////////////////////
 	// SSAT
 
-	double T_last_BS;
+	double T_last_BS;         // Tracking of time since last PCR-detectable blood-stage infection
 
 	///////////////////////////////////////////////////
 	// Individual-level effect of vector control
@@ -946,7 +946,8 @@ int main(int argc, char** argv)
 	population PNG_pop;
 	params Pv_mod_par;
 
-	int time_start, time_end, burnin_time, N_time;
+	double time_start, time_end, burnin_time;
+	int  N_time;
 
 
 	////////////////////////////////////////////
@@ -2857,7 +2858,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[4], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
@@ -2965,7 +2966,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].Hyp = 0;
 
 						POP->people[n].PQ_proph = 1;
-						POP->people[n].PQ_proph_timer = theta->SSAT_PQ_PQproph;
+						POP->people[n].PQ_proph_timer = theta->MDA_PQ_PQproph;
 					}
 				}
 			}
@@ -3008,7 +3009,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[5], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[4], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
@@ -3154,7 +3155,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						POP->people[n].Hyp = 0;
 
 						POP->people[n].PQ_proph = 1;
-						POP->people[n].PQ_proph_timer = theta->SSAT_PQ_PQproph;
+						POP->people[n].PQ_proph_timer = theta->MSAT_PQ_PQproph;
 					}
 				}
 			}
@@ -3197,7 +3198,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n < POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[6], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[5], theta->sig_round_MDA) < QQ)
 				{
 					/////////////////////////////////////////////////////
 					// Blood-stage treatment is always administered
@@ -3217,9 +3218,15 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 					/////////////////////////////////////////////////////////////////////
 					// SSAT screening for blood-stage infection in the last 9 months
+					//
+					// There are two options here. Option 1 define over-treatment on the 
+					// basis of blood-stage infection with the last 9 month. Option 2
+					// defines over-treatment on the basis of presence of hypnozoites.
 
 					SSAT_pos = 0;
 
+					// OPTION 1
+/*
 					if( (POP->people[n].T_last_BS <= 270.0) && (genunf(0.0, 1.0) < theta->SSAT_PQ_sens) )
 					{
 						SSAT_pos = 1;
@@ -3229,6 +3236,20 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 					{
 						SSAT_pos = 1;
 					}
+*/
+
+					// OPTION 2
+
+					if ((POP->people[n].Hyp > 0) && (genunf(0.0, 1.0) < theta->SSAT_PQ_sens))
+					{
+						SSAT_pos = 1;
+					}
+
+					if ((POP->people[n].Hyp == 0) && (genunf(0.0, 1.0) > theta->SSAT_PQ_spec))
+					{
+						SSAT_pos = 1;
+					}
+
 
 					/////////////////////////////////////////////////////////////////////
 					// Is PQ administered?
