@@ -24,9 +24,6 @@
 
 #include "Intervention.hpp"
 
-// Function declarations (TODO: these are temporary)
-void mosquito_step(double t, Params& theta, Population& POP);
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                     //

@@ -16,6 +16,15 @@
 #include <fstream>
 #include <cmath>
 
+////////////////////////////////////////////////////////////
+//                                                        //
+//  Function declarations                                 //
+//                                                        //
+////////////////////////////////////////////////////////////
+
+// Defined in Mosquito.cpp
+void mosquito_step(double t, Params& theta, Population& POP);
+
 
 Simulation::Simulation(SimTimes times):
     times(times)
