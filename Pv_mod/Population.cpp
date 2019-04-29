@@ -33,6 +33,181 @@ void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> 
 void gauher(Population& POP, Params& theta);
 
 
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+//  2.5. Summarise the output from the population                           //
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+void Population::summary()
+{
+    for (int k = 0; k<N_H_comp; k++)
+    {
+        yH[k] = 0.0;
+    }
+
+    for (int k = 0; k<10; k++)
+    {
+        prev_all[k] = 0.0;
+        prev_U5[k] = 0.0;
+        prev_U10[k] = 0.0;
+    }
+
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        ////////////////////////////////////////
+        // Numbers in each compartment
+
+        yH[0] = yH[0] + people[n].S;
+        yH[1] = yH[1] + people[n].I_PCR;
+        yH[2] = yH[2] + people[n].I_LM;
+        yH[3] = yH[3] + people[n].I_D;
+        yH[4] = yH[4] + people[n].T;
+        yH[5] = yH[5] + people[n].P;
+
+
+        //////////////////////////////////////////////
+        //////////////////////////////////////////////
+        // Summary - full population
+
+        ////////////////////////////////////////
+        // Prevalence
+
+        prev_all[0] = prev_all[0] + 1;                                                                        // Numbers - denominator
+        prev_all[1] = prev_all[1] + people[n].I_PCR + people[n].I_LM +
+                                            + people[n].I_D + people[n].T;                                      // PCR detectable infections
+        prev_all[2] = prev_all[2] + people[n].I_LM + people[n].I_D + people[n].T;                // LM detectable infections
+        prev_all[3] = prev_all[3] + people[n].I_D + people[n].T;                                      // Clinical episodes
+
+        if (people[n].Hyp > 0)
+        {
+            prev_all[4] = prev_all[4] + 1;                     // Hypnozoite positive
+
+            prev_all[5] = prev_all[5] + people[n].Hyp;    // Number of batches of hypnozoites
+        }
+
+
+        ////////////////////////////////////////
+        // Incidence
+
+        prev_all[6]  = prev_all[6]  + people[n].I_PCR_new;
+        prev_all[7]  = prev_all[7]  + people[n].I_LM_new;
+        prev_all[8]  = prev_all[8]  + people[n].I_D_new;
+        prev_all[9]  = prev_all[9]  + people[n].ACT_treat;
+        prev_all[10] = prev_all[10] + people[n].PQ_treat;
+
+
+        //////////////////////////////////////////////
+        //////////////////////////////////////////////
+        // Summary - under 5's
+
+        if (people[n].age < 1825.0)
+        {
+            ////////////////////////////////////////
+            // Prevalence
+
+            prev_U5[0] = prev_U5[0] + 1;                                                                // Numbers - denominator
+            prev_U5[1] = prev_U5[1] + people[n].I_PCR + people[n].I_LM
+                                              + people[n].I_D + people[n].T;                              // PCR detectable infections
+            prev_U5[2] = prev_U5[2] + people[n].I_LM + people[n].I_D + people[n].T;        // LM detectable infections
+            prev_U5[3] = prev_U5[3] + people[n].I_D + people[n].T;                              // Clinical episodes
+
+            if (people[n].Hyp > 0)
+            {
+                prev_U5[4] = prev_U5[4] + 1;                     // Hypnozoite positive
+
+                prev_U5[5] = prev_U5[5] + people[n].Hyp;    // Number of batches of hypnozoites
+            }
+
+
+            ////////////////////////////////////////
+            // Incidence
+
+            prev_U5[6] = prev_U5[6] + people[n].I_PCR_new;
+            prev_U5[7] = prev_U5[7] + people[n].I_LM_new;
+            prev_U5[8] = prev_U5[8] + people[n].I_D_new;
+            prev_U5[9] = prev_U5[9] + people[n].ACT_treat;
+            prev_U5[10] = prev_U5[10] + people[n].PQ_treat;
+        }
+
+        //////////////////////////////////////////////
+        //////////////////////////////////////////////
+        // Summary - under 10's
+
+        if (people[n].age < 3650.0)
+        {
+            ////////////////////////////////////////
+            // Prevalence
+
+            prev_U10[0] = prev_U10[0] + 1;                                                            // Numbers - denominator
+            prev_U10[1] = prev_U10[1] + people[n].I_PCR + people[n].I_LM
+                                                + people[n].I_D + people[n].T;                          // PCR detectable infections
+            prev_U10[2] = prev_U10[2] + people[n].I_LM + people[n].I_D + people[n].T;    // LM detectable infections
+            prev_U10[3] = prev_U10[3] + people[n].I_D + people[n].T;                          // Clinical episodes
+
+            if (people[n].Hyp > 0)
+            {
+                prev_U10[4] = prev_U10[4] + 1;                     // Hypnozoite positive
+
+                prev_U10[5] = prev_U10[5] + people[n].Hyp;    // Number of batches of hypnozoites
+            }
+
+
+            ////////////////////////////////////////
+            // Incidence
+
+            prev_U10[6]  = prev_U10[6]  + people[n].I_PCR_new;
+            prev_U10[7]  = prev_U10[7]  + people[n].I_LM_new;
+            prev_U10[8]  = prev_U10[8]  + people[n].I_D_new;
+            prev_U10[9]  = prev_U10[9]  + people[n].ACT_treat;
+            prev_U10[10] = prev_U10[10] + people[n].PQ_treat;
+        }
+    }
+
+
+    //////////////////////////////
+    // Intervention coverage
+
+    LLIN_cov_t = 0;
+    IRS_cov_t = 0;
+    ACT_treat_t = 0;
+    PQ_treat_t = 0;
+    pregnant_t = 0;
+
+    PQ_overtreat_t = 0;
+    PQ_overtreat_9m_t = 0;
+
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        LLIN_cov_t  = LLIN_cov_t  + people[n].LLIN;
+        IRS_cov_t   = IRS_cov_t   + people[n].IRS;
+        ACT_treat_t = ACT_treat_t + people[n].ACT_treat;
+        PQ_treat_t  = PQ_treat_t  + people[n].PQ_treat;
+        pregnant_t  = pregnant_t  + people[n].pregnant;
+
+        PQ_overtreat_t    = PQ_overtreat_t    + people[n].PQ_overtreat;
+        PQ_overtreat_9m_t = PQ_overtreat_9m_t + people[n].PQ_overtreat_9m;
+    }
+
+
+    //////////////////////////////
+    // Immunity
+
+    double A_par_mean = 0.0, A_clin_mean = 0.0;
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        A_par_mean = A_par_mean + people[n].A_par;
+        A_clin_mean = A_clin_mean + people[n].A_clin;
+    }
+
+    A_par_mean_t = A_par_mean / ((double)N_pop);
+    A_clin_mean_t = A_clin_mean / ((double)N_pop);
+}
+
+
 /////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////// 
 //          //                                                         // 

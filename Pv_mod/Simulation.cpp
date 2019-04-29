@@ -109,7 +109,7 @@ void Simulation::run(Params& theta, Population& POP, Intervention& INTVEN)
 
         INTVEN.distribute(t_vec[i], theta, POP);
 
-        POP_summary(POP);
+        POP.summary();
 
         //////////////////////////////////////
         // Fill out Simulation object
