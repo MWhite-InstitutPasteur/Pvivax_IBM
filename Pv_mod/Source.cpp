@@ -64,9 +64,9 @@
 
 #include "Population.hpp"
 #include "Intervention.hpp"
+#include "Simulation.hpp"
 
 #include <iostream>
-#include <fstream>
 #include <cmath>
 #include "randlib.h"
 
@@ -82,57 +82,6 @@
 //          //                                      //
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                     //
-// 0.5. Define a structure for storing the output of a simulation                      //
-//                                                                                     //
-/////////////////////////////////////////////////////////////////////////////////////////
-
-struct Simulation
-{
-    //////////////////////////////////////////
-    // 0.5.1. Vector of simulation times
-
-    int N_time;
-
-    vector<double> t_vec;
-
-
-    //////////////////////////////////////////
-    // 0.5.2. Tracking output
-
-    vector<vector<int>> yH_t;
-    vector<vector<vector<double>>> yM_t;
-
-
-    vector<double> EIR_t;
-
-    vector<vector<int>> prev_all;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
-    vector<vector<int>> prev_U5;    // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
-    vector<vector<int>> prev_U10;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
-
-
-    ////////////////////////////////////////
-    // 0.5.3. Tracking coverage over time
-
-    vector<int> LLIN_cov_t;
-    vector<int> IRS_cov_t;
-    vector<int> ACT_treat_t;
-    vector<int> PQ_treat_t;
-    vector<int> pregnant_t;
-
-    vector<int> PQ_overtreat_t;
-    vector<int> PQ_overtreat_9m_t;
-
-
-    //////////////////////////////////////////
-    // 0.5.4. Tracking immunity over time
-
-    vector<double> A_par_mean_t;
-    vector<double> A_clin_mean_t;
-};
 
 
 ////////////////////////////////////////////////////////////
@@ -210,7 +159,7 @@ int main(int argc, char** argv)
     //                                        //
     ////////////////////////////////////////////
 
-    Pv_mod_par.read(parameter_File, mosquito_File);
+    SimTimes times = Pv_mod_par.read(parameter_File, mosquito_File);
     PNG_pop.N_pop = Pv_mod_par.N_pop;
 
     Intervention PNG_intven;
@@ -239,75 +188,7 @@ int main(int argc, char** argv)
     //                                                                     //
     /////////////////////////////////////////////////////////////////////////
 
-    Simulation PNG_sim;
-
-
-    /////////////////////////////////////////////////////////////////////////
-    // 1.9.1. Vector of simulation times
-
-    // Number of time steps for simulation:
-    int N_time = (1 / t_step)*(Pv_mod_par.burnin_time + Pv_mod_par.time_end - Pv_mod_par.time_start) * 365;
-
-    PNG_sim.N_time = N_time;
-
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.t_vec.push_back((double)(Pv_mod_par.time_start * 365 - Pv_mod_par.burnin_time * 365 + i*t_step));
-    }
-
-
-    /////////////////////////////////////////////////////////////////////////
-    // 1.9.2. Create storage for output
-
-    PNG_sim.yH_t.resize(N_time);
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.yH_t[i].resize(N_H_comp);
-    }
-
-
-    PNG_sim.yM_t.resize(N_time);
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.yM_t[i].resize(N_spec);
-        for (int g = 0; g < N_spec; g++)
-        {
-            PNG_sim.yM_t[i][g].resize(N_M_comp);
-        }
-    }
-
-
-    PNG_sim.prev_all.resize(N_time);
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.prev_all[i].resize(11);
-    }
-
-    PNG_sim.prev_U5.resize(N_time);
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.prev_U5[i].resize(11);
-    }
-
-    PNG_sim.prev_U10.resize(N_time);
-    for (int i = 0; i<N_time; i++)
-    {
-        PNG_sim.prev_U10[i].resize(11);
-    }
-
-    PNG_sim.EIR_t.resize(N_time);
-
-    PNG_sim.LLIN_cov_t.resize(N_time);
-    PNG_sim.IRS_cov_t.resize(N_time);
-    PNG_sim.ACT_treat_t.resize(N_time);
-    PNG_sim.PQ_treat_t.resize(N_time);
-    PNG_sim.pregnant_t.resize(N_time);
-
-    PNG_sim.PQ_overtreat_t.resize(N_time);
-    PNG_sim.PQ_overtreat_9m_t.resize(N_time);
-
-    PNG_sim.A_par_mean_t.resize(N_time);
-    PNG_sim.A_clin_mean_t.resize(N_time);
+    Simulation PNG_sim(times);
 
 
     //////////////////////////////////////////////////////
@@ -330,70 +211,7 @@ int main(int argc, char** argv)
     //                                                  //
     ////////////////////////////////////////////////////// 
 
-    cout << "Start writing output to file......" << endl;
-    cout << endl;
-
-    ofstream output_Stream(output_File);
-
-    for (int i = (int) (1/t_step)*(Pv_mod_par.burnin_time)*365; i<N_time; i++)
-    {
-        output_Stream << PNG_sim.t_vec[i] << "\t";
-
-        for (int k = 0; k<N_H_comp; k++)
-        {
-            output_Stream << PNG_sim.yH_t[i][k] << "\t";
-        }
-
-        for (int g = 0; g < N_spec; g++)
-        {
-            // Write only compartments S, E and I in mosquitoes
-            for (int k = 3; k < N_M_comp; k++)
-            // Write all compartments in mosquitoes
-            // for (int k = 0; k < N_M_comp; k++)
-            {
-                output_Stream << PNG_sim.yM_t[i][g][k] << "\t";
-            }
-        }
-
-        for (int k = 0; k<10; k++)
-        {
-            output_Stream << PNG_sim.prev_all[i][k] << "\t";
-        }
-
-        // Write output for age categories U5 and U10
-        /*for (int k = 0; k<10; k++)
-        {
-            output_Stream << PNG_sim.prev_U5[i][k] << "\t";
-        }
-
-        for (int k = 0; k<10; k++)
-        {
-            output_Stream << PNG_sim.prev_U10[i][k] << "\t";
-        }*/
-
-        output_Stream << PNG_sim.EIR_t[i] << "\t";
-        output_Stream << PNG_sim.LLIN_cov_t[i] << "\t";
-        output_Stream << PNG_sim.IRS_cov_t[i] << "\t";
-        output_Stream << PNG_sim.ACT_treat_t[i] << "\t";
-        output_Stream << PNG_sim.PQ_treat_t[i] << "\t";
-        // Write number of pregnant women
-        // output_Stream << PNG_sim.pregnant_t[i] << "\t";
-
-        output_Stream << PNG_sim.PQ_overtreat_t[i] << "\t";
-        output_Stream << PNG_sim.PQ_overtreat_9m_t[i] << "\t";
-
-        // Write A_par_mean_t and A_clin_mean_t
-        /*output_Stream << PNG_sim.A_par_mean_t[i] << "\t";
-        output_Stream << PNG_sim.A_clin_mean_t[i] << "\t";*/
-
-        output_Stream << endl;
-    }
-
-    output_Stream.close();
-
-
-    cout << "Output successfully written to file......" << endl;
-    cout << endl;
+    PNG_sim.write_output(output_File);
 
 
     cout << "Time taken: " << ((double)clock() - clock_time) / ((double)CLOCKS_PER_SEC) << " seconds" << endl;

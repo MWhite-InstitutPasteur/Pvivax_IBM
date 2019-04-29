@@ -47,6 +47,11 @@ using namespace std;
 const double CONST_LOG_2 = 0.6931471805599453094172321214581766L;
 
 
+struct SimTimes {
+    double start, end, burnin;
+};
+
+
 ///////////////////////////////////////////////////////////////////
 //                                                               //
 // 0.1. Define structure for parameters                          //
@@ -61,7 +66,7 @@ struct Params
     
     /////////////////////////////////////
     // Read parameters from input files
-    void read(const char *parameter_File, const char *mosquito_File[N_spec_max]);
+    SimTimes read(const char *parameter_File, const char *mosquito_File[N_spec_max]);
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -69,7 +74,6 @@ struct Params
     //////////////////////////////////////////////////////////////////////////
 
     int N_pop;                     // human population size
-    double time_start, time_end, burnin_time;
     
     
     /////////////////////////////////////

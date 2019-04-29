@@ -30,7 +30,7 @@ double gammln(const double xx);
 
 /////////////////////////////////////
 // Read parameters from input files
-void Params::read(const char *parameter_File, const char *mosquito_File[N_spec_max])
+SimTimes Params::read(const char *parameter_File, const char *mosquito_File[N_spec_max])
 {
     cout << "Reading in parameter file............." << endl;
     cout << endl;
@@ -57,9 +57,10 @@ void Params::read(const char *parameter_File, const char *mosquito_File[N_spec_m
         parameter_Stream >> discard >> Prop_mosq[g] >> discard; // Proportions of each mosquito species
     }
 
-    parameter_Stream >> discard >> time_start >> discard;                  // Start time for simulation
-    parameter_Stream >> discard >> time_end >> discard;                    // End time for simulation
-    parameter_Stream >> discard >> burnin_time >> discard;                 // End time for simulation
+    SimTimes times;
+    parameter_Stream >> discard >> times.start >> discard;                  // Start time for simulation
+    parameter_Stream >> discard >> times.end >> discard;                    // End time for simulation
+    parameter_Stream >> discard >> times.burnin >> discard;                 // End time for simulation
 
 
     /////////////////////////////////
@@ -463,6 +464,8 @@ void Params::read(const char *parameter_File, const char *mosquito_File[N_spec_m
         H_MAT[k][k] = -1.0;
         H_MAT[k + 1][k] = +1.0;
     }
+    
+    return times;
 }
 
 
