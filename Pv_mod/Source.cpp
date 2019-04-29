@@ -386,32 +386,6 @@ struct params
     double P_IRS_decay;         // Proportional decay of IRS insecticide per time step (pre-calculated for efficiency)
 
 
-    ///////////////////////////////////
-    // Probability of exiting states
-
-    double S_out;
-    double I_PCR_out;
-    double I_LM_out;
-    double I_D_out;
-    double T_out;
-    double P_out;
-
-
-    ///////////////////////////////////////////////////
-    // Vector of probabilities for competing hazards
-    //
-    // These are stored in the parameter structure for convenience.      
-    // It would perhaps be more natural to have them specific for each   
-    // individual, but that would require storing them N_pop times.      
-
-    double S_move[4];
-    double I_PCR_move[5];
-    double I_LM_move[4];
-    double I_D_move[2];
-    double T_move[2];
-    double P_move[2];
-
-
     ////////////////////////////////////////
     // Matrices for hypnozoite transitions
 
@@ -5416,6 +5390,31 @@ void individual::state_mover(params& theta, double lam_bite)
     PQ_overtreat    = 0;
     PQ_overtreat_9m = 0;
 
+    ///////////////////////////////////
+    // Probability of exiting states
+
+    double S_out;
+    double I_PCR_out;
+    double I_LM_out;
+    double I_D_out;
+    double T_out;
+    double P_out;
+
+
+    ///////////////////////////////////////////////////
+    // Vector of probabilities for competing hazards
+    //
+    // These are stored in the parameter structure for convenience.      
+    // It would perhaps be more natural to have them specific for each   
+    // individual, but that would require storing them N_pop times.      
+
+    double S_move[4];
+    double I_PCR_move[5];
+    double I_LM_move[4];
+    double I_D_move[2];
+    double T_move[2];
+    double P_move[2];
+
 
     //////////////////////////////////////////////////////////////////////
     //     //                                                           // 
@@ -5425,21 +5424,21 @@ void individual::state_mover(params& theta, double lam_bite)
 
     if (S == 1)
     {
-        theta.S_out = lam_H_lag;
+        S_out = lam_H_lag;
 
-        if (exp(-t_step*theta.S_out) < genunf(0, 1))
+        if (exp(-t_step*S_out) < genunf(0, 1))
         {
             //theta.r_PCR   = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) )); 
             theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
             theta.phi_D = theta.phi_D_min + (theta.phi_D_max - theta.phi_D_min) / (1.0 + pow((A_clin + A_clin_mat)*theta.A_D_50pc_inv, theta.K_D));
 
 
-            theta.S_move[0] = (1.0 - theta.phi_LM);                                  // Move to I_PCR  //  lam_H_lag*(1.0-theta.phi_LM)/theta.S_out; 
-            theta.S_move[1] = theta.phi_LM*(1.0 - theta.phi_D);                      // Move to I_LM   //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)/theta.S_out;
-            theta.S_move[2] = theta.phi_LM*theta.phi_D*(1.0 - theta.treat_BScover);  // Move to I_D    //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)*(1.0-theta.treat_cov)/theta.S_out;
-            theta.S_move[3] = theta.phi_LM*theta.phi_D*theta.treat_BScover;          // Move to T      //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)*theta.treat_cov/theta.S_out;
+            S_move[0] = (1.0 - theta.phi_LM);                                  // Move to I_PCR  //  lam_H_lag*(1.0-theta.phi_LM)/S_out; 
+            S_move[1] = theta.phi_LM*(1.0 - theta.phi_D);                      // Move to I_LM   //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)/S_out;
+            S_move[2] = theta.phi_LM*theta.phi_D*(1.0 - theta.treat_BScover);  // Move to I_D    //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)*(1.0-theta.treat_cov)/S_out;
+            S_move[3] = theta.phi_LM*theta.phi_D*theta.treat_BScover;          // Move to T      //  lam_H_lag*theta.phi_LM*(1.0-theta.phi_D)*theta.treat_cov/S_out;
 
-            CH_move = CH_sample(theta.S_move, 4);
+            CH_move = CH_sample(S_move, 4);
 
             ////////////////////////////////
             // S -> I_PCR
@@ -5675,21 +5674,21 @@ void individual::state_mover(params& theta, double lam_bite)
     {
         theta.r_PCR = 1.0 / (theta.d_PCR_min + (theta.d_PCR_max - theta.d_PCR_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_PCR_50pc_inv, theta.K_PCR)));
 
-        theta.I_PCR_out = lam_H_lag + theta.r_PCR;
+        I_PCR_out = lam_H_lag + theta.r_PCR;
 
-        if (exp(-t_step*theta.I_PCR_out) < genunf(0, 1))
+        if (exp(-t_step*I_PCR_out) < genunf(0, 1))
         {
             theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
             theta.phi_D = theta.phi_D_min + (theta.phi_D_max - theta.phi_D_min) / (1.0 + pow((A_clin + A_clin_mat)*theta.A_D_50pc_inv, theta.K_D));
 
 
-            theta.I_PCR_move[0] = theta.r_PCR / theta.I_PCR_out;                                                       // Move to S 
-            theta.I_PCR_move[1] = lam_H_lag*(1 - theta.phi_LM) / theta.I_PCR_out;                                      // Move to I_PCR
-            theta.I_PCR_move[2] = lam_H_lag*theta.phi_LM*(1.0 - theta.phi_D) / theta.I_PCR_out;                        // Move to I_LM
-            theta.I_PCR_move[3] = lam_H_lag*theta.phi_LM*theta.phi_D*(1.0 - theta.treat_BScover) / theta.I_PCR_out;        // Move to I_D
-            theta.I_PCR_move[4] = lam_H_lag*theta.phi_LM*theta.phi_D*theta.treat_BScover / theta.I_PCR_out;                // Move to T
+            I_PCR_move[0] = theta.r_PCR / I_PCR_out;                                                       // Move to S 
+            I_PCR_move[1] = lam_H_lag*(1 - theta.phi_LM) / I_PCR_out;                                      // Move to I_PCR
+            I_PCR_move[2] = lam_H_lag*theta.phi_LM*(1.0 - theta.phi_D) / I_PCR_out;                        // Move to I_LM
+            I_PCR_move[3] = lam_H_lag*theta.phi_LM*theta.phi_D*(1.0 - theta.treat_BScover) / I_PCR_out;        // Move to I_D
+            I_PCR_move[4] = lam_H_lag*theta.phi_LM*theta.phi_D*theta.treat_BScover / I_PCR_out;                // Move to T
 
-            CH_move = CH_sample(theta.I_PCR_move, 5);
+            CH_move = CH_sample(I_PCR_move, 5);
 
             ////////////////////////////////
             // I_PCR -> S
@@ -5927,21 +5926,21 @@ void individual::state_mover(params& theta, double lam_bite)
 
     if (I_LM == 1)
     {
-        theta.I_LM_out = lam_H_lag + theta.r_LM;
+        I_LM_out = lam_H_lag + theta.r_LM;
 
-        if (exp(-t_step*theta.I_LM_out) < genunf(0, 1))
+        if (exp(-t_step*I_LM_out) < genunf(0, 1))
         {
             //theta.r_PCR = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) ) ); 
             theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
             theta.phi_D = theta.phi_D_min + (theta.phi_D_max - theta.phi_D_min) / (1.0 + pow((A_clin + A_clin_mat)*theta.A_D_50pc_inv, theta.K_D));
 
 
-            theta.I_LM_move[0] = theta.r_LM / theta.I_LM_out;                                            // Move to I_PCR
-            theta.I_LM_move[1] = lam_H_lag*(1.0 - theta.phi_D) / theta.I_LM_out;                         // Move to I_LM
-            theta.I_LM_move[2] = lam_H_lag*theta.phi_D*(1.0 - theta.treat_BScover) / theta.I_LM_out;     // Move to I_D
-            theta.I_LM_move[3] = lam_H_lag*theta.phi_D*theta.treat_BScover / theta.I_LM_out;             // Move to T
+            I_LM_move[0] = theta.r_LM / I_LM_out;                                            // Move to I_PCR
+            I_LM_move[1] = lam_H_lag*(1.0 - theta.phi_D) / I_LM_out;                         // Move to I_LM
+            I_LM_move[2] = lam_H_lag*theta.phi_D*(1.0 - theta.treat_BScover) / I_LM_out;     // Move to I_D
+            I_LM_move[3] = lam_H_lag*theta.phi_D*theta.treat_BScover / I_LM_out;             // Move to T
 
-            CH_move = CH_sample(theta.I_LM_move, 4);
+            CH_move = CH_sample(I_LM_move, 4);
 
             ////////////////////////////////
             // I_LM -> I_PCR
@@ -6146,14 +6145,14 @@ void individual::state_mover(params& theta, double lam_bite)
 
     if (I_D == 1)
     {
-        theta.I_D_out = lam_H_lag + theta.r_D;
+        I_D_out = lam_H_lag + theta.r_D;
 
-        if (exp(-t_step*theta.I_D_out) < genunf(0, 1))
+        if (exp(-t_step*I_D_out) < genunf(0, 1))
         {
-            theta.I_D_move[0] = theta.r_D / theta.I_D_out;              // Move to I_LM
-            theta.I_D_move[1] = lam_H_lag / theta.I_D_out;              // Move to D
+            I_D_move[0] = theta.r_D / I_D_out;              // Move to I_LM
+            I_D_move[1] = lam_H_lag / I_D_out;              // Move to D
 
-            CH_move = CH_sample(theta.I_D_move, 2);
+            CH_move = CH_sample(I_D_move, 2);
 
             ////////////////////////////////
             // I_D -> I_LM
@@ -6209,14 +6208,14 @@ void individual::state_mover(params& theta, double lam_bite)
 
     if (T == 1)
     {
-        theta.T_out = lam_H_lag + theta.r_T;
+        T_out = lam_H_lag + theta.r_T;
 
-        if (exp(-t_step*theta.T_out) < genunf(0, 1))
+        if (exp(-t_step*T_out) < genunf(0, 1))
         {
-            theta.T_move[0] = theta.r_T / theta.T_out;              // Move to P
-            theta.T_move[1] = lam_H_lag / theta.T_out;              // Move to T
+            T_move[0] = theta.r_T / T_out;              // Move to P
+            T_move[1] = lam_H_lag / T_out;              // Move to T
 
-            CH_move = CH_sample(theta.T_move, 2);
+            CH_move = CH_sample(T_move, 2);
 
             ////////////////////////////////
             // T -> P
@@ -6278,14 +6277,14 @@ void individual::state_mover(params& theta, double lam_bite)
 
     if (P == 1)
     {
-        theta.P_out = lam_H_lag + theta.r_P;
+        P_out = lam_H_lag + theta.r_P;
 
-        if (exp(-t_step*theta.P_out) < genunf(0, 1))
+        if (exp(-t_step*P_out) < genunf(0, 1))
         {
-            theta.P_move[0] = theta.r_P / theta.P_out;              // Move to S
-            theta.P_move[1] = lam_H_lag / theta.P_out;              // Move to P
+            P_move[0] = theta.r_P / P_out;              // Move to S
+            P_move[1] = lam_H_lag / P_out;              // Move to P
 
-            CH_move = CH_sample(theta.P_move, 2);
+            CH_move = CH_sample(P_move, 2);
 
             ////////////////////////////////
             // P -> S
