@@ -23,7 +23,7 @@
 #ifndef PVIVAX_MODEL_INTERVENTION
 #define PVIVAX_MODEL_INTERVENTION
 
-#include "Params.hpp"
+#include "Population.hpp"
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -151,5 +151,7 @@ struct Intervention
     vector<int>    SSAT_PQ_preg_risk;
     vector<double> SSAT_PQ_low_age;
 };
+
+void intervention_dist(double t, Params& theta, Population& POP, Intervention& INTVEN);
 
 #endif
