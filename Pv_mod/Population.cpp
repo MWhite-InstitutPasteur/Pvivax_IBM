@@ -27,10 +27,9 @@ void ludcmp(vector<vector<double>> &a, int n_dim, vector<int> &indx, double &d);
 void lubksb(vector<vector<double>> &a, int n_dim, vector<int> &indx, vector<double> &b);
 void matrix_inv(vector<vector<double>> &a, int n, vector<vector<double>> &a_inv);
 void inv_MM_bb(vector<vector<double>> &MM, vector<double> &bb, vector<double> &xx, int n_dim);
-void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> &MM,
+void MM_ij(int i, int j, Params& theta, double r_age[], vector<vector<double>> &MM,
            vector<vector<double>> lam_eq, vector<vector<vector<double>>> phi_LM_eq,
            vector<vector<vector<double>>> phi_D_eq, vector<vector<vector<double>>> r_PCR_eq);
-void gauher(Population& POP, Params& theta);
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -793,7 +792,7 @@ void inv_MM_bb(vector<vector<double>> &MM, vector<double> &bb, vector<double> &x
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
 
-void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> &MM,
+void MM_ij(int i, int j, Params& theta, double r_age[], vector<vector<double>> &MM,
     vector<vector<double>> lam_eq, vector<vector<vector<double>>> phi_LM_eq,
     vector<vector<vector<double>>> phi_D_eq, vector<vector<vector<double>>> r_PCR_eq)
 {
@@ -817,21 +816,21 @@ void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> 
         for (int k2 = 0; k2<(K_max + 1); k2++)
         {
             MM[0 * (K_max + 1) + k1][0 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.ff*theta.K_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
             MM[0 * (K_max + 1) + k1][1 * (K_max + 1) + k2] = + r_PCR_eq[i][j][k2]*theta.D_MAT[k1][k2];
             MM[0 * (K_max + 1) + k1][5 * (K_max + 1) + k2] = +theta.r_P*theta.D_MAT[k1][k2];
 
             MM[1 * (K_max + 1) + k1][0 * (K_max + 1) + k2] = + lam_eq[i][j]*(1.0 - phi_LM_eq[i][j][k2])*theta.OD_MAT[k1][k2] + theta.ff*(1.0 - phi_LM_eq[i][j][k2])*theta.K_MAT[k1][k2];
             MM[1 * (K_max + 1) + k1][1 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.ff*theta.K_MAT[k1][k2] - r_PCR_eq[i][j][k2]*theta.D_MAT[k1][k2]
                                                              + lam_eq[i][j]*(1.0 - phi_LM_eq[i][j][k2])*theta.OD_MAT[k1][k2] + theta.ff*(1.0 - phi_LM_eq[i][j][k2])*theta.K_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
             MM[1 * (K_max + 1) + k1][2 * (K_max + 1) + k2] = + theta.r_LM*theta.D_MAT[k1][k2];
 
             MM[2 * (K_max + 1) + k1][0 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_LM_eq[i][j][k2]*(1.0 - phi_D_eq[i][j][k2])*theta.OD_MAT[k1][k2] + theta.ff*phi_LM_eq[i][j][k2]*(1.0 - phi_D_eq[i][j][k2])*theta.K_MAT[k1][k2];
             MM[2 * (K_max + 1) + k1][1 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_LM_eq[i][j][k2]*(1.0 - phi_D_eq[i][j][k2])*theta.OD_MAT[k1][k2] + theta.ff*phi_LM_eq[i][j][k2] * (1.0 - phi_D_eq[i][j][k2])*theta.K_MAT[k1][k2];
             MM[2 * (K_max + 1) + k1][2 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.ff*theta.K_MAT[k1][k2] - theta.r_LM*theta.D_MAT[k1][k2]
                                                              + lam_eq[i][j]*(1.0 - phi_D_eq[i][j][k2])*theta.OD_MAT[k1][k2] + theta.ff*(1.0 - phi_D_eq[i][j][k2])*theta.K_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
             MM[2 * (K_max + 1) + k1][3 * (K_max + 1) + k2] = + theta.r_D*theta.D_MAT[k1][k2];
 
             MM[3 * (K_max + 1) + k1][0 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_LM_eq[i][j][k2]*phi_D_eq[i][j][k2]*(1.0 - theta.treat_BScover*theta.treat_BSeff)*theta.OD_MAT[k1][k2] 
@@ -840,7 +839,7 @@ void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> 
                                                              + theta.ff*phi_LM_eq[i][j][k2]*phi_D_eq[i][j][k2]*(1.0 - theta.treat_BScover*theta.treat_BSeff)*theta.K_MAT[k1][k2];
             MM[3 * (K_max + 1) + k1][2 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_D_eq[i][j][k2]*(1.0 - theta.treat_BScover*theta.treat_BSeff)*theta.OD_MAT[k1][k2] + theta.ff*phi_D_eq[i][j][k2]*(1.0 - theta.treat_BScover*theta.treat_BSeff)*theta.K_MAT[k1][k2];
             MM[3 * (K_max + 1) + k1][3 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.r_D*theta.D_MAT[k1][k2] + lam_eq[i][j]*theta.OD_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i]*theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i]*theta.D_MAT[k1][k2];
 
             MM[4 * (K_max + 1) + k1][0 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_LM_eq[i][j][k2]*phi_D_eq[i][j][k2]*theta.treat_BScover*theta.treat_BSeff*theta.OD_MAT[k1][k2] 
                                                              + theta.ff*phi_LM_eq[i][j][k2]*phi_D_eq[i][j][k2]*theta.treat_BScover*theta.treat_BSeff*theta.K_MAT[k1][k2];
@@ -848,11 +847,11 @@ void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> 
                                                              + theta.ff*phi_LM_eq[i][j][k2]*phi_D_eq[i][j][k2]*theta.treat_BScover*theta.treat_BSeff*theta.K_MAT[k1][k2];
             MM[4 * (K_max + 1) + k1][2 * (K_max + 1) + k2] = + lam_eq[i][j]*phi_D_eq[i][j][k2]*theta.treat_BScover*theta.treat_BSeff*theta.OD_MAT[k1][k2] + theta.ff*phi_D_eq[i][j][k2]*theta.treat_BScover*theta.treat_BSeff*theta.K_MAT[k1][k2];
             MM[4 * (K_max + 1) + k1][4 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.r_T*theta.D_MAT[k1][k2] + lam_eq[i][j] * theta.OD_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
 
             MM[5 * (K_max + 1) + k1][4 * (K_max + 1) + k2] = + theta.r_T*theta.D_MAT[k1][k2];
             MM[5 * (K_max + 1) + k1][5 * (K_max + 1) + k2] = - lam_eq[i][j]*theta.D_MAT[k1][k2] - theta.r_P*theta.D_MAT[k1][k2] + lam_eq[i][j] * theta.OD_MAT[k1][k2]
-                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                                                             + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
         }
     }
 
@@ -869,7 +868,7 @@ void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-void gauher(Population& POP, Params& theta)
+void Population::gauher(Params& theta)
 {
     double x[N_het];
     double w[N_het];
@@ -935,8 +934,8 @@ void gauher(Population& POP, Params& theta)
 
     for (int j = 0; j<N_het; j++)
     {
-        POP.x_het[j] = exp(theta.sig_het*x[N_het - 1 - j] * sqrt(2.0) - 0.5*theta.sig_het*theta.sig_het);
-        POP.w_het[j] = w[j] / w_sum;
+        x_het[j] = exp(theta.sig_het*x[N_het - 1 - j] * sqrt(2.0) - 0.5*theta.sig_het*theta.sig_het);
+        w_het[j] = w[j] / w_sum;
     }
 
 
@@ -945,30 +944,30 @@ void gauher(Population& POP, Params& theta)
 
     if (N_het == 1)
     {
-        POP.x_het[0] = 1.0;
-        POP.w_het[0] = 1.0;
+        x_het[0] = 1.0;
+        w_het[0] = 1.0;
     }
 
     for (int i = 0; i<N_age; i++)
     {
         for (int j = 0; j<N_het; j++)
         {
-            POP.x_age_het[i][j] = POP.age_bite[i] * POP.x_het[j];
-            POP.w_age_het[i][j] = POP.age_demog[i] * POP.w_het[j];
+            x_age_het[i][j] = age_bite[i] * x_het[j];
+            w_age_het[i][j] = age_demog[i] * w_het[j];
         }
     }
 
     ////////////////////////////////
     // Boundaries of heterogeneity compartments
 
-    POP.x_het_bounds[0] = 0.0;
+    x_het_bounds[0] = 0.0;
 
     for (int j = 1; j<N_het; j++)
     {
-        POP.x_het_bounds[j] = exp(0.5*(log(POP.x_het[j - 1]) + log(POP.x_het[j])));
+        x_het_bounds[j] = exp(0.5*(log(x_het[j - 1]) + log(x_het[j])));
     }
 
-    POP.x_het_bounds[N_het] = theta.het_max;
+    x_het_bounds[N_het] = theta.het_max;
 }
 
 
@@ -983,7 +982,7 @@ void gauher(Population& POP, Params& theta)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void equi_pop_setup(Population& POP, Params& theta)
+void Population::equi_pop_setup(Params& theta)
 {
     //////////////////////////////////////////////////////
     // 3.7.1. Set up age and heterogeneity compartments
@@ -1008,14 +1007,14 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int i = 0; i<(N_age - 1); i++)
     {
-        POP.age_demog[i] = exp(-theta.mu_H*age_bounds[i]) - exp(-theta.mu_H*age_bounds[i + 1]);
+        age_demog[i] = exp(-theta.mu_H*age_bounds[i]) - exp(-theta.mu_H*age_bounds[i + 1]);
     }
 
-    POP.age_demog[N_age - 1] = 1.0;
+    age_demog[N_age - 1] = 1.0;
 
     for (int i = 0; i<(N_age - 1); i++)
     {
-        POP.age_demog[N_age - 1] = POP.age_demog[N_age - 1] - POP.age_demog[i];
+        age_demog[N_age - 1] = age_demog[N_age - 1] - age_demog[i];
     }
 
 
@@ -1023,14 +1022,14 @@ void equi_pop_setup(Population& POP, Params& theta)
     // 3.7.1.3. Ageing rates - formula below ensures
     //          balanced demography
 
-    POP.r_age[0] = theta.mu_H*(1.0 - POP.age_demog[0]) / POP.age_demog[0];
+    r_age[0] = theta.mu_H*(1.0 - age_demog[0]) / age_demog[0];
 
     for (int i = 1; i<(N_age - 1); i++)
     {
-        POP.r_age[i] = (POP.r_age[i - 1] * POP.age_demog[i - 1] - theta.mu_H*POP.age_demog[i]) / POP.age_demog[i];
+        r_age[i] = (r_age[i - 1] * age_demog[i - 1] - theta.mu_H*age_demog[i]) / age_demog[i];
     }
 
-    POP.r_age[N_age - 1] = 0.0;
+    r_age[N_age - 1] = 0.0;
 
 
     ////////////////////////////////////////
@@ -1038,15 +1037,15 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int i = 0; i<N_age; i++)
     {
-        POP.age_mids[i] = 0.5*(age_bounds[i] + age_bounds[i + 1]);
+        age_mids[i] = 0.5*(age_bounds[i] + age_bounds[i + 1]);
     }
 
     for (int i = 0; i<N_age; i++)
     {
-        POP.age_bite[i] = 1.0 - theta.rho_age*exp(-POP.age_mids[i] / theta.age_0);
+        age_bite[i] = 1.0 - theta.rho_age*exp(-age_mids[i] / theta.age_0);
     }
 
-    POP.P_age_bite = exp(-t_step / theta.age_0);
+    P_age_bite = exp(-t_step / theta.age_0);
 
 
     ///////////////////////////////////////
@@ -1056,7 +1055,7 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int i = 0; i<N_age; i++)
     {
-        omega_age = omega_age + POP.age_demog[i] * POP.age_bite[i];
+        omega_age = omega_age + age_demog[i] * age_bite[i];
     }
 
     omega_age = 1 / omega_age;
@@ -1064,23 +1063,23 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int i = 0; i<N_age; i++)
     {
-        POP.age_bite[i] = omega_age*POP.age_bite[i];
+        age_bite[i] = omega_age*age_bite[i];
     }
 
 
     //////////////////////////////////////////////////////
     // 3.7.1.5. Find age category closest to 20 yr old woman
 
-    POP.index_age_20 = 0;
+    index_age_20 = 0;
 
-    double age_diff = (POP.age_mids[0] - 20.0*365.0)*(POP.age_mids[0] - 20.0*365.0);
+    double age_diff = (age_mids[0] - 20.0*365.0)*(age_mids[0] - 20.0*365.0);
 
     for (int i = 1; i<N_age; i++)
     {
-        if ((POP.age_mids[i] - 20.0*365.0)*(POP.age_mids[i] - 20.0*365.0) < age_diff)
+        if ((age_mids[i] - 20.0*365.0)*(age_mids[i] - 20.0*365.0) < age_diff)
         {
-            age_diff = (POP.age_mids[i] - 20.0*365.0)*(POP.age_mids[i] - 20.0*365.0);
-            POP.index_age_20 = i;
+            age_diff = (age_mids[i] - 20.0*365.0)*(age_mids[i] - 20.0*365.0);
+            index_age_20 = i;
         }
     }
 
@@ -1090,7 +1089,7 @@ void equi_pop_setup(Population& POP, Params& theta)
     //          Weights for heterogeneity calculate using Gaussian-Hemite quadrature.
     //          The function also fills out the N_age*N_het matrix
 
-    gauher(POP, theta);
+    gauher(theta);
 
 
     //////////////////////////////////////////////////////////////
@@ -1213,7 +1212,7 @@ void equi_pop_setup(Population& POP, Params& theta)
     {
         for (int j = 0; j<N_het; j++)
         {
-            lam_eq[i][j] = theta.EIR_equil*theta.bb*POP.x_age_het[i][j];
+            lam_eq[i][j] = theta.EIR_equil*theta.bb*x_age_het[i][j];
         }
     }
 
@@ -1254,14 +1253,14 @@ void equi_pop_setup(Population& POP, Params& theta)
         {
             HH_bb[k] = 0.0;
         }
-        HH_bb[0] = POP.w_het[j] * theta.mu_H;
+        HH_bb[0] = w_het[j] * theta.mu_H;
 
 
         for (int k1 = 0; k1 < (K_max + 1); k1++)
         {
             for (int k2 = 0; k2 < (K_max + 1); k2++)
             {
-                HH_mat[k1][k2] = lam_eq[0][j] * theta.H_MAT[k1][k2] + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[0] * theta.D_MAT[k1][k2];
+                HH_mat[k1][k2] = lam_eq[0][j] * theta.H_MAT[k1][k2] + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[0] * theta.D_MAT[k1][k2];
             }
         }
 
@@ -1282,14 +1281,14 @@ void equi_pop_setup(Population& POP, Params& theta)
         {
             for (int k = 0; k < (K_max + 1); k++)
             {
-                HH_bb[k] = -POP.r_age[i - 1] * HH_xx[k];
+                HH_bb[k] = -r_age[i - 1] * HH_xx[k];
             }
 
             for (int k1 = 0; k1 < (K_max + 1); k1++)
             {
                 for (int k2 = 0; k2 < (K_max + 1); k2++)
                 {
-                    HH_mat[k1][k2] = lam_eq[i][j] * theta.H_MAT[k1][k2] + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2];
+                    HH_mat[k1][k2] = lam_eq[i][j] * theta.H_MAT[k1][k2] + theta.gamma_L*theta.L_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2];
                 }
             }
 
@@ -1387,7 +1386,7 @@ void equi_pop_setup(Population& POP, Params& theta)
             for (int k2 = 0; k2 < (K_max + 1); k2++)
             {
                 ODE_eq_MAT[k1][k2] = -(lam_eq[0][j] * LAM_MAT[k1][k2] + theta.gamma_L*GAM_MAT[k1][k2] -
-                    theta.r_par*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[0] * theta.D_MAT[k1][k2]);
+                    theta.r_par*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[0] * theta.D_MAT[k1][k2]);
             }
         }
 
@@ -1429,7 +1428,7 @@ void equi_pop_setup(Population& POP, Params& theta)
 
             for (int k = 0; k < (K_max + 1); k++)
             {
-                ODE_eq_vec[k] = G_VEC[k] + POP.r_age[i - 1] * A_par_eq[i - 1][j][k] * HH_eq[i - 1][j][k] / HH_eq[i][j][k];
+                ODE_eq_vec[k] = G_VEC[k] + r_age[i - 1] * A_par_eq[i - 1][j][k] * HH_eq[i - 1][j][k] / HH_eq[i][j][k];
             }
 
 
@@ -1462,7 +1461,7 @@ void equi_pop_setup(Population& POP, Params& theta)
                 for (int k2 = 0; k2 < (K_max + 1); k2++)
                 {
                     ODE_eq_MAT[k1][k2] = -(lam_eq[i][j] * LAM_MAT[k1][k2] + theta.gamma_L*GAM_MAT[k1][k2] -
-                        theta.r_par*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2]);
+                        theta.r_par*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2]);
                 }
             }
 
@@ -1579,7 +1578,7 @@ void equi_pop_setup(Population& POP, Params& theta)
             for (int k2 = 0; k2 < (K_max + 1); k2++)
             {
                 ODE_eq_MAT[k1][k2] = -(lam_eq[0][j] * LAM_MAT[k1][k2] + theta.gamma_L*GAM_MAT[k1][k2] -
-                    theta.r_clin*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[0] * theta.D_MAT[k1][k2]);
+                    theta.r_clin*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[0] * theta.D_MAT[k1][k2]);
             }
         }
 
@@ -1621,7 +1620,7 @@ void equi_pop_setup(Population& POP, Params& theta)
 
             for (int k = 0; k < (K_max + 1); k++)
             {
-                ODE_eq_vec[k] = G_VEC[k] + POP.r_age[i - 1] * A_clin_eq[i - 1][j][k] * HH_eq[i - 1][j][k] / HH_eq[i][j][k];
+                ODE_eq_vec[k] = G_VEC[k] + r_age[i - 1] * A_clin_eq[i - 1][j][k] * HH_eq[i - 1][j][k] / HH_eq[i][j][k];
             }
 
 
@@ -1654,7 +1653,7 @@ void equi_pop_setup(Population& POP, Params& theta)
                 for (int k2 = 0; k2 < (K_max + 1); k2++)
                 {
                     ODE_eq_MAT[k1][k2] = -(lam_eq[i][j] * LAM_MAT[k1][k2] + theta.gamma_L*GAM_MAT[k1][k2] -
-                        theta.r_clin*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - POP.r_age[i] * theta.D_MAT[k1][k2]);
+                        theta.r_clin*theta.D_MAT[k1][k2] - theta.mu_H*theta.D_MAT[k1][k2] - r_age[i] * theta.D_MAT[k1][k2]);
                 }
             }
 
@@ -1718,8 +1717,8 @@ void equi_pop_setup(Population& POP, Params& theta)
         {
             for (int k = 0; k < (K_max + 1); k++)
             {
-                A_par_eq[i][j][k] = A_par_eq[i][j][k] + A_par_eq_mean[POP.index_age_20][j] * theta.P_mat*exp(-POP.age_mids[i] / theta.d_mat);
-                A_clin_eq[i][j][k] = A_clin_eq[i][j][k] + A_clin_eq_mean[POP.index_age_20][j] * theta.P_mat*exp(-POP.age_mids[i] / theta.d_mat);
+                A_par_eq[i][j][k] = A_par_eq[i][j][k] + A_par_eq_mean[index_age_20][j] * theta.P_mat*exp(-age_mids[i] / theta.d_mat);
+                A_clin_eq[i][j][k] = A_clin_eq[i][j][k] + A_clin_eq_mean[index_age_20][j] * theta.P_mat*exp(-age_mids[i] / theta.d_mat);
             }
         }
     }
@@ -1750,7 +1749,7 @@ void equi_pop_setup(Population& POP, Params& theta)
         ///////////////////////////////////////////////
         // 3.7.2.8.1. Youngest age category
 
-        MM_ij(0, j, theta, POP, MM,
+        MM_ij(0, j, theta, r_age, MM,
             lam_eq, phi_LM_eq, phi_D_eq, r_PCR_eq);
 
         for (int k = 0; k<N_H_comp*(K_max + 1); k++)
@@ -1758,7 +1757,7 @@ void equi_pop_setup(Population& POP, Params& theta)
             bb[k] = 0.0;
         }
 
-        bb[0] = -POP.w_het[j] * theta.mu_H;
+        bb[0] = -w_het[j] * theta.mu_H;
 
         inv_MM_bb(MM, bb, xx, N_H_comp*(K_max + 1));
 
@@ -1780,12 +1779,12 @@ void equi_pop_setup(Population& POP, Params& theta)
 
         for (int i = 1; i<N_age; i++)
         {
-            MM_ij(i, j, theta, POP, MM,
+            MM_ij(i, j, theta, r_age, MM,
                 lam_eq, phi_LM_eq, phi_D_eq, r_PCR_eq);
 
             for (int c = 0; c<N_H_comp*(K_max + 1); c++)
             {
-                bb[c] = -POP.r_age[i - 1] * xx[c];
+                bb[c] = -r_age[i - 1] * xx[c];
             }
 
             inv_MM_bb(MM, bb, xx, N_H_comp * (K_max + 1));
@@ -1845,7 +1844,7 @@ void equi_pop_setup(Population& POP, Params& theta)
             {
                 for (int k = 0; k < (K_max + 1); k++)
                 {
-                    theta.lam_M[g] = theta.lam_M[g] + POP.x_age_het[i][j] * theta.aa[g] * (theta.c_PCR*yH_eq[i][j][k][1] + theta.c_LM*yH_eq[i][j][k][2] +
+                    theta.lam_M[g] = theta.lam_M[g] + x_age_het[i][j] * theta.aa[g] * (theta.c_PCR*yH_eq[i][j][k][1] + theta.c_LM*yH_eq[i][j][k][2] +
                         theta.c_D*yH_eq[i][j][k][3] + theta.c_T*yH_eq[i][j][k][4]);
                 }
             }
@@ -1911,12 +1910,12 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int g = 0; g < N_spec; g++)
     {
-        POP.yM[g][0] = 2.0*theta.omega_larvae[g] * theta.mu_M[g] * theta.d_L_larvae*(1.0 + theta.d_pupae*theta.mu_P)*theta.mm_0[g];
-        POP.yM[g][1] = 2.0*theta.mu_M[g] * theta.d_L_larvae*(1.0 + theta.d_pupae*theta.mu_P)*theta.mm_0[g];
-        POP.yM[g][2] = 2.0*theta.d_pupae*theta.mu_M[g] * theta.mm_0[g];
-        POP.yM[g][3] = theta.mm_0[g] * (theta.mu_M[g] / (theta.lam_M[g] + theta.mu_M[g]));
-        POP.yM[g][4] = theta.mm_0[g] * (theta.lam_M[g] / (theta.lam_M[g] + theta.mu_M[g]))*(1.0 - exp(-theta.mu_M[g] * theta.tau_M[g]));
-        POP.yM[g][5] = theta.mm_0[g] * (theta.lam_M[g] / (theta.lam_M[g] + theta.mu_M[g]))*exp(-theta.mu_M[g] * theta.tau_M[g]);
+        yM[g][0] = 2.0*theta.omega_larvae[g] * theta.mu_M[g] * theta.d_L_larvae*(1.0 + theta.d_pupae*theta.mu_P)*theta.mm_0[g];
+        yM[g][1] = 2.0*theta.mu_M[g] * theta.d_L_larvae*(1.0 + theta.d_pupae*theta.mu_P)*theta.mm_0[g];
+        yM[g][2] = 2.0*theta.d_pupae*theta.mu_M[g] * theta.mm_0[g];
+        yM[g][3] = theta.mm_0[g] * (theta.mu_M[g] / (theta.lam_M[g] + theta.mu_M[g]));
+        yM[g][4] = theta.mm_0[g] * (theta.lam_M[g] / (theta.lam_M[g] + theta.mu_M[g]))*(1.0 - exp(-theta.mu_M[g] * theta.tau_M[g]));
+        yM[g][5] = theta.mm_0[g] * (theta.lam_M[g] / (theta.lam_M[g] + theta.mu_M[g]))*exp(-theta.mu_M[g] * theta.tau_M[g]);
 
         theta.Karry[g] = theta.mm_0[g] * 2.0*theta.d_L_larvae*theta.mu_M[g] * (1.0 + theta.d_pupae*theta.mu_P)*theta.gamma_larvae*(theta.omega_larvae[g] + 1.0) /
             (theta.omega_larvae[g] / (theta.mu_L0*theta.d_E_larvae) - 1.0 / (theta.mu_L0*theta.d_L_larvae) - 1.0);   // Larval carry capacity
@@ -1933,16 +1932,16 @@ void equi_pop_setup(Population& POP, Params& theta)
         if (g == 1) { cout << "An. punctulatus:  " << 100.0 * theta.Prop_mosq[1] << "%" << endl; }
         if (g == 2) { cout << "An. koliensis:  " << 100.0 * theta.Prop_mosq[2] << "%" << endl; }
 
-        cout << "EL_M  " << POP.yM[g][0] << endl;
-        cout << "LL_M  " << POP.yM[g][1] << endl;
-        cout << "P_M  " << POP.yM[g][2] << endl;
-        cout << "S_M  " << POP.yM[g][3] << endl;
-        cout << "E_M  " << POP.yM[g][4] << endl;
-        cout << "I_M  " << POP.yM[g][5] << endl;
+        cout << "EL_M  " << yM[g][0] << endl;
+        cout << "LL_M  " << yM[g][1] << endl;
+        cout << "P_M  " << yM[g][2] << endl;
+        cout << "S_M  " << yM[g][3] << endl;
+        cout << "E_M  " << yM[g][4] << endl;
+        cout << "I_M  " << yM[g][5] << endl;
 
         cout << "lam_M = " << theta.lam_M[g] << endl;
 
-        cout << "I_M = " << POP.yM[g][5] << endl;
+        cout << "I_M = " << yM[g][5] << endl;
 
         cout << "mm = " << theta.mm_0[g] << endl;
 
@@ -1955,7 +1954,7 @@ void equi_pop_setup(Population& POP, Params& theta)
     double EIR_out = 0.0;
     for (int g = 0; g < N_spec; g++)
     {
-        EIR_out = EIR_out + 365.0*theta.aa[g] * POP.yM[g][5];
+        EIR_out = EIR_out + 365.0*theta.aa[g] * yM[g][5];
     }
 
     cout << "EIR = " << EIR_out << endl;
@@ -1974,7 +1973,7 @@ void equi_pop_setup(Population& POP, Params& theta)
     {
         for (int k = 0; k < theta.M_track; k++)
         {
-            theta.lam_S_M_track[g].push_back(theta.lam_M[g] * POP.yM[g][3]);
+            theta.lam_S_M_track[g].push_back(theta.lam_M[g] * yM[g][3]);
         }
     }
 
@@ -2057,7 +2056,7 @@ void equi_pop_setup(Population& POP, Params& theta)
     ///////////////////////////////////////////////////////////////////////////
     // 3.7.4.2 Loop through and create N_pop individuals            
 
-    for (int n = 0; n<POP.N_pop; n++)
+    for (int n = 0; n<N_pop; n++)
     {
         //////////////////////////////////////////////////////////////////
         // 3.7.4.2.1. Assign age and heterogeneity 
@@ -2095,7 +2094,7 @@ void equi_pop_setup(Population& POP, Params& theta)
 
         for (int j = 0; j<N_het; j++)
         {
-            if ((zeta_start > POP.x_het_bounds[j]) && (zeta_start < POP.x_het_bounds[j + 1]))
+            if ((zeta_start > x_het_bounds[j]) && (zeta_start < x_het_bounds[j + 1]))
             {
                 j_index = j;
             }
@@ -2231,8 +2230,8 @@ void equi_pop_setup(Population& POP, Params& theta)
         ////////////////////////////////////////////
         //  3.7.4.2.5. Initialise immunity
 
-        HH.A_par_mat = A_par_eq_mean[POP.index_age_20][j_index] * theta.P_mat*exp(-POP.age_mids[i_index] / theta.d_mat);
-        HH.A_clin_mat = A_clin_eq_mean[POP.index_age_20][j_index] * theta.P_mat*exp(-POP.age_mids[i_index] / theta.d_mat);
+        HH.A_par_mat = A_par_eq_mean[index_age_20][j_index] * theta.P_mat*exp(-age_mids[i_index] / theta.d_mat);
+        HH.A_clin_mat = A_clin_eq_mean[index_age_20][j_index] * theta.P_mat*exp(-age_mids[i_index] / theta.d_mat);
 
         HH.A_par = A_par_eq[i_index][j_index][HH.Hyp] - HH.A_par_mat;
         HH.A_clin = A_clin_eq[i_index][j_index][HH.Hyp] - HH.A_clin_mat;
@@ -2314,23 +2313,23 @@ void equi_pop_setup(Population& POP, Params& theta)
         ////////////////////////////////////////////////////
         // 3.7.4.3.. Add this person to the vector of people
 
-        POP.people.push_back(move(HH));
+        people.push_back(move(HH));
     }
 
     ///////////////////////////////////////////////////////////
     // 3.7.5.1. Proportion of bites received by each person
 
-    POP.pi_n.resize(POP.N_pop);
-    for (int n = 0; n < POP.N_pop; n++)
+    pi_n.resize(N_pop);
+    for (int n = 0; n < N_pop; n++)
     {
-        POP.pi_n[n].resize(N_spec);
+        pi_n[n].resize(N_spec);
     }
 
-    for (int n = 0; n<POP.N_pop; n++)
+    for (int n = 0; n<N_pop; n++)
     {
         for (int g = 0; g < N_spec; g++)
         {
-            POP.pi_n[n][g] = POP.people[n].zeta_het*(1.0 - theta.rho_age*exp(-POP.people[n].age*theta.age_0_inv));
+            pi_n[n][g] = people[n].zeta_het*(1.0 - theta.rho_age*exp(-people[n].age*theta.age_0_inv));
         }
     }
 
@@ -2341,14 +2340,14 @@ void equi_pop_setup(Population& POP, Params& theta)
     for (int g = 0; g < N_spec; g++)
     {
         SIGMA_PI[g] = 0.0;
-        for (int n = 0; n<POP.N_pop; n++)
+        for (int n = 0; n<N_pop; n++)
         {
-            SIGMA_PI[g] = SIGMA_PI[g] + POP.pi_n[n][g];
+            SIGMA_PI[g] = SIGMA_PI[g] + pi_n[n][g];
         }
 
-        for (int n = 0; n<POP.N_pop; n++)
+        for (int n = 0; n<N_pop; n++)
         {
-            POP.pi_n[n][g] = POP.pi_n[n][g] / SIGMA_PI[g];
+            pi_n[n][g] = pi_n[n][g] / SIGMA_PI[g];
         }
     }
 
@@ -2360,53 +2359,53 @@ void equi_pop_setup(Population& POP, Params& theta)
 
     for (int g = 0; g < N_spec; g++)
     {
-        POP.SUM_pi_w[g] = 0;
-        POP.SUM_pi_z[g] = 0;
+        SUM_pi_w[g] = 0;
+        SUM_pi_z[g] = 0;
 
 
-        for (int n = 0; n < POP.N_pop; n++)
+        for (int n = 0; n < N_pop; n++)
         {
-            POP.SUM_pi_w[g] = POP.SUM_pi_w[g] + POP.pi_n[n][g] * POP.people[n].w_VC[g];
-            POP.SUM_pi_z[g] = POP.SUM_pi_z[g] + POP.pi_n[n][g] * POP.people[n].z_VC[g];
+            SUM_pi_w[g] = SUM_pi_w[g] + pi_n[n][g] * people[n].w_VC[g];
+            SUM_pi_z[g] = SUM_pi_z[g] + pi_n[n][g] * people[n].z_VC[g];
         }
     }
 
 
     for (int g = 0; g < N_spec; g++)
     {
-        POP.W_VC[g] = 1.0 - theta.Q_0[g] + theta.Q_0[g] * POP.SUM_pi_w[g];
-        POP.Z_VC[g] = theta.Q_0[g] * POP.SUM_pi_z[g];
+        W_VC[g] = 1.0 - theta.Q_0[g] + theta.Q_0[g] * SUM_pi_w[g];
+        Z_VC[g] = theta.Q_0[g] * SUM_pi_z[g];
 
-        POP.delta_1_VC[g] = theta.delta_1 / (1.0 - POP.Z_VC[g]);
-        POP.delta_VC[g] = POP.delta_1_VC[g] + theta.delta_2;
+        delta_1_VC[g] = theta.delta_1 / (1.0 - Z_VC[g]);
+        delta_VC[g] = delta_1_VC[g] + theta.delta_2;
 
-        POP.p_1_VC[g] = exp(-theta.mu_M[g] * POP.delta_1_VC[g]);
-        POP.mu_M_VC[g] = -log(POP.p_1_VC[g] * theta.p_2[g]) / POP.delta_VC[g];
+        p_1_VC[g] = exp(-theta.mu_M[g] * delta_1_VC[g]);
+        mu_M_VC[g] = -log(p_1_VC[g] * theta.p_2[g]) / delta_VC[g];
 
-        POP.Q_VC[g] = 1.0 - (1.0 - theta.Q_0[g]) / POP.W_VC[g];
+        Q_VC[g] = 1.0 - (1.0 - theta.Q_0[g]) / W_VC[g];
 
-        POP.aa_VC[g] = POP.Q_VC[g] / POP.delta_VC[g];
+        aa_VC[g] = Q_VC[g] / delta_VC[g];
 
-        POP.exp_muM_tauM_VC[g] = exp(-POP.mu_M_VC[g] * theta.tau_M[g]);
-        POP.beta_VC[g] = theta.eps_max[g] * POP.mu_M_VC[g] / (exp(POP.delta_VC[g] * POP.mu_M_VC[g]) - 1.0);
+        exp_muM_tauM_VC[g] = exp(-mu_M_VC[g] * theta.tau_M[g]);
+        beta_VC[g] = theta.eps_max[g] * mu_M_VC[g] / (exp(delta_VC[g] * mu_M_VC[g]) - 1.0);
     }
 
 
     /////////////////////////////////////////////////////////////////////////
     // 3.7.5.2. The rate at which person n is bitten by a single mosquito
 
-    POP.lam_n.resize(POP.N_pop);
-    for (int n = 0; n < POP.N_pop; n++)
+    lam_n.resize(N_pop);
+    for (int n = 0; n < N_pop; n++)
     {
-        POP.lam_n[n].resize(N_spec);
+        lam_n[n].resize(N_spec);
     }
 
 
-    for (int n = 0; n < POP.N_pop; n++)
+    for (int n = 0; n < N_pop; n++)
     {
         for (int g = 0; g < N_spec; g++)
         {
-            POP.lam_n[n][g] = theta.aa[g] * POP.pi_n[n][g];
+            lam_n[n][g] = theta.aa[g] * pi_n[n][g];
         }
     }
 
@@ -2419,14 +2418,14 @@ void equi_pop_setup(Population& POP, Params& theta)
     double S_ind = 0.0, I_PCR_ind = 0.0, I_LM_ind = 0.0, I_D_ind = 0.0, T_ind = 0.0, P_ind = 0.0;
     double S_eqq = 0.0, I_PCR_eqq = 0.0, I_LM_eqq = 0.0, I_D_eqq = 0.0, T_eqq = 0.0, P_eqq = 0.0;
 
-    for (int n = 0; n<POP.N_pop; n++)
+    for (int n = 0; n<N_pop; n++)
     {
-        S_ind = S_ind + POP.people[n].S;
-        I_PCR_ind = I_PCR_ind + POP.people[n].I_PCR;
-        I_LM_ind = I_LM_ind + POP.people[n].I_LM;
-        I_D_ind = I_D_ind + POP.people[n].I_D;
-        T_ind = T_ind + POP.people[n].T;
-        P_ind = P_ind + POP.people[n].P;
+        S_ind = S_ind + people[n].S;
+        I_PCR_ind = I_PCR_ind + people[n].I_PCR;
+        I_LM_ind = I_LM_ind + people[n].I_LM;
+        I_D_ind = I_D_ind + people[n].I_D;
+        T_ind = T_ind + people[n].T;
+        P_ind = P_ind + people[n].P;
     }
 
 
@@ -2447,11 +2446,11 @@ void equi_pop_setup(Population& POP, Params& theta)
     }
 
 
-    cout << "S = " << ((double)S_ind) / POP.N_pop << "\t" << S_eqq << endl;
-    cout << "I_PCR = " << ((double)I_PCR_ind) / POP.N_pop << "\t" << I_PCR_eqq << endl;
-    cout << "I_LM = " << ((double)I_LM_ind) / POP.N_pop << "\t" << I_LM_eqq << endl;
-    cout << "I_D = " << ((double)I_D_ind) / POP.N_pop << "\t" << I_D_eqq << endl;
-    cout << "T = " << ((double)T_ind) / POP.N_pop << "\t" << T_eqq << endl;
-    cout << "P = " << ((double)P_ind) / POP.N_pop << "\t" << P_eqq << endl;
+    cout << "S = " << ((double)S_ind) / N_pop << "\t" << S_eqq << endl;
+    cout << "I_PCR = " << ((double)I_PCR_ind) / N_pop << "\t" << I_PCR_eqq << endl;
+    cout << "I_LM = " << ((double)I_LM_ind) / N_pop << "\t" << I_LM_eqq << endl;
+    cout << "I_D = " << ((double)I_D_ind) / N_pop << "\t" << I_D_eqq << endl;
+    cout << "T = " << ((double)T_ind) / N_pop << "\t" << T_eqq << endl;
+    cout << "P = " << ((double)P_ind) / N_pop << "\t" << P_eqq << endl;
 
 }

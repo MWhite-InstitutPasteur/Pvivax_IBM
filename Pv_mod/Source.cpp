@@ -130,7 +130,7 @@ int main(int argc, char** argv)
     cout << "Initialise population of individuals for simulation at equilbirium EIR of " << 365.0*Pv_mod_par.EIR_equil << endl;
     cout << endl;
 
-    equi_pop_setup(PNG_pop, Pv_mod_par);
+    PNG_pop.equi_pop_setup(Pv_mod_par);
 
     cout << "Population of size " << PNG_pop.N_pop << " initialised!" << endl;
     cout << endl;
