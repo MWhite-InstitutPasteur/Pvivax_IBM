@@ -869,9 +869,9 @@ void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N
 void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], params& theta, population& POP);
 void mosquito_step(double t, params& theta, population& POP);
 void human_step(params& theta, population& POP);
-void intervention_dist(double t, params& theta, population& POP, intervention* INTVEN);
+void intervention_dist(double t, params& theta, population& POP, intervention& INTVEN);
 void POP_summary(population& POP);
-void model_simulator(params& theta, population& POP, intervention* INTVEN, simulation* SIM);
+void model_simulator(params& theta, population& POP, intervention& INTVEN, simulation& SIM);
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
@@ -1704,7 +1704,7 @@ int main(int argc, char** argv)
 
     cout << "Starting model simulations......." << endl;
 
-    model_simulator(Pv_mod_par, PNG_pop, &PNG_intven, &PNG_sim);
+    model_simulator(Pv_mod_par, PNG_pop, PNG_intven, PNG_sim);
 
     cout << "Model simulations completed....." << endl;
     cout << endl;
@@ -2541,21 +2541,21 @@ void POP_summary(population& POP)
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-void model_simulator(params& theta, population& POP, intervention* INTVEN, simulation* SIM)
+void model_simulator(params& theta, population& POP, intervention& INTVEN, simulation& SIM)
 {
 
-    for (int i = 0; i<SIM->N_time; i++)
+    for (int i = 0; i<SIM.N_time; i++)
     {
-        if (SIM->t_vec[i] / 365.0 - floor(SIM->t_vec[i] / 365.0) < 0.5*t_step / 365.0)
+        if (SIM.t_vec[i] / 365.0 - floor(SIM.t_vec[i] / 365.0) < 0.5*t_step / 365.0)
         {
-            cout << "time = " << SIM->t_vec[i] / 365.0 << "\t" << 100.0*(SIM->t_vec[i] - SIM->t_vec[0]) / (double(t_step*SIM->N_time)) << "% complete" << endl;
+            cout << "time = " << SIM.t_vec[i] / 365.0 << "\t" << 100.0*(SIM.t_vec[i] - SIM.t_vec[0]) / (double(t_step*SIM.N_time)) << "% complete" << endl;
         }
 
         human_step(theta, POP);
 
-        mosquito_step(SIM->t_vec[i], theta, POP);
+        mosquito_step(SIM.t_vec[i], theta, POP);
 
-        intervention_dist(SIM->t_vec[i], theta, POP, INTVEN);
+        intervention_dist(SIM.t_vec[i], theta, POP, INTVEN);
 
         POP_summary(POP);
 
@@ -2564,43 +2564,43 @@ void model_simulator(params& theta, population& POP, intervention* INTVEN, simul
 
         for (int k = 0; k<N_H_comp; k++)
         {
-            SIM->yH_t[i][k] = POP.yH[k];
+            SIM.yH_t[i][k] = POP.yH[k];
         }
 
         for (int k = 0; k<N_M_comp; k++)
         {
             for (int g = 0; g < N_spec; g++)
             {
-                SIM->yM_t[i][g][k] = POP.yM[g][k];
+                SIM.yM_t[i][g][k] = POP.yM[g][k];
             }
         }
 
         for (int k = 0; k<11; k++)
         {
-            SIM->prev_all[i][k] = POP.prev_all[k];
-            SIM->prev_U5[i][k] = POP.prev_U5[k];
-            SIM->prev_U10[i][k] = POP.prev_U10[k];
+            SIM.prev_all[i][k] = POP.prev_all[k];
+            SIM.prev_U5[i][k] = POP.prev_U5[k];
+            SIM.prev_U10[i][k] = POP.prev_U10[k];
         }
 
 
-        SIM->LLIN_cov_t[i] = POP.LLIN_cov_t;
-        SIM->IRS_cov_t[i] = POP.IRS_cov_t;
-        SIM->ACT_treat_t[i] = POP.ACT_treat_t;
-        SIM->PQ_treat_t[i] = POP.PQ_treat_t;
-        SIM->pregnant_t[i] = POP.pregnant_t;
+        SIM.LLIN_cov_t[i] = POP.LLIN_cov_t;
+        SIM.IRS_cov_t[i] = POP.IRS_cov_t;
+        SIM.ACT_treat_t[i] = POP.ACT_treat_t;
+        SIM.PQ_treat_t[i] = POP.PQ_treat_t;
+        SIM.pregnant_t[i] = POP.pregnant_t;
 
-        SIM->PQ_overtreat_t[i] = POP.PQ_overtreat_t;
-        SIM->PQ_overtreat_9m_t[i] = POP.PQ_overtreat_9m_t;
+        SIM.PQ_overtreat_t[i] = POP.PQ_overtreat_t;
+        SIM.PQ_overtreat_9m_t[i] = POP.PQ_overtreat_9m_t;
 
 
-        SIM->EIR_t[i] = 0.0;
+        SIM.EIR_t[i] = 0.0;
         for (int g = 0; g < N_spec; g++)
         {
-            SIM->EIR_t[i] = SIM->EIR_t[i] + POP.aa_VC[g] * POP.yM[g][5];
+            SIM.EIR_t[i] = SIM.EIR_t[i] + POP.aa_VC[g] * POP.yM[g][5];
         }
 
-        SIM->A_par_mean_t[i] = POP.A_par_mean_t;
-        SIM->A_clin_mean_t[i] = POP.A_clin_mean_t;
+        SIM.A_par_mean_t[i] = POP.A_par_mean_t;
+        SIM.A_clin_mean_t[i] = POP.A_clin_mean_t;
 
     }
 
@@ -2615,7 +2615,7 @@ void model_simulator(params& theta, population& POP, intervention* INTVEN, simul
 //////////////////////////////////////////////////////////////////////////////
 
 
-void intervention_dist(double t, params& theta, population& POP, intervention* INTVEN)
+void intervention_dist(double t, params& theta, population& POP, intervention& INTVEN)
 {
     double QQ;
 
@@ -2629,16 +2629,16 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 1: LLINS
 
-    for (size_t m = 0; m<INTVEN->LLIN_year.size(); m++)
+    for (size_t m = 0; m<INTVEN.LLIN_year.size(); m++)
     {
-        if ((t > INTVEN->LLIN_year[m] - 0.5*t_step) &&
-            (t < INTVEN->LLIN_year[m] + 0.51*t_step))
+        if ((t > INTVEN.LLIN_year[m] - 0.5*t_step) &&
+            (t < INTVEN.LLIN_year[m] + 0.51*t_step))
         {
             cout << "LLIN distribution" << endl;
 
             try 
             {
-                QQ = phi_inv(INTVEN->LLIN_cover[m], 0.0, sqrt(1.0 + theta.sig_round_LLIN*theta.sig_round_LLIN));
+                QQ = phi_inv(INTVEN.LLIN_cover[m], 0.0, sqrt(1.0 + theta.sig_round_LLIN*theta.sig_round_LLIN));
             }
             catch (const char* e)
             {
@@ -2668,16 +2668,16 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 2: IRS
 
-    for (size_t m = 0; m<INTVEN->IRS_year.size(); m++)
+    for (size_t m = 0; m<INTVEN.IRS_year.size(); m++)
     {
-        if ((t > INTVEN->IRS_year[m] - 0.5*t_step) &&
-            (t < INTVEN->IRS_year[m] + 0.51*t_step))
+        if ((t > INTVEN.IRS_year[m] - 0.5*t_step) &&
+            (t < INTVEN.IRS_year[m] + 0.51*t_step))
         {
             cout << "IRS distribution" << endl;
 
             try 
             {
-                QQ = phi_inv(INTVEN->IRS_cover[m], 0.0, sqrt(1.0 + theta.sig_round_IRS*theta.sig_round_IRS));
+                QQ = phi_inv(INTVEN.IRS_cover[m], 0.0, sqrt(1.0 + theta.sig_round_IRS*theta.sig_round_IRS));
             }
             catch (const char* e)
             {
@@ -2707,16 +2707,16 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 3: first-line treatment (blood-stage)
 
-    for (size_t m = 0; m<INTVEN->BS_treat_year_on.size(); m++)
+    for (size_t m = 0; m<INTVEN.BS_treat_year_on.size(); m++)
     {
-        if ((t > INTVEN->BS_treat_year_on[m] - 0.5*t_step) &&
-            (t < INTVEN->BS_treat_year_on[m] + 0.51*t_step))
+        if ((t > INTVEN.BS_treat_year_on[m] - 0.5*t_step) &&
+            (t < INTVEN.BS_treat_year_on[m] + 0.51*t_step))
         {
             cout << "New front-line BS treatment" << endl;
 
-            theta.BS_treat_BScover = INTVEN->BS_treat_BScover[m];
-            theta.BS_treat_BSeff   = INTVEN->BS_treat_BSeff[m];
-            theta.BS_treat_BSproph = INTVEN->BS_treat_BSproph[m];
+            theta.BS_treat_BScover = INTVEN.BS_treat_BScover[m];
+            theta.BS_treat_BSeff   = INTVEN.BS_treat_BSeff[m];
+            theta.BS_treat_BSproph = INTVEN.BS_treat_BSproph[m];
 
             theta.treat_BScover = theta.BS_treat_BScover;
             theta.treat_BSeff   = theta.BS_treat_BSeff;
@@ -2729,10 +2729,10 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Switching back to baseline.
 
-    for (size_t m = 0; m<INTVEN->BS_treat_year_on.size(); m++)
+    for (size_t m = 0; m<INTVEN.BS_treat_year_on.size(); m++)
     {
-        if ((t > INTVEN->BS_treat_year_off[m] - 0.5*t_step) &&
-            (t < INTVEN->BS_treat_year_off[m] + 0.51*t_step))
+        if ((t > INTVEN.BS_treat_year_off[m] - 0.5*t_step) &&
+            (t < INTVEN.BS_treat_year_off[m] + 0.51*t_step))
         {
             cout << "End of changing front-line BS treatment" << endl;
 
@@ -2747,23 +2747,23 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 4: first-line treatment (primaquine)
 
-    for (size_t m = 0; m<INTVEN->PQ_treat_year_on.size(); m++)
+    for (size_t m = 0; m<INTVEN.PQ_treat_year_on.size(); m++)
     {
-        if ((t > INTVEN->PQ_treat_year_on[m] - 0.5*t_step) &&
-            (t < INTVEN->PQ_treat_year_on[m] + 0.51*t_step))
+        if ((t > INTVEN.PQ_treat_year_on[m] - 0.5*t_step) &&
+            (t < INTVEN.PQ_treat_year_on[m] + 0.51*t_step))
         {
             cout << "New front-line PQ treatment" << endl;
 
-            theta.PQ_treat_BScover     = INTVEN->PQ_treat_BScover[m];
-            theta.PQ_treat_BSeff       = INTVEN->PQ_treat_BSeff[m];
-            theta.PQ_treat_BSproph     = INTVEN->PQ_treat_BSproph[m];
-            theta.PQ_treat_PQavail     = INTVEN->PQ_treat_PQavail[m];
-            theta.PQ_treat_PQeff       = INTVEN->PQ_treat_PQeff[m];
-            theta.PQ_treat_PQproph     = INTVEN->PQ_treat_PQproph[m];
-            theta.PQ_treat_G6PD_risk   = INTVEN->PQ_treat_G6PD_risk[m];
-            theta.PQ_treat_CYP2D6_risk = INTVEN->PQ_treat_CYP2D6_risk[m];
-            theta.PQ_treat_preg_risk   = INTVEN->PQ_treat_preg_risk[m];
-            theta.PQ_treat_low_age     = INTVEN->PQ_treat_low_age[m];
+            theta.PQ_treat_BScover     = INTVEN.PQ_treat_BScover[m];
+            theta.PQ_treat_BSeff       = INTVEN.PQ_treat_BSeff[m];
+            theta.PQ_treat_BSproph     = INTVEN.PQ_treat_BSproph[m];
+            theta.PQ_treat_PQavail     = INTVEN.PQ_treat_PQavail[m];
+            theta.PQ_treat_PQeff       = INTVEN.PQ_treat_PQeff[m];
+            theta.PQ_treat_PQproph     = INTVEN.PQ_treat_PQproph[m];
+            theta.PQ_treat_G6PD_risk   = INTVEN.PQ_treat_G6PD_risk[m];
+            theta.PQ_treat_CYP2D6_risk = INTVEN.PQ_treat_CYP2D6_risk[m];
+            theta.PQ_treat_preg_risk   = INTVEN.PQ_treat_preg_risk[m];
+            theta.PQ_treat_low_age     = INTVEN.PQ_treat_low_age[m];
 
             theta.treat_BScover = theta.PQ_treat_BScover;
             theta.treat_BSeff   = theta.PQ_treat_BSeff;
@@ -2776,10 +2776,10 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Switching back to baseline.
 
-    for (size_t m = 0; m<INTVEN->PQ_treat_year_on.size(); m++)
+    for (size_t m = 0; m<INTVEN.PQ_treat_year_on.size(); m++)
     {
-        if ((t > INTVEN->PQ_treat_year_off[m] - 0.5*t_step) &&
-            (t < INTVEN->PQ_treat_year_off[m] + 0.51*t_step))
+        if ((t > INTVEN.PQ_treat_year_off[m] - 0.5*t_step) &&
+            (t < INTVEN.PQ_treat_year_off[m] + 0.51*t_step))
         {
             cout << "End of changing front-line PQ treatment" << endl;
 
@@ -2805,16 +2805,16 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 5: MDA (blood-stage)
 
-    for (size_t m = 0; m<INTVEN->MDA_BS_year.size(); m++)
+    for (size_t m = 0; m<INTVEN.MDA_BS_year.size(); m++)
     {
-        if ((t > INTVEN->MDA_BS_year[m] - 0.5*t_step) &&
-            (t < INTVEN->MDA_BS_year[m] + 0.51*t_step))
+        if ((t > INTVEN.MDA_BS_year[m] - 0.5*t_step) &&
+            (t < INTVEN.MDA_BS_year[m] + 0.51*t_step))
         {
             cout << "MDA (BS) distribution" << endl;
 
-            theta.MDA_BS_BScover = INTVEN->MDA_BS_BScover[m];
-            theta.MDA_BS_BSeff   = INTVEN->MDA_BS_BSeff[m];
-            theta.MDA_BS_BSproph = INTVEN->MDA_BS_BSproph[m];
+            theta.MDA_BS_BScover = INTVEN.MDA_BS_BScover[m];
+            theta.MDA_BS_BSeff   = INTVEN.MDA_BS_BSeff[m];
+            theta.MDA_BS_BSproph = INTVEN.MDA_BS_BSproph[m];
 
             try 
             {
@@ -2848,23 +2848,23 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 6: MDA (blood-stage and liver-stage)
 
-    for (size_t m = 0; m<INTVEN->MDA_PQ_year.size(); m++)
+    for (size_t m = 0; m<INTVEN.MDA_PQ_year.size(); m++)
     {
-        if ((t > INTVEN->MDA_PQ_year[m] - 0.5*t_step) &&
-            (t < INTVEN->MDA_PQ_year[m] + 0.51*t_step))
+        if ((t > INTVEN.MDA_PQ_year[m] - 0.5*t_step) &&
+            (t < INTVEN.MDA_PQ_year[m] + 0.51*t_step))
         {
             cout << "MDA (BS+PQ) distribution" << endl;
 
-            theta.MDA_PQ_BScover     = INTVEN->MDA_PQ_BScover[m];
-            theta.MDA_PQ_BSeff       = INTVEN->MDA_PQ_BSeff[m];
-            theta.MDA_PQ_BSproph     = INTVEN->MDA_PQ_BSproph[m];
-            theta.MDA_PQ_PQavail     = INTVEN->MDA_PQ_PQavail[m];
-            theta.MDA_PQ_PQeff       = INTVEN->MDA_PQ_PQeff[m];
-            theta.MDA_PQ_PQproph     = INTVEN->MDA_PQ_PQproph[m];
-            theta.MDA_PQ_G6PD_risk   = INTVEN->MDA_PQ_G6PD_risk[m];
-            theta.MDA_PQ_CYP2D6_risk = INTVEN->MDA_PQ_CYP2D6_risk[m];
-            theta.MDA_PQ_preg_risk   = INTVEN->MDA_PQ_preg_risk[m];
-            theta.MDA_PQ_low_age     = INTVEN->MDA_PQ_low_age[m];
+            theta.MDA_PQ_BScover     = INTVEN.MDA_PQ_BScover[m];
+            theta.MDA_PQ_BSeff       = INTVEN.MDA_PQ_BSeff[m];
+            theta.MDA_PQ_BSproph     = INTVEN.MDA_PQ_BSproph[m];
+            theta.MDA_PQ_PQavail     = INTVEN.MDA_PQ_PQavail[m];
+            theta.MDA_PQ_PQeff       = INTVEN.MDA_PQ_PQeff[m];
+            theta.MDA_PQ_PQproph     = INTVEN.MDA_PQ_PQproph[m];
+            theta.MDA_PQ_G6PD_risk   = INTVEN.MDA_PQ_G6PD_risk[m];
+            theta.MDA_PQ_CYP2D6_risk = INTVEN.MDA_PQ_CYP2D6_risk[m];
+            theta.MDA_PQ_preg_risk   = INTVEN.MDA_PQ_preg_risk[m];
+            theta.MDA_PQ_low_age     = INTVEN.MDA_PQ_low_age[m];
 
             try 
             {
@@ -2997,25 +2997,25 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 7: MSAT (blood-stage and liver-stage)
 
-    for (size_t m = 0; m < INTVEN->MSAT_PQ_year.size(); m++)
+    for (size_t m = 0; m < INTVEN.MSAT_PQ_year.size(); m++)
     {
-        if( (t > INTVEN->MSAT_PQ_year[m] - 0.5*t_step) &&
-            (t < INTVEN->MSAT_PQ_year[m] + 0.51*t_step) )
+        if( (t > INTVEN.MSAT_PQ_year[m] - 0.5*t_step) &&
+            (t < INTVEN.MSAT_PQ_year[m] + 0.51*t_step) )
         {
             cout << "MSAT (BS+PQ) distribution" << endl;
 
-            theta.MSAT_PQ_BScover     = INTVEN->MSAT_PQ_BScover[m];
-            theta.MSAT_PQ_RDT_PCR     = INTVEN->MSAT_PQ_RDT_PCR[m];
-            theta.MSAT_PQ_sens        = INTVEN->MSAT_PQ_sens[m];
-            theta.MSAT_PQ_BSeff       = INTVEN->MSAT_PQ_BSeff[m];
-            theta.MSAT_PQ_BSproph     = INTVEN->MSAT_PQ_BSproph[m];
-            theta.MSAT_PQ_PQavail     = INTVEN->MSAT_PQ_PQavail[m];
-            theta.MSAT_PQ_PQeff       = INTVEN->MSAT_PQ_PQeff[m];
-            theta.MSAT_PQ_PQproph     = INTVEN->MSAT_PQ_PQproph[m];
-            theta.MSAT_PQ_G6PD_risk   = INTVEN->MSAT_PQ_G6PD_risk[m];
-            theta.MSAT_PQ_CYP2D6_risk = INTVEN->MSAT_PQ_CYP2D6_risk[m];
-            theta.MSAT_PQ_preg_risk   = INTVEN->MSAT_PQ_preg_risk[m];
-            theta.MSAT_PQ_low_age     = INTVEN->MSAT_PQ_low_age[m];
+            theta.MSAT_PQ_BScover     = INTVEN.MSAT_PQ_BScover[m];
+            theta.MSAT_PQ_RDT_PCR     = INTVEN.MSAT_PQ_RDT_PCR[m];
+            theta.MSAT_PQ_sens        = INTVEN.MSAT_PQ_sens[m];
+            theta.MSAT_PQ_BSeff       = INTVEN.MSAT_PQ_BSeff[m];
+            theta.MSAT_PQ_BSproph     = INTVEN.MSAT_PQ_BSproph[m];
+            theta.MSAT_PQ_PQavail     = INTVEN.MSAT_PQ_PQavail[m];
+            theta.MSAT_PQ_PQeff       = INTVEN.MSAT_PQ_PQeff[m];
+            theta.MSAT_PQ_PQproph     = INTVEN.MSAT_PQ_PQproph[m];
+            theta.MSAT_PQ_G6PD_risk   = INTVEN.MSAT_PQ_G6PD_risk[m];
+            theta.MSAT_PQ_CYP2D6_risk = INTVEN.MSAT_PQ_CYP2D6_risk[m];
+            theta.MSAT_PQ_preg_risk   = INTVEN.MSAT_PQ_preg_risk[m];
+            theta.MSAT_PQ_low_age     = INTVEN.MSAT_PQ_low_age[m];
 
             try 
             {
@@ -3186,25 +3186,25 @@ void intervention_dist(double t, params& theta, population& POP, intervention* I
     //////////////////////////////////////////////////////////
     // Intervention 8: SSAT (blood-stage and liver-stage)
 
-    for (size_t m = 0; m<INTVEN->SSAT_PQ_year.size(); m++)
+    for (size_t m = 0; m<INTVEN.SSAT_PQ_year.size(); m++)
     {
-        if ((t > INTVEN->SSAT_PQ_year[m] - 0.5*t_step) &&
-            (t < INTVEN->SSAT_PQ_year[m] + 0.51*t_step))
+        if ((t > INTVEN.SSAT_PQ_year[m] - 0.5*t_step) &&
+            (t < INTVEN.SSAT_PQ_year[m] + 0.51*t_step))
         {
             cout << "SSAT (BS+PQ) distribution" << endl;
 
-            theta.SSAT_PQ_BScover     = INTVEN->SSAT_PQ_BScover[m];
-            theta.SSAT_PQ_sens        = INTVEN->SSAT_PQ_sens[m];
-            theta.SSAT_PQ_spec        = INTVEN->SSAT_PQ_spec[m];
-            theta.SSAT_PQ_BSeff       = INTVEN->SSAT_PQ_BSeff[m];
-            theta.SSAT_PQ_BSproph     = INTVEN->SSAT_PQ_BSproph[m];
-            theta.SSAT_PQ_PQavail     = INTVEN->SSAT_PQ_PQavail[m];
-            theta.SSAT_PQ_PQeff       = INTVEN->SSAT_PQ_PQeff[m];
-            theta.SSAT_PQ_PQproph     = INTVEN->SSAT_PQ_PQproph[m];
-            theta.SSAT_PQ_G6PD_risk   = INTVEN->SSAT_PQ_G6PD_risk[m];
-            theta.SSAT_PQ_CYP2D6_risk = INTVEN->SSAT_PQ_CYP2D6_risk[m];
-            theta.SSAT_PQ_preg_risk   = INTVEN->SSAT_PQ_preg_risk[m];
-            theta.SSAT_PQ_low_age     = INTVEN->SSAT_PQ_low_age[m];
+            theta.SSAT_PQ_BScover     = INTVEN.SSAT_PQ_BScover[m];
+            theta.SSAT_PQ_sens        = INTVEN.SSAT_PQ_sens[m];
+            theta.SSAT_PQ_spec        = INTVEN.SSAT_PQ_spec[m];
+            theta.SSAT_PQ_BSeff       = INTVEN.SSAT_PQ_BSeff[m];
+            theta.SSAT_PQ_BSproph     = INTVEN.SSAT_PQ_BSproph[m];
+            theta.SSAT_PQ_PQavail     = INTVEN.SSAT_PQ_PQavail[m];
+            theta.SSAT_PQ_PQeff       = INTVEN.SSAT_PQ_PQeff[m];
+            theta.SSAT_PQ_PQproph     = INTVEN.SSAT_PQ_PQproph[m];
+            theta.SSAT_PQ_G6PD_risk   = INTVEN.SSAT_PQ_G6PD_risk[m];
+            theta.SSAT_PQ_CYP2D6_risk = INTVEN.SSAT_PQ_CYP2D6_risk[m];
+            theta.SSAT_PQ_preg_risk   = INTVEN.SSAT_PQ_preg_risk[m];
+            theta.SSAT_PQ_low_age     = INTVEN.SSAT_PQ_low_age[m];
 
             try 
             {
