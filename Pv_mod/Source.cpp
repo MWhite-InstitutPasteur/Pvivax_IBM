@@ -1169,7 +1169,7 @@ void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simul
 
         mosquito_step(SIM.t_vec[i], theta, POP);
 
-        intervention_dist(SIM.t_vec[i], theta, POP, INTVEN);
+        INTVEN.distribute(SIM.t_vec[i], theta, POP);
 
         POP_summary(POP);
 

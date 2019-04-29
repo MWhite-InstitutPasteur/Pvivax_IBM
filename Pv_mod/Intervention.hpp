@@ -42,6 +42,10 @@ struct Intervention
     /////////////////////////////////////
     // Read intervention data from input files
     void read(const char *coverage_File);
+    
+    /////////////////////////////////////
+    // Distribute interventions
+    void distribute(double t, Params& theta, Population& POP);
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -151,7 +155,5 @@ struct Intervention
     vector<int>    SSAT_PQ_preg_risk;
     vector<double> SSAT_PQ_low_age;
 };
-
-void intervention_dist(double t, Params& theta, Population& POP, Intervention& INTVEN);
 
 #endif
