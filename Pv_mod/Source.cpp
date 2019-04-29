@@ -62,8 +62,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-#include "Population.hpp"
-#include "Intervention.hpp"
 #include "Simulation.hpp"
 
 #include <iostream>
@@ -92,10 +90,6 @@
 
 void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N_spec][N_M_comp], Params& theta, Population& POP);
 void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], Params& theta, Population& POP);
-void mosquito_step(double t, Params& theta, Population& POP);
-void human_step(Params& theta, Population& POP);
-void POP_summary(Population& POP);
-void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simulation& SIM);
 
 
 ////////////////////////////////////////////
@@ -198,7 +192,7 @@ int main(int argc, char** argv)
 
     cout << "Starting model simulations......." << endl;
 
-    model_simulator(Pv_mod_par, PNG_pop, PNG_intven, PNG_sim);
+    PNG_sim.run(Pv_mod_par, PNG_pop, PNG_intven);
 
     cout << "Model simulations completed....." << endl;
     cout << endl;
@@ -962,77 +956,4 @@ void POP_summary(Population& POP)
 
     POP.A_par_mean_t = A_par_mean / ((double)POP.N_pop);
     POP.A_clin_mean_t = A_clin_mean / ((double)POP.N_pop);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//                                                                          //
-//  2.6. Simulate the model and store the output in SIM                     //
-//                                                                          //
-//////////////////////////////////////////////////////////////////////////////
-
-void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simulation& SIM)
-{
-
-    for (int i = 0; i<SIM.N_time; i++)
-    {
-        if (SIM.t_vec[i] / 365.0 - floor(SIM.t_vec[i] / 365.0) < 0.5*t_step / 365.0)
-        {
-            cout << "time = " << SIM.t_vec[i] / 365.0 << "\t" << 100.0*(SIM.t_vec[i] - SIM.t_vec[0]) / (double(t_step*SIM.N_time)) << "% complete" << endl;
-        }
-
-        human_step(theta, POP);
-
-        mosquito_step(SIM.t_vec[i], theta, POP);
-
-        INTVEN.distribute(SIM.t_vec[i], theta, POP);
-
-        POP_summary(POP);
-
-        //////////////////////////////////////
-        // Fill out Simulation object
-
-        for (int k = 0; k<N_H_comp; k++)
-        {
-            SIM.yH_t[i][k] = POP.yH[k];
-        }
-
-        for (int k = 0; k<N_M_comp; k++)
-        {
-            for (int g = 0; g < N_spec; g++)
-            {
-                SIM.yM_t[i][g][k] = POP.yM[g][k];
-            }
-        }
-
-        for (int k = 0; k<11; k++)
-        {
-            SIM.prev_all[i][k] = POP.prev_all[k];
-            SIM.prev_U5[i][k] = POP.prev_U5[k];
-            SIM.prev_U10[i][k] = POP.prev_U10[k];
-        }
-
-
-        SIM.LLIN_cov_t[i] = POP.LLIN_cov_t;
-        SIM.IRS_cov_t[i] = POP.IRS_cov_t;
-        SIM.ACT_treat_t[i] = POP.ACT_treat_t;
-        SIM.PQ_treat_t[i] = POP.PQ_treat_t;
-        SIM.pregnant_t[i] = POP.pregnant_t;
-
-        SIM.PQ_overtreat_t[i] = POP.PQ_overtreat_t;
-        SIM.PQ_overtreat_9m_t[i] = POP.PQ_overtreat_9m_t;
-
-
-        SIM.EIR_t[i] = 0.0;
-        for (int g = 0; g < N_spec; g++)
-        {
-            SIM.EIR_t[i] = SIM.EIR_t[i] + POP.aa_VC[g] * POP.yM[g][5];
-        }
-
-        SIM.A_par_mean_t[i] = POP.A_par_mean_t;
-        SIM.A_clin_mean_t[i] = POP.A_clin_mean_t;
-
-    }
-
 }

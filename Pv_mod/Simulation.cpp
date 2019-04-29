@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 
 Simulation::Simulation(SimTimes times):
@@ -83,6 +84,77 @@ Simulation::Simulation(SimTimes times):
 
     A_par_mean_t.resize(N_time);
     A_clin_mean_t.resize(N_time);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+//  2.6. Simulate the model and store the output in SIM                     //
+//                                                                          //
+//////////////////////////////////////////////////////////////////////////////
+
+void Simulation::run(Params& theta, Population& POP, Intervention& INTVEN)
+{
+
+    for (int i = 0; i<N_time; i++)
+    {
+        if (t_vec[i] / 365.0 - floor(t_vec[i] / 365.0) < 0.5*t_step / 365.0)
+        {
+            cout << "time = " << t_vec[i] / 365.0 << "\t" << 100.0*(t_vec[i] - t_vec[0]) / (double(t_step*N_time)) << "% complete" << endl;
+        }
+
+        human_step(theta, POP);
+
+        mosquito_step(t_vec[i], theta, POP);
+
+        INTVEN.distribute(t_vec[i], theta, POP);
+
+        POP_summary(POP);
+
+        //////////////////////////////////////
+        // Fill out Simulation object
+
+        for (int k = 0; k<N_H_comp; k++)
+        {
+            yH_t[i][k] = POP.yH[k];
+        }
+
+        for (int k = 0; k<N_M_comp; k++)
+        {
+            for (int g = 0; g < N_spec; g++)
+            {
+                yM_t[i][g][k] = POP.yM[g][k];
+            }
+        }
+
+        for (int k = 0; k<11; k++)
+        {
+            prev_all[i][k] = POP.prev_all[k];
+            prev_U5[i][k] = POP.prev_U5[k];
+            prev_U10[i][k] = POP.prev_U10[k];
+        }
+
+
+        LLIN_cov_t[i] = POP.LLIN_cov_t;
+        IRS_cov_t[i] = POP.IRS_cov_t;
+        ACT_treat_t[i] = POP.ACT_treat_t;
+        PQ_treat_t[i] = POP.PQ_treat_t;
+        pregnant_t[i] = POP.pregnant_t;
+
+        PQ_overtreat_t[i] = POP.PQ_overtreat_t;
+        PQ_overtreat_9m_t[i] = POP.PQ_overtreat_9m_t;
+
+
+        EIR_t[i] = 0.0;
+        for (int g = 0; g < N_spec; g++)
+        {
+            EIR_t[i] = EIR_t[i] + POP.aa_VC[g] * POP.yM[g][5];
+        }
+
+        A_par_mean_t[i] = POP.A_par_mean_t;
+        A_clin_mean_t[i] = POP.A_clin_mean_t;
+
+    }
 }
 
 

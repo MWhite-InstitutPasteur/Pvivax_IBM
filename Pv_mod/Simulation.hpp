@@ -22,7 +22,13 @@
 #ifndef PVIVAX_MODEL_SIMULATION
 #define PVIVAX_MODEL_SIMULATION
 
-#include "Params.hpp"
+#include "Intervention.hpp"
+
+// Function declarations (TODO: these are temporary)
+void mosquito_step(double t, Params& theta, Population& POP);
+void human_step(Params& theta, Population& POP);
+void POP_summary(Population& POP);
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                     //
@@ -41,6 +47,10 @@ public:
     /////////////////////////////////////
     // Set up simulation times and storage for outputs
     Simulation(SimTimes times);
+    
+    /////////////////////////////////////
+    //  2.6. Simulate the model and store the output
+    void run(Params& theta, Population& POP, Intervention& INTVEN);
 
     /////////////////////////////////////
     // Write output file
