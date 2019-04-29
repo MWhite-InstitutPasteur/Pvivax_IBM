@@ -446,9 +446,9 @@ public:
     ////////////////////////////////////////////////////
     // 0.2.2. Function declarations within the human class
 
-    void state_mover(params theta, double lam_bite);
-    void ager(params theta);
-    void intervention_updater(params theta);
+    void state_mover(params& theta, double lam_bite);
+    void ager(params& theta);
+    void intervention_updater(params& theta);
 
 
     ////////////////////////////////////////////////////
@@ -5386,7 +5386,7 @@ void equi_pop_setup(population& POP, params& theta)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void individual::state_mover(params theta, double lam_bite)
+void individual::state_mover(params& theta, double lam_bite)
 {
     lam_bite_track.push_back(lam_bite);
     lam_bite_track.erase(lam_bite_track.begin());
@@ -6349,7 +6349,7 @@ void individual::state_mover(params theta, double lam_bite)
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void individual::ager(params theta)
+void individual::ager(params& theta)
 {
     /////////////////////////
     // Ageing
@@ -6491,7 +6491,7 @@ void individual::ager(params theta)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void individual::intervention_updater(params theta)
+void individual::intervention_updater(params& theta)
 {
 
     ///////////////////////////////////////////
