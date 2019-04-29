@@ -7,3 +7,4 @@ Pv_mod/Debug/
 *.vcxproj*
 *.sln
 IB_mod_batch.bat
+build/
