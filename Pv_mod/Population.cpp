@@ -35,6 +35,392 @@ void gauher(Population& POP, Params& theta);
 
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
+//  2.4. Update the vector of human classes                                 //
+//                                                                          // 
+//       THINK CAREFULLY ABOUT THE ORDERING OF EVENTS                       //
+//////////////////////////////////////////////////////////////////////////////
+
+void Population::human_step(Params& theta)
+{
+
+    //////////////////////////////////////////////////////////////////////////
+    // 2.4.1 Temporary objects for setting up individuals' intervention   
+    //       access characteristics 
+
+    float GMN_parm[(N_int)*(N_int + 3) / 2 + 1];
+    float GMN_work[N_int];
+    float GMN_zero[N_int];
+    float zz_GMN[N_int];
+
+    for (int k = 0; k<N_int; k++)
+    {
+        GMN_zero[k] = 0.0;
+    }
+
+
+    ///////////////////////////////////////////////
+    // 2.4.2. Apply ageing
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        people[n].ager(theta);
+    }
+
+
+    ///////////////////////////////////////////////
+    // 2.4.3. Deaths
+    //
+    // Look again at how things are erased from vectors.
+
+    int N_dead = 0;
+
+    for (size_t n = 0; n<people.size(); n++)
+    {
+        /////////////////////////////////////////////
+        // Everyone has an equal probability of dying
+
+        if (theta.P_dead > genunf(0, 1))
+        {
+            people.erase(people.begin() + n);
+
+            pi_n.erase(pi_n.begin() + n);
+            lam_n.erase(lam_n.begin() + n);
+
+            N_dead = N_dead + 1;
+            n = n - 1;      // If we erase something, the next one moves into it's place so we don't want to step forward.
+        }
+        else {
+
+            ///////////////////////////////////////////
+            // People die once they reach the maximum age
+
+            if (people[n].age > theta.age_max)
+            {
+                people.erase(people.begin() + n);
+
+                pi_n.erase(pi_n.begin() + n);
+                lam_n.erase(lam_n.begin() + n);
+
+                N_dead = N_dead + 1;
+                n = n - 1;       // If we erase something, the next one moves into it's place so we don't want to step forward.
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////
+    // 2.4.4. Births - set up to ensure balanced population.
+    //        Can be adjusted to account for changing demography.
+
+    double zeta_start, het_dif_track, q_rand;
+
+    vector<double> zero_push(N_spec);
+    for (int g = 0; g < N_spec; g++)
+    {
+        zero_push[g] = 0.0;
+    }
+
+
+    for (int n = 0; n<N_dead; n++)
+    {
+        zeta_start = exp(gennor(-0.5*theta.sig_het*theta.sig_het, theta.sig_het));
+
+        while (zeta_start > theta.het_max)
+        {
+            zeta_start = exp(gennor(-0.5*theta.sig_het*theta.sig_het, theta.sig_het));
+        }
+
+        Individual HH(0.0, zeta_start);
+
+        HH.S = 1;
+        HH.I_PCR = 0;
+        HH.I_LM = 0;
+        HH.I_D = 0;
+        HH.T = 0;
+        HH.P = 0;
+
+
+        HH.A_par = 0.0;
+        HH.A_clin = 0.0;
+
+        HH.A_par_boost = 0;
+        HH.A_clin_boost = 0;
+
+        HH.A_par_timer = -1.0;
+        HH.A_clin_timer = -1.0;
+
+        HH.PQ_proph = 0;
+        HH.PQ_proph_timer = -1.0;
+
+        HH.Hyp = 0;
+
+        if (genunf(0.0, 1.0) < 0.5)
+        {
+            HH.gender = 0;
+        }
+        else {
+            HH.gender = 1;
+        }
+
+        if (HH.gender == 0)
+        {
+            if (genunf(0.0, 1.0) < theta.G6PD_prev)
+            {
+                HH.G6PD_def = 1;
+            }
+            else {
+                HH.G6PD_def = 0;
+            }
+        }
+        else {
+
+            q_rand = genunf(0.0, 1.0);
+
+            if (q_rand <= theta.G6PD_prev*theta.G6PD_prev)
+            {
+                HH.G6PD_def = 2;
+            }
+
+            if ((q_rand > theta.G6PD_prev*theta.G6PD_prev) && (q_rand <= theta.G6PD_prev*theta.G6PD_prev + 2 * theta.G6PD_prev*(1.0 - theta.G6PD_prev)))
+            {
+                HH.G6PD_def = 1;
+            }
+
+            if (q_rand > (theta.G6PD_prev*theta.G6PD_prev + 2 * theta.G6PD_prev*(1.0 - theta.G6PD_prev)))
+            {
+                HH.G6PD_def = 0;
+            }
+        }
+
+        if (genunf(0.0, 1.0) < theta.CYP2D6_prev)
+        {
+            HH.CYP2D6 = 1;
+        }
+        else {
+            HH.CYP2D6 = 0;
+        }
+
+        HH.preg_age = 0;
+        HH.pregnant = 0;
+        HH.preg_timer = 0.0;
+
+
+        /////////////////////////////////
+        // Assign levels of maternally-acquired immunity
+        // by finding women of child-bearing age with the
+        // closest level of heterogeneity
+
+        HH.A_par_mat = 0.0;
+        HH.A_clin_mat = 0.0;
+
+        het_dif_track = 1e10;
+
+        for (size_t j = 0; j<people.size(); j++)
+        {
+            if (people[j].preg_age == 1)
+            {
+                if (abs(HH.zeta_het - people[j].zeta_het) < het_dif_track)
+                {
+                    HH.A_par_mat = theta.P_mat*people[j].A_par_mat;
+                    HH.A_clin_mat = theta.P_mat*people[j].A_clin_mat;
+
+                    het_dif_track = (HH.zeta_het - people[j].zeta_het)*(HH.zeta_het - people[j].zeta_het);
+                }
+            }
+        }
+
+
+        ///////////////////////////////////////////////////
+        // Lagged exposure equals zero - they're not born yet!
+
+        for (int k = 0; k<theta.H_track; k++)
+        {
+            HH.lam_bite_track.push_back(0.0);
+            HH.lam_rel_track.push_back(0.0);
+        }
+
+
+        ///////////////////////////////////////////////////
+        // Assign intervention access scores
+
+        for (int p = 0; p<N_int; p++)
+        {
+            for (int q = 0; q<N_int; q++)
+            {
+                theta.V_int_dummy[p][q] = theta.V_int[p][q];
+            }
+        }
+
+        setgmn(GMN_zero, *theta.V_int_dummy, N_int, GMN_parm);
+
+        genmn(GMN_parm, zz_GMN, GMN_work);
+
+        for (int k = 0; k<N_int; k++)
+        {
+            HH.zz_int[k] = zz_GMN[k];
+        }
+
+
+        ///////////////////////////////////////////////////
+        // Born with no interventions
+
+        HH.LLIN = 0;
+        HH.IRS = 0;
+
+        for (int g = 0; g < N_spec; g++)
+        {
+            HH.w_VC[g] = 1.0;
+            HH.y_VC[g] = 1.0;
+            HH.z_VC[g] = 0.0;
+        }
+
+
+        /////////////////////////////////////////////////////////////////
+        // 2.4.5. Push the created individual onto the vector of people
+
+        people.push_back(move(HH));
+
+        pi_n.push_back(zero_push);
+        lam_n.push_back(zero_push);
+    }
+
+
+
+    ///////////////////////////////////////////////////
+    // 2.4.6. Update individual-level vector control
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        people[n].intervention_updater(theta);
+    }
+
+
+    ///////////////////////////////////////////////////
+    // 2.4.7. Update proportion of bites
+    //
+    //        Note the ordering of n and g loops. Need to 
+    //        check if this makes a difference for speed.
+    //
+    //        Should be able to make this quicker
+
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        for (int g = 0; g < N_spec; g++)
+        {
+            pi_n[n][g] = people[n].zeta_het*(1.0 - theta.rho_age*exp(-people[n].age*theta.age_0_inv));
+
+            //pi_n[n][g] = people[n].zeta_het - (people[n].zeta_het - people[n].zeta_het)*P_age_bite;   // Slightly quicker - no calling of exponentials
+        }
+    }
+
+    double SIGMA_PI[N_spec];
+    for (int g = 0; g < N_spec; g++)
+    {
+        SIGMA_PI[g] = 0.0;
+    }
+
+    for (int n = 0; n < N_pop; n++)
+    {
+        for (int g = 0; g < N_spec; g++)
+        {
+            SIGMA_PI[g] = SIGMA_PI[g] + pi_n[n][g];
+        }
+    }
+
+    for (int g = 0; g < N_spec; g++)
+    {
+        SIGMA_PI[g] = 1.0 / SIGMA_PI[g];
+    }
+
+    for (int n = 0; n < N_pop; n++)
+    {
+        for (int g = 0; g < N_spec; g++)
+        {
+            pi_n[n][g] = pi_n[n][g] * SIGMA_PI[g];
+        }
+    }
+
+
+    ///////////////////////////////////////////////////
+    // 2.4.8 Update population-level vector control quantities
+
+    for (int g = 0; g < N_spec; g++)
+    {
+        SUM_pi_w[g] = 0;
+    }
+
+    for (int n = 0; n < N_pop; n++)
+    {
+        for (int g = 0; g < N_spec; g++)
+        {
+            SUM_pi_w[g] = SUM_pi_w[g] + pi_n[n][g] * people[n].w_VC[g];
+        }
+    }
+
+
+    for (int g = 0; g < N_spec; g++)
+    {
+        W_VC[g] = 1.0 - theta.Q_0[g] + theta.Q_0[g] * SUM_pi_w[g];
+        Z_VC[g] = theta.Q_0[g] * SUM_pi_z[g];
+
+        delta_1_VC[g] = theta.delta_1 / (1.0 - Z_VC[g]);
+        delta_VC[g] = delta_1_VC[g] + theta.delta_2;
+
+        p_1_VC[g] = theta.p_1[g] * W_VC[g] / (1.0 - Z_VC[g] * theta.p_1[g]);
+
+        mu_M_VC[g] = -log(p_1_VC[g] * theta.p_2[g]) / delta_VC[g];
+
+        Q_VC[g] = 1.0 - (1.0 - theta.Q_0[g]) / W_VC[g];
+
+        aa_VC[g] = Q_VC[g] / delta_VC[g];
+
+        exp_muM_tauM_VC[g] = exp(-mu_M_VC[g] * theta.tau_M[g]);
+        beta_VC[g] = theta.eps_max[g] * mu_M_VC[g] / (exp(delta_VC[g] * mu_M_VC[g]) - 1.0);
+    }
+
+
+    ///////////////////////////////////////////////////
+    // 2.4.9. Update individual-level force of infection on humans
+
+    for (int n = 0; n < N_pop; n++)
+    {
+        for (int g = 0; g < N_spec; g++)
+        {
+            lam_n[n][g] = aa_VC[g] * pi_n[n][g] * people[n].w_VC[g] / SUM_pi_w[g];
+        }
+    }
+
+
+    ///////////////////////////////////////////////////
+    // 2.4.10. Implement moves between compartments
+    //
+    // TO DO: Can take some multiplications out of the loop.
+
+    double lam_bite_base[N_spec];
+    double lam_bite_n;     // better notation (this is lam_bite)
+
+    for (int g = 0; g < N_spec; g++)
+    {
+        lam_bite_base[g] = (double(N_pop))*theta.bb*yM[g][5];
+    }
+
+    for (int n = 0; n<N_pop; n++)
+    {
+        lam_bite_n = 0.0;
+
+        for (int g = 0; g < N_spec; g++)
+        {
+            lam_bite_n = lam_bite_n + lam_n[n][g] * lam_bite_base[g];
+        }
+
+        people[n].state_mover(theta, lam_bite_n);
+    }
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
 //  2.5. Summarise the output from the population                           //
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////

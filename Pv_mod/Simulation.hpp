@@ -26,7 +26,6 @@
 
 // Function declarations (TODO: these are temporary)
 void mosquito_step(double t, Params& theta, Population& POP);
-void human_step(Params& theta, Population& POP);
 
 
 /////////////////////////////////////////////////////////////////////////////////////////

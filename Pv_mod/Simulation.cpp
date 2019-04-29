@@ -103,7 +103,7 @@ void Simulation::run(Params& theta, Population& POP, Intervention& INTVEN)
             cout << "time = " << t_vec[i] / 365.0 << "\t" << 100.0*(t_vec[i] - t_vec[0]) / (double(t_step*N_time)) << "% complete" << endl;
         }
 
-        human_step(theta, POP);
+        POP.human_step(theta);
 
         mosquito_step(t_vec[i], theta, POP);
 
