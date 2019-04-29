@@ -33,17 +33,34 @@
 class Individual
 {
 public:
-
+    //////////////////////////////////////////////////////////////////////////
+    //  Class constructors and destructors
+    //////////////////////////////////////////////////////////////////////////
+    
     ////////////////////////////////////////////////////
     // 0.2.1. Class constructor
-
     Individual(double a, double zeta)
     {
         age = a;
         zeta_het = zeta;
     }
+    
+    
+    ////////////////////////////////////////////////////
+    // Copy and move constructors
+
+    // Delete unwanted copy constructors
+    Individual(Individual&) =delete;
+    void operator= (Individual&) =delete;
+    // Allow default move constructors
+    Individual(Individual&&) = default;
+    Individual& operator= (Individual&&) = default;
 
 
+    //////////////////////////////////////////////////////////////////////////
+    //  Class member functions
+    //////////////////////////////////////////////////////////////////////////
+    
     ////////////////////////////////////////////////////
     // 0.2.2. Function declarations within the human class
 
@@ -51,6 +68,10 @@ public:
     void ager(Params& theta);
     void intervention_updater(Params& theta);
 
+
+    //////////////////////////////////////////////////////////////////////////
+    //  Data
+    //////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////
     // 0.2.3. Person-specific age and exposure classifiers
@@ -186,8 +207,6 @@ public:
     double z_VC[N_spec];      // probability of mosquito being repelled from this individual during a single feeding attempt
     double y_VC[N_spec];      // probability of mosquito feeding on this individual during a single attempt
     double w_VC[N_spec];      // probability of mosquito feeding and surviving on this individual during a single feeding attempt
-
-private:
 };
 
 #endif

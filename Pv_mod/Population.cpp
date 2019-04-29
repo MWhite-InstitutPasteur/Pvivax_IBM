@@ -1753,7 +1753,7 @@ void equi_pop_setup(Population& POP, Params& theta)
         ////////////////////////////////////////////////////
         // 3.7.4.3.. Add this person to the vector of people
 
-        POP.people.push_back(HH);
+        POP.people.push_back(move(HH));
     }
 
     ///////////////////////////////////////////////////////////

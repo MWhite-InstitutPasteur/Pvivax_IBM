@@ -162,8 +162,7 @@ int main(int argc, char** argv)
     SimTimes times = Pv_mod_par.read(parameter_File, mosquito_File);
     PNG_pop.N_pop = Pv_mod_par.N_pop;
 
-    Intervention PNG_intven;
-    PNG_intven.read(coverage_File);
+    Intervention PNG_intven(coverage_File);
 
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
@@ -649,7 +648,7 @@ void human_step(Params& theta, Population& POP)
         /////////////////////////////////////////////////////////////////
         // 2.4.5. Push the created individual onto the vector of people
 
-        POP.people.push_back(HH);
+        POP.people.push_back(move(HH));
 
         POP.pi_n.push_back(zero_push);
         POP.lam_n.push_back(zero_push);
