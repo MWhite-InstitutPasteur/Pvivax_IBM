@@ -21,12 +21,12 @@
 ///  The code below is structured as follows:                             ///
 ///                                                                       ///
 ///  0. SETTING UP STRUCTURES AND CLASSES                                 ///
-///     All parameter values are stored in a structure called params.     ///
+///     All parameter values are stored in a structure called Params.     ///
 ///     A class is created which stores all the information of a          ///
 ///     single individual.                                                ///
-///     A structure called population stores all individuals.             ///
+///     A structure called Population stores all individuals.             ///
 ///     The time-dependent output of the model is stored in a             ///
-///     structure called simulation.                                      ///
+///     structure called Simulation.                                      ///
 ///                                                                       ///
 ///  1. MAIN - SIMULATION                                                 ///
 ///     Here we read in parameters from files (model parameters,          ///
@@ -102,7 +102,7 @@ using namespace std;
 //                                                               //
 ///////////////////////////////////////////////////////////////////
 
-struct params
+struct Params
 {
     /////////////////////////////////////
     // Equilibrium EIR (no seasonality)
@@ -399,18 +399,18 @@ struct params
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                     //
-// 0.2. Define a class for humans                                                      //
+// 0.2. Define a  for humans                                                      //
 //                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-class individual
+class Individual
 {
 public:
 
     ////////////////////////////////////////////////////
     // 0.2.1. Class constructor
 
-    individual(double a, double zeta)
+    Individual(double a, double zeta)
     {
         age = a;
         zeta_het = zeta;
@@ -420,9 +420,9 @@ public:
     ////////////////////////////////////////////////////
     // 0.2.2. Function declarations within the human class
 
-    void state_mover(params& theta, double lam_bite);
-    void ager(params& theta);
-    void intervention_updater(params& theta);
+    void state_mover(Params& theta, double lam_bite);
+    void ager(Params& theta);
+    void intervention_updater(Params& theta);
 
 
     ////////////////////////////////////////////////////
@@ -573,14 +573,14 @@ private:
 //                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-struct population
+struct Population
 {
     ////////////////////////////////////////////////
     // 0.3.1. Human population
 
     int N_pop;                      // Population size - we have balanced demography at the moment so this will be effectively constant 
 
-    vector<individual> people;      // A vector of individuals
+    vector<Individual> people;      // A vector of individuals
 
     vector<vector<double>> pi_n;    // Proportion of bites on humans that person n receives
     vector<vector<double>> lam_n;   // Biting rate of a single mosquito on person n
@@ -676,7 +676,7 @@ struct population
 //                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-struct intervention
+struct Intervention
 {
     ////////////////////////////////
     // LLINs
@@ -788,7 +788,7 @@ struct intervention
 //                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-struct simulation
+struct Simulation
 {
     //////////////////////////////////////////
     // 0.5.1. Vector of simulation times
@@ -839,13 +839,13 @@ struct simulation
 //                                                        //
 ////////////////////////////////////////////////////////////
 
-void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N_spec][N_M_comp], params& theta, population& POP);
-void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], params& theta, population& POP);
-void mosquito_step(double t, params& theta, population& POP);
-void human_step(params& theta, population& POP);
-void intervention_dist(double t, params& theta, population& POP, intervention& INTVEN);
-void POP_summary(population& POP);
-void model_simulator(params& theta, population& POP, intervention& INTVEN, simulation& SIM);
+void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N_spec][N_M_comp], Params& theta, Population& POP);
+void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], Params& theta, Population& POP);
+void mosquito_step(double t, Params& theta, Population& POP);
+void human_step(Params& theta, Population& POP);
+void intervention_dist(double t, Params& theta, Population& POP, Intervention& INTVEN);
+void POP_summary(Population& POP);
+void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simulation& SIM);
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
@@ -859,11 +859,11 @@ void ludcmp(vector<vector<double>> &a, int n_dim, vector<int> &indx, double &d);
 void lubksb(vector<vector<double>> &a, int n_dim, vector<int> &indx, vector<double> &b);
 void matrix_inv(vector<vector<double>> &a, int n, vector<vector<double>> &a_inv);
 void inv_MM_bb(vector<vector<double>> &MM, vector<double> &bb, vector<double> &xx, int n_dim);
-void MM_ij(int i, int j, params& theta, population& POP, vector<vector<double>> &MM,
+void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> &MM,
            vector<vector<double>> lam_eq, vector<vector<vector<double>>> phi_LM_eq,
            vector<vector<vector<double>>> phi_D_eq, vector<vector<vector<double>>> r_PCR_eq);
-void gauher(population& POP, params& theta);
-void equi_pop_setup(population& POP, params& theta);
+void gauher(Population& POP, Params& theta);
+void equi_pop_setup(Population& POP, Params& theta);
 
 
 ////////////////////////////////////////////
@@ -917,8 +917,8 @@ int main(int argc, char** argv)
     //                                        //
     ////////////////////////////////////////////
 
-    population PNG_pop;
-    params Pv_mod_par;
+    Population PNG_pop;
+    Params Pv_mod_par;
 
     double time_start, time_end, burnin_time;
     int  N_time;
@@ -1446,9 +1446,9 @@ int main(int argc, char** argv)
 
 
     /////////////////////////////////////////////////////////////////////////
-    // 1.7.2. Fill out intervention structure
+    // 1.7.2. Fill out Intervention structure
 
-    intervention PNG_intven;
+    Intervention PNG_intven;
 
     for (int j = 0; j<N_cov_rounds; j++)
     {
@@ -1598,11 +1598,11 @@ int main(int argc, char** argv)
 
     /////////////////////////////////////////////////////////////////////////
     //                                                                     //
-    // 1.9. Create simulation object                                       //
+    // 1.9. Create Simulation object                                       //
     //                                                                     //
     /////////////////////////////////////////////////////////////////////////
 
-    simulation PNG_sim;
+    Simulation PNG_sim;
 
 
     /////////////////////////////////////////////////////////////////////////
@@ -1783,7 +1783,7 @@ int main(int argc, char** argv)
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N_spec][N_M_comp], params& theta, population& POP)
+void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N_spec][N_M_comp], Params& theta, Population& POP)
 {
     double Karry_seas_inv[N_spec];
 
@@ -1808,7 +1808,7 @@ void mosq_derivs(const double t, double(&yM)[N_spec][N_M_comp], double(&dyMdt)[N
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], params& theta, population& POP)
+void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_comp], Params& theta, Population& POP)
 {
     double k1_yM[N_spec][N_M_comp], k2_yM[N_spec][N_M_comp], k3_yM[N_spec][N_M_comp], k4_yM[N_spec][N_M_comp], yM_temp[N_spec][N_M_comp];
 
@@ -1885,7 +1885,7 @@ void mosq_rk4(const double t, const double t_step_mosq, double(&yM)[N_spec][N_M_
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-void mosquito_step(double t, params& theta, population& POP)
+void mosquito_step(double t, Params& theta, Population& POP)
 {
     //////////////////////////////////
     // Set up mosquito state vector
@@ -1954,7 +1954,7 @@ void mosquito_step(double t, params& theta, population& POP)
 //       THINK CAREFULLY ABOUT THE ORDERING OF EVENTS                       //
 //////////////////////////////////////////////////////////////////////////////
 
-void human_step(params& theta, population& POP)
+void human_step(Params& theta, Population& POP)
 {
 
     //////////////////////////////////////////////////////////////////////////
@@ -2043,7 +2043,7 @@ void human_step(params& theta, population& POP)
             zeta_start = exp(gennor(-0.5*theta.sig_het*theta.sig_het, theta.sig_het));
         }
 
-        individual HH(0.0, zeta_start);
+        Individual HH(0.0, zeta_start);
 
         HH.S = 1;
         HH.I_PCR = 0;
@@ -2339,7 +2339,7 @@ void human_step(params& theta, population& POP)
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-void POP_summary(population& POP)
+void POP_summary(Population& POP)
 {
     for (int k = 0; k<N_H_comp; k++)
     {
@@ -2515,7 +2515,7 @@ void POP_summary(population& POP)
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-void model_simulator(params& theta, population& POP, intervention& INTVEN, simulation& SIM)
+void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simulation& SIM)
 {
 
     for (int i = 0; i<SIM.N_time; i++)
@@ -2534,7 +2534,7 @@ void model_simulator(params& theta, population& POP, intervention& INTVEN, simul
         POP_summary(POP);
 
         //////////////////////////////////////
-        // Fill out simulation object
+        // Fill out Simulation object
 
         for (int k = 0; k<N_H_comp; k++)
         {
@@ -2589,7 +2589,7 @@ void model_simulator(params& theta, population& POP, intervention& INTVEN, simul
 //////////////////////////////////////////////////////////////////////////////
 
 
-void intervention_dist(double t, params& theta, population& POP, intervention& INTVEN)
+void intervention_dist(double t, Params& theta, Population& POP, Intervention& INTVEN)
 {
     double QQ;
 
@@ -3669,7 +3669,7 @@ void inv_MM_bb(vector<vector<double>> &MM, vector<double> &bb, vector<double> &x
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
 
-void MM_ij(int i, int j, params& theta, population& POP, vector<vector<double>> &MM,
+void MM_ij(int i, int j, Params& theta, Population& POP, vector<vector<double>> &MM,
     vector<vector<double>> lam_eq, vector<vector<vector<double>>> phi_LM_eq,
     vector<vector<vector<double>>> phi_D_eq, vector<vector<vector<double>>> r_PCR_eq)
 {
@@ -3745,7 +3745,7 @@ void MM_ij(int i, int j, params& theta, population& POP, vector<vector<double>> 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-void gauher(population& POP, params& theta)
+void gauher(Population& POP, Params& theta)
 {
     double x[N_het];
     double w[N_het];
@@ -3859,7 +3859,7 @@ void gauher(population& POP, params& theta)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void equi_pop_setup(population& POP, params& theta)
+void equi_pop_setup(Population& POP, Params& theta)
 {
     //////////////////////////////////////////////////////
     // 3.7.1. Set up age and heterogeneity compartments
@@ -4982,7 +4982,7 @@ void equi_pop_setup(population& POP, params& theta)
 
         double q_rand;
 
-        individual HH(age_start, zeta_start);
+        Individual HH(age_start, zeta_start);
 
         HH.S = 0;
         HH.I_PCR = 0;
@@ -5360,7 +5360,7 @@ void equi_pop_setup(population& POP, params& theta)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void individual::state_mover(params& theta, double lam_bite)
+void Individual::state_mover(Params& theta, double lam_bite)
 {
     lam_bite_track.push_back(lam_bite);
     lam_bite_track.erase(lam_bite_track.begin());
@@ -6348,7 +6348,7 @@ void individual::state_mover(params& theta, double lam_bite)
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void individual::ager(params& theta)
+void Individual::ager(Params& theta)
 {
     /////////////////////////
     // Ageing
@@ -6490,7 +6490,7 @@ void individual::ager(params& theta)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void individual::intervention_updater(params& theta)
+void Individual::intervention_updater(Params& theta)
 {
 
     ///////////////////////////////////////////
