@@ -18,10 +18,16 @@
 ///  finding something new that results in >20% speed up.                 ///
 ///                                                                       ///
 ///                                                                       ///
+///  Model code is split up into multiple files as follows:               ///
+///                                                                       ///
+///  -  Params.hpp, Params.cpp                                            ///
+///     The Params structure stores input parameters and has              ///
+///     associated code for reading parameters from input files.          ///
+///                                                                       ///
+///                                                                       ///
 ///  The code below is structured as follows:                             ///
 ///                                                                       ///
 ///  0. SETTING UP STRUCTURES AND CLASSES                                 ///
-///     All parameter values are stored in a structure called Params.     ///
 ///     A class is created which stores all the information of a          ///
 ///     single individual.                                                ///
 ///     A structure called Population stores all individuals.             ///
@@ -53,6 +59,8 @@
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
+#include "Params.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -61,27 +69,8 @@
 #include <time.h>
 #include "randlib.h"
 #include <omp.h>
-#include <vector>
 #include <algorithm>
 #include <regex>
-
-using namespace std;
-
-#define t_step 1            // Time step for update in humans
-#define mosq_steps 20       // Number of mosquito steps per human step
-
-#define N_H_comp 6          // Number of human compartments (indexed by p)
-#define N_M_comp 6          // Number of mossquito compartments (indexed by p)
-
-#define N_age 58            // Number of age categories for calculation of equilibrium set up (indexed by i)
-#define N_het 21            // Number of heterogeneity categories for calculation of equilibrium set up (indexed by j)
-#define K_max 30            // Maximum umber of hypnozoites (indexed by k)
-#define N_int 6             // Number of interventions
-
-#define N_spec_max 3        // Maximum number of mosquito species that can be modelled
-#define N_spec 3            // Number of mosquito species to be modelled
-
-#define log2 0.69314718056
 
 
 //////////////////////////////////////////////////////
@@ -95,306 +84,6 @@ using namespace std;
 //          //                                      //
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
-//                                                               //
-// 0.1. Define structure for parameters                          //
-//                                                               //
-///////////////////////////////////////////////////////////////////
-
-struct Params
-{
-    /////////////////////////////////////
-    // Equilibrium EIR (no seasonality)
-
-    double EIR_equil;              // EIR at equilibrium
-
-
-    /////////////////////////////////
-    // Human demography
-
-    double mu_H;                   // human death rate 
-    double age_mean;               // mean age of human population
-    double age_max;                // maximum age in human population
-    double het_max;                // maximum heterogeneity
-
-    double G6PD_prev;              // Prevalence of G6PD deficiency
-    double CYP2D6_prev;            // Prevalence of CYP2D6 phenotype
-
-
-    ////////////////////////////////////////////////////////
-    // Heterogeneity in exposure and age-dependent biting
-
-    double age_0;                  // age-dependent biting parameter
-    double rho_age;                // age-dependent biting parameter
-
-    double sig_het;                // heterogeneity in exposure - standard deviation on a log scale
-
-
-    /////////////////////////////////
-    // Transmission probabilities
-
-    double bb;                     // mosquito -> human transmission probability
-    double c_PCR;                  // human -> mosquito transmission probability - PCR detectable
-    double c_LM;                   // human -> mosquito transmission probability - LM detectable
-    double c_D;                    // human -> mosquito transmission probability - clinical disease
-    double c_T;                    // human -> mosquito transmission probability - treatment
-
-    double d_latent;               // duration of latency in the liver
-    int H_track;                   // Number of steps for tracking lagged lam_H (due to duration of latency)
-
-
-    /////////////////////////////////
-    // Human recovery parameters
-
-    double r_LM;                   // rate of recovery from LM detectable infection
-    double r_D;                    // rate of recovery from symptomatic disease
-    double r_T;                    // rate of progression through treatment 
-    double r_P;                    // rate of loss of prophylaxis
-
-    double d_PCR_min;              // minimum duration of PCR-detectable infection - full immunity
-    double d_PCR_max;              // maximum duration of PCR-detectable infection - no immunity
-    double A_PCR_50pc;             // scale parameter for effect of anti-parasite immunity on PCR-detectable infection
-    double K_PCR;                  // shape parameter for effect of anti-parasite immunity on PCR-detectable infection
-
-    double r_PCR;                  // recovery rate from PCR detectable infection - depends on level of immunity
-
-
-    /////////////////////////////////
-    // Baseline treatment parameters
-
-    double BS_treat_BScover_base;  // proportion of episodes of symptomatic disease treated (baseline)
-    double BS_treat_BSeff_base;    // proportion of episodes of symptomatic disease treated (baseline)
-    double BS_treat_BSproph_base;  // proportion of episodes of symptomatic disease treated (baseline)
-
-    double treat_BScover;          // proportion of episodes of symptomatic disease treated (changing)
-    double treat_BSeff;            // blood-stage treatment efficacy
-    double treat_PQavail;          // availability of PQ
-
-
-    ////////////////////////////////
-    // Anti-parasite immunity parameters
-
-    double u_par;                  // scale paramter for acquisition of blood-stage immunity
-    double r_par;                  // rate of decay of blood-stage immunity
-
-    double phi_LM_max;             // probability of LM-detectable infection with no immunity 
-    double phi_LM_min;             // probability of LM-detectable infection with full immunity 
-    double A_LM_50pc;              // blood-stage immunity scale parameter
-    double K_LM;                   // blood-stage immunity shape parameter
-
-    double phi_LM;                 // probability that PCR detectable infection becomes detectable by light microscopy (LM) - DYNAMICALLY UPDATED
-
-
-    ////////////////////////////////
-    // Clinical immunity parameters
-
-    double u_clin;                 // scale paramter for acquisition of blood-stage immunity
-    double r_clin;                 // rate of decay of clinical immunity
-
-    double phi_D_max;              // probability of clinical episode with no immunity 
-    double phi_D_min;              // probability of clinical episode with full immunity
-    double A_D_50pc;               // clinical immunity scale parameter
-    double K_D;                    // clinical immunity shape parameter
-
-    double phi_D;                  // probability that LM detectable infection progresses to symptomatic disease - DYNAMICALLY UPDATED
-
-
-    /////////////////////////////////////////////
-    // maternal im munity
-
-    double P_mat;                  // New-born immunity relative to mother's
-    double d_mat;                  // Inverse of decay rate of maternal immunity
-
-
-    /////////////////////////////////
-    // Relapse paramters
-
-    double ff;                     // relapse rate
-    double gamma_L;                // liver clearance rate
-
-
-    /////////////////////////////////
-    // Entomological paramters
-
-    double Prop_mosq[N_spec_max];      // Proportion of An. farauti
-
-    double mm_0[N_spec];               // number of mosquitoes per human (An. farauti)
-    double aa[N_spec];                 // mosquito biting rate (in the absence of vector control)        
-    double mu_M[N_spec];               // mosquito death rate
-    double tau_M[N_spec];              // duration of sporogony
-
-    double lam_M[N_spec];              // Force of infection on mosquites - updated dynamically
-
-    int M_track;                           // Number of steps for tracking lagged lam_M*S_M (needed for lag due to duration of sporogony)
-    vector<vector<double>> lam_S_M_track;  // Lagged force of infection on moquitoes
-
-
-    ////////////////////////////////
-    // Seasonality paramters
-
-    double dry_seas[N_spec];        // Proportion of dry season transmission compared to mean 
-    double kappa_seas[N_spec];      // Shape parameter for seasonality
-    double t_peak_seas[N_spec];     // Offset for seasonal transmission
-    double denom_seas[N_spec];      // Denominator for seasonality
-
-
-    ///////////////////////////////
-    // Larval paramters
-
-    double d_E_larvae;              // Development time of early larval instars
-    double d_L_larvae;              // Development time of late larval instars
-    double d_pupae;                 // Development time of pupae
-    double mu_E0;                   // Mortality rate of early larval instars (low density)
-    double mu_L0;                   // Mortality rate of late larval instars (low density)
-    double mu_P;                    // Mortality rate of pupae
-    double beta_larvae;             // Number of eggs laid per day per mosquito
-    double gamma_larvae;            // Effect of density dependence on late instars relative to early instars
-
-    double omega_larvae[N_spec];    // Useful pre-calculated quantity
-
-    double Karry[N_spec];           // Larval carry capacity
-
-    double eps_max[N_spec];         // Number of eggs per day
-
-
-    ////////////////////////////////
-    // Treatment parameters (treatment as intervention)
-
-    double BS_treat_BScover;        // Coverage of first-line treatment with BS drugs
-    double BS_treat_BSeff;          // Efficacy of first-line treatment with BS drugs
-    double BS_treat_BSproph;        // Duration of prophylaxis with first-line BS drugs
-
-    double PQ_treat_BScover;        // Coverage of BS treatment in combined BS & PQ first-line regimen
-    double PQ_treat_BSeff;          // Efficacy of BS treatment
-    double PQ_treat_BSproph;        // Duration of BS prophylaxis 
-    double PQ_treat_PQavail;        // Availability of PQ treatment (as a proportion of those receiving BS treatment)
-    double PQ_treat_PQeff;          // Efficacy of PQ treatment
-    double PQ_treat_PQproph;        // Duration of PQ prophylaxis (i.e. for how long does PQ prevent new hypnozoites)
-    int PQ_treat_G6PD_risk;         // Risk in G6PD - deficient individuals
-    int PQ_treat_CYP2D6_risk;       // Risk of not working in low CYP2D6 metabolizers
-    int PQ_treat_preg_risk;         // Risk in pregnant women
-    double PQ_treat_low_age;        // Lower age limit for treatment(in years)
-
-    double MDA_BS_BScover;          // Coverage of blood - stage drugs
-    double MDA_BS_BSeff;            // Efficacy of blood - stage drugs
-    double MDA_BS_BSproph;          // Duration of blood - stage prophylaxis
-
-    double MDA_PQ_BScover;          // Coverage of blood - stage drugs
-    double MDA_PQ_BSeff;            // Efficacy of blood - stage drugs
-    double MDA_PQ_BSproph;          // Duration of blood - stage prophylaxis
-    double MDA_PQ_PQavail;          // Availability of primaquine
-    double MDA_PQ_PQeff;            // Efficacy of primaquine
-    double MDA_PQ_PQproph;          // Duration of primaquine prophylaxis(prevents new hypnozoites)
-    int MDA_PQ_G6PD_risk;           // Risk in G6PD - deficient individuals
-    int MDA_PQ_CYP2D6_risk;         // Risk of not working in low CYP2D6 metabolizers
-    int MDA_PQ_preg_risk;           // Risk in pregnant women
-    double MDA_PQ_low_age;          // Lower age limit for treatment(in years)
-
-    double MSAT_PQ_RDT_PCR;         // What diagnostic tool : 1 for RDT(= LM); 2 for PCR
-    double MSAT_PQ_sens;            // Sensitivity of diagnostic tool
-    double MSAT_PQ_BScover;         // Coverage of blood - stage drugs
-    double MSAT_PQ_BSeff;           // Efficacy of blood - stage drugs
-    double MSAT_PQ_BSproph;         // Duration of blood - stage prophylaxis
-    double MSAT_PQ_PQavail;         // Availability of primaquine
-    double MSAT_PQ_PQeff;           // Efficacy of primaquine
-    double MSAT_PQ_PQproph;         // Duration of primaquine prophylaxis(prevents new hypnozoites)
-    int MSAT_PQ_G6PD_risk;          // Risk in G6PD - deficient individuals
-    int MSAT_PQ_CYP2D6_risk;        // Risk of not working in low CYP2D6 metabolizers
-    int MSAT_PQ_preg_risk;          // Risk in pregnant women
-    double MSAT_PQ_low_age;         // Lower age limit for treatment(in years)
-
-    double SSAT_PQ_sens;            // Sensitivity of diagnostic tool
-    double SSAT_PQ_spec;            // Sensitivity of diagnostic tool
-    double SSAT_PQ_BScover;         // Coverage of blood - stage drugs
-    double SSAT_PQ_BSeff;           // Efficacy of blood - stage drugs
-    double SSAT_PQ_BSproph;         // Duration of blood - stage prophylaxis
-    double SSAT_PQ_PQavail;         // Availability of primaquine
-    double SSAT_PQ_PQeff;           // Efficacy of primaquine
-    double SSAT_PQ_PQproph;         // Duration of primaquine prophylaxis(prevents new hypnozoites)
-    int SSAT_PQ_G6PD_risk;          // Risk in G6PD - deficient individuals
-    int SSAT_PQ_CYP2D6_risk;        // Risk of not working in low CYP2D6 metabolizers
-    int SSAT_PQ_preg_risk;          // Risk in pregnant women
-    double SSAT_PQ_low_age;         // Lower age limit for treatment(in years)
-
-
-    /////////////////////////////////////////////////////////
-    // Baseline entomological parameters required for LLINs
-
-    double LLIN_half_life;      // Half-life of loss of LLINs
-    double P_LLIN_loss;         // Daily probability of losing LLIN - pre-calculated for efficiency
-    double PYR_half_life;       // Half-life of pyrethroid decay on LLINs
-    double PYR_decay;           // Daily pyrethroid decay - pre-calculated for efficiency
-
-    double r_LLIN_0[N_spec];    // Probability mosquito repelled (with full insecticide activity)
-    double r_LLIN_net[N_spec];  // Probability mosquito repelled due to barrier effect of net (no insecticide)
-    double s_LLIN_0[N_spec];    // Probability mosquito feeds successfully
-    double d_LLIN_0[N_spec];    // Probability mosquito dies during feeding attempt
-
-    double IRS_half_life;       // Half-life of IRS insecticide decay
-    double IRS_decay;           // Daily IRS insecticide decay - pre-calculated for efficiency
-
-    double r_IRS_0[N_spec];     // Probability mosquito repelled by IRS (full insecticide activity)
-    double d_IRS_0[N_spec];     // Probability mosquito killed by IRS (full insecticide activity)
-    double s_IRS_0[N_spec];     // Probability mosquito survives feeding attempt with IRS (full insecticide activity)
-
-    double Q_0[N_spec];         // Human Blood Index (proportion of blood meals taken on humans)
-    double CHI_endo[N_spec];    // Endophily - proportion of mosquitoes resting indoors after feeding (no intervention)
-    double PSI_indoors[N_spec]; // Proportion of bites taken on humans indoors
-    double PSI_bed[N_spec];     // Proportion of bites taken on humans in bed
-
-    double delta_1;             // Time spent foraging for a blood meal
-    double delta_2;             // Time_spent_digesting_blood_meal
-    double delta;               // Duration of gonotrophic cycle
-
-    double p_1[N_spec];         // Daily? death probability when foraging for a blood meal
-    double p_2[N_spec];         // Daily? death probability when digesting blood meal
-
-    double rho_round_LLIN;      // Between round correlation of LLINS
-    double rho_round_IRS;       // Between round correlation of IRS
-    double rho_LLIN_IRS;        // Correlation between LLIN and IRS coverage
-
-    double rho_round_MDA;       // Between round correlation of MDA
-    double rho_MDA_LLIN;        // Correlation between MDA and LLINs
-    double rho_MDA_IRS;         // Correlation between MDA and IRS
-
-    double sig_round_LLIN;      // Derived parameter for correlation between rounds of LLINs
-    double sig_round_IRS;       // Derived parameter for correlation between rounds of IRS
-    double sig_round_MDA;       // Derived parameter for correlation between rounds of MDA
-
-    float V_int[N_int][N_int];
-    float V_int_dummy[N_int][N_int];
-
-
-    //////////////////////////////////////////////////////
-    // Pre-multiplication of quantities for efficiency
-
-    double A_par_decay;         // Decay factor for BS immunity
-    double A_clin_decay;        // Decay factor for clinical immunity
-    double mat_decay;           // Decay factor for maternal immunity 
-
-    double age_0_inv;           // Inverse of age-dependent biting parameter
-
-    double A_PCR_50pc_inv;      // Immune scalar for PCR-detectable infection
-    double A_LM_50pc_inv;       // Immune scalar for LM-detectable infection
-    double A_D_50pc_inv;        // Immune scalar for clinical disease
-
-    double P_dead;              // Probability of dying in each time step
-    double P_preg;              // Probability of woman 18-40 years becoming pregnant per day
-
-    double P_PYR_decay;         // Proportional decay of pyrethroid per time step (pre-calculated for efficiency)
-    double P_IRS_decay;         // Proportional decay of IRS insecticide per time step (pre-calculated for efficiency)
-
-
-    ////////////////////////////////////////
-    // Matrices for hypnozoite transitions
-
-    double D_MAT[K_max + 1][K_max + 1];
-    double OD_MAT[K_max + 1][K_max + 1];
-    double K_MAT[K_max + 1][K_max + 1];
-    double L_MAT[K_max + 1][K_max + 1];
-    double H_MAT[K_max + 1][K_max + 1];
-};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -848,7 +537,6 @@ void POP_summary(Population& POP);
 void model_simulator(Params& theta, Population& POP, Intervention& INTVEN, Simulation& SIM);
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
-double gammln(const double xx);
 
 
 ///////////////////////////////////////////
@@ -893,22 +581,22 @@ int main(int argc, char** argv)
     ////////////////////////////////////////////
 
     // do we have the correct command line?
-    if (argc != 7)
+    if (argc != 4 + N_spec_max)
     {
         std::cout << "Incorrect command line.\n";
         return 0;
     }
 
-    char* parameter_File = argv[1];
+    const char* parameter_File = argv[1];
 
-    char* mosquito_File[N_spec_max];
+    const char* mosquito_File[N_spec_max];
     for (int g = 0; g < N_spec_max; g++)
     {
         mosquito_File[g] = argv[2 + g];
     }
 
-    char* coverage_File = argv[5];
-    char* output_File = argv[6];
+    const char* coverage_File = argv[5];
+    const char* output_File = argv[6];
 
 
     ////////////////////////////////////////////
@@ -920,9 +608,6 @@ int main(int argc, char** argv)
     Population PNG_pop;
     Params Pv_mod_par;
 
-    double time_start, time_end, burnin_time;
-    int  N_time;
-
 
     ////////////////////////////////////////////
     //                                        //
@@ -930,440 +615,8 @@ int main(int argc, char** argv)
     //                                        //
     ////////////////////////////////////////////
 
-    cout << "Reading in parameter file............." << endl;
-    cout << endl;
-
-    string discard;
-
-    std::ifstream parameter_Stream(parameter_File);
-
-    if (parameter_Stream.fail())
-    {
-        std::cout << "Failure reading in data." << endl;
-    }
-
-
-    //////////////////////////////////////////////////
-    // Population size and simulation time
-
-    parameter_Stream >> discard >> PNG_pop.N_pop >> discard;               // Number of participants
-
-    parameter_Stream >> discard >> Pv_mod_par.EIR_equil >> discard;        // EIR at equilibrium
-
-    for (int g = 0; g < N_spec_max; g++)
-    {
-        parameter_Stream >> discard >> Pv_mod_par.Prop_mosq[g] >> discard; // Proportions of each mosquito species
-    }
-
-    parameter_Stream >> discard >> time_start >> discard;                  // Start time for simulation
-    parameter_Stream >> discard >> time_end >> discard;                    // End time for simulation
-    parameter_Stream >> discard >> burnin_time >> discard;                 // End time for simulation
-
-    N_time = (1 / t_step)*(burnin_time + time_end - time_start) * 365;     // Number of time steps for simulation
-
-
-    /////////////////////////////////
-    // Human demography
-    // Note that the mean age isn't technically the mean 
-    // due to the effects of truncation at maximum age
-
-    parameter_Stream >> discard >> Pv_mod_par.age_mean >> discard;    // mean age of human population
-    parameter_Stream >> discard >> Pv_mod_par.age_max >> discard;     // maximum age in human population
-
-    Pv_mod_par.mu_H = 1.0 / Pv_mod_par.age_mean;                      // human death rate
-
-    Pv_mod_par.het_max = 100.0;                                       // Maximum relative heterogeneity value
-
-
-    ////////////////////////////////////////////////////////
-    // Heterogeneity in exposure and age-dependent biting
-
-    parameter_Stream >> discard >> Pv_mod_par.age_0 >> discard;       // age-dependent biting parameter
-    parameter_Stream >> discard >> Pv_mod_par.rho_age >> discard;     // age-dependent biting parameter
-    parameter_Stream >> discard >> Pv_mod_par.sig_het >> discard;     // heterogeneity in exposure - standard deviation on a log scale
-
-
-    /////////////////////////////////
-    // Transmission probabilities
-
-    parameter_Stream >> discard >> Pv_mod_par.bb >> discard;          // mosquito -> human transmission probability
-    parameter_Stream >> discard >> Pv_mod_par.c_PCR >> discard;       // human -> mosquito transmission probability (PCR detectable)
-    parameter_Stream >> discard >> Pv_mod_par.c_LM >> discard;        // human -> mosquito transmission probability (LM detectable)
-    parameter_Stream >> discard >> Pv_mod_par.c_D >> discard;         // human -> mosquito transmission probability (clinical disease)
-    parameter_Stream >> discard >> Pv_mod_par.c_T >> discard;         // human -> mosquito transmission probability (during treatment)
-
-
-    ////////////////////////////////
-    // Human recovery paramters
-
-    parameter_Stream >> discard >> Pv_mod_par.d_latent >> discard;             // latent period in liver
-    parameter_Stream >> discard >> Pv_mod_par.r_LM >> discard;                 // rate of recovery from LM detectable infection
-    parameter_Stream >> discard >> Pv_mod_par.r_D >> discard;                  // rate of recovery from symptomatic disease
-    parameter_Stream >> discard >> Pv_mod_par.r_T >> discard;                  // rate of progression through treatment 
-    parameter_Stream >> discard >> Pv_mod_par.d_PCR_min >> discard;            // minimum duration of PCR-detectable infection - full immunity
-    parameter_Stream >> discard >> Pv_mod_par.d_PCR_max >> discard;            // maximum duration of PCR-detectable infection - no immunity
-
-    parameter_Stream >> discard >> Pv_mod_par.BS_treat_BScover_base >> discard;      // proportion of episodes of symptomatic disease treated (baseline)
-    parameter_Stream >> discard >> Pv_mod_par.BS_treat_BSeff_base >> discard;      // efficacy of front-line treatment (baseline)
-    parameter_Stream >> discard >> Pv_mod_par.BS_treat_BSproph_base >> discard;  // duration of prophylaxis of front-line treatment (baseline)
-
-    parameter_Stream >> discard >> Pv_mod_par.A_PCR_50pc >> discard;           // PCR_detectable infection scale parameter
-    parameter_Stream >> discard >> Pv_mod_par.K_PCR >> discard;                // PCR_detectable infection shape parameter
-
-
-    Pv_mod_par.H_track = int(Pv_mod_par.d_latent / t_step);                       // Number of time steps for duration of latency
-
-    Pv_mod_par.treat_BScover = Pv_mod_par.BS_treat_BScover_base;                  // Treatment coverage
-    Pv_mod_par.treat_BSeff   = Pv_mod_par.BS_treat_BSeff_base;                    // Efficacy of treatment
-    Pv_mod_par.r_P           = 1.0 / Pv_mod_par.BS_treat_BSproph_base;            // rate of recovery from prophylaxis
-    Pv_mod_par.treat_PQavail = Pv_mod_par.MDA_PQ_PQavail;                         // PQ availability
-
-    Pv_mod_par.PQ_treat_BScover     = 0.0;
-    Pv_mod_par.PQ_treat_BSeff       = 0.0;
-    Pv_mod_par.PQ_treat_BSproph     = 10.0;
-    Pv_mod_par.PQ_treat_PQavail     = 0.0;
-    Pv_mod_par.PQ_treat_PQeff       = 0.0;
-    Pv_mod_par.PQ_treat_PQproph     = 0.0;
-    Pv_mod_par.PQ_treat_G6PD_risk   = 1;
-    Pv_mod_par.PQ_treat_CYP2D6_risk = 1;
-    Pv_mod_par.PQ_treat_preg_risk   = 1;
-    Pv_mod_par.PQ_treat_low_age     = 180.0;
-
-
-    //////////////////
-    // temporary setting treatment cov to zero
-    //
-    //Pv_mod_par.treat_cov_eff = 0.0;
-
-
-    /////////////////////////////////
-    // Blood-stage immunity paramters
-
-    parameter_Stream >> discard >> Pv_mod_par.u_par >> discard;         // scale paramter for acquisition of blood-stage immunity
-    parameter_Stream >> discard >> Pv_mod_par.r_par >> discard;         // rate of decay of blood-stage immunity
-
-    parameter_Stream >> discard >> Pv_mod_par.phi_LM_max >> discard;    // probability of blood-stage infection with no immunity 
-    parameter_Stream >> discard >> Pv_mod_par.phi_LM_min >> discard;    // probability of blood-stage infection with maximum immunity
-    parameter_Stream >> discard >> Pv_mod_par.A_LM_50pc >> discard;     // blood-stage immunity scale parameter
-    parameter_Stream >> discard >> Pv_mod_par.K_LM >> discard;          // blood-stage immunity shape parameter
-
-
-    /////////////////////////////////
-    // Clinical immunity paramters
-
-    parameter_Stream >> discard >> Pv_mod_par.u_clin >> discard;       // scale paramter for acquisition of blood-stage immunity
-    parameter_Stream >> discard >> Pv_mod_par.r_clin >> discard;       // rate of decay of clinical immunity
-
-    parameter_Stream >> discard >> Pv_mod_par.phi_D_max >> discard;    // probability of clinical episode with no immunity
-    parameter_Stream >> discard >> Pv_mod_par.phi_D_min >> discard;    // probability of clinical episode with maximum immunity
-    parameter_Stream >> discard >> Pv_mod_par.A_D_50pc >> discard;     // clinical immunity scale parameter
-    parameter_Stream >> discard >> Pv_mod_par.K_D >> discard;          // clinical immunity shape parameter
-
-
-    /////////////////////////////////////////////
-    // maternal immunity
-
-    parameter_Stream >> discard >> Pv_mod_par.P_mat >> discard;        // New-born immunity relative to mother's
-    parameter_Stream >> discard >> Pv_mod_par.d_mat >> discard;        // Inverse of decay rate of maternal immunity
-
-
-    /////////////////////////////////
-    // Relapse paramters
-
-    parameter_Stream >> discard >> Pv_mod_par.ff >> discard;           // relapse rate
-    parameter_Stream >> discard >> Pv_mod_par.gamma_L >> discard;      // liver clearance rate
-
-
-    ////////////////////////////////
-    // Human genotype prevalences
-
-    parameter_Stream >> discard >> Pv_mod_par.G6PD_prev >> discard;    // prevalence of G6PD deficiency
-    parameter_Stream >> discard >> Pv_mod_par.CYP2D6_prev >> discard;  // prevalence of CYP2D6 phenotype 
-
-
-    ////////////////////////////////////////////////////////
-    // Intervention distribution parameters
-
-    parameter_Stream >> discard >> Pv_mod_par.rho_round_LLIN >> discard;
-    parameter_Stream >> discard >> Pv_mod_par.rho_round_IRS >> discard;
-    parameter_Stream >> discard >> Pv_mod_par.rho_round_MDA >> discard;
-
-    parameter_Stream >> discard >> Pv_mod_par.rho_LLIN_IRS >> discard;
-    parameter_Stream >> discard >> Pv_mod_par.rho_MDA_IRS >> discard;
-    parameter_Stream >> discard >> Pv_mod_par.rho_MDA_LLIN >> discard;
-
-
-    Pv_mod_par.sig_round_LLIN = sqrt((1.0 - Pv_mod_par.rho_round_LLIN) / Pv_mod_par.rho_round_LLIN);
-    Pv_mod_par.sig_round_IRS = sqrt((1.0 - Pv_mod_par.rho_round_IRS) / Pv_mod_par.rho_round_IRS);
-    Pv_mod_par.sig_round_MDA = sqrt((1.0 - Pv_mod_par.rho_round_MDA) / Pv_mod_par.rho_round_MDA);
-
-
-    //////////////////////////////////////////////
-    // TO DO - no need to have different possible correlations
-    //         for the various MDA interventions - can assume access
-    //         to individuals is all the same
-
-    Pv_mod_par.V_int[0][0] = 1.0;
-    Pv_mod_par.V_int[0][1] = Pv_mod_par.rho_LLIN_IRS;
-    Pv_mod_par.V_int[0][2] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[0][3] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[0][4] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[0][5] = Pv_mod_par.rho_MDA_LLIN;
-
-    Pv_mod_par.V_int[1][0] = Pv_mod_par.rho_LLIN_IRS;
-    Pv_mod_par.V_int[1][1] = 1.0;
-    Pv_mod_par.V_int[1][2] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[1][3] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[1][4] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[1][5] = Pv_mod_par.rho_MDA_IRS;
-
-    Pv_mod_par.V_int[2][0] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[2][1] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[2][2] = 1.0;
-    Pv_mod_par.V_int[2][3] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[2][4] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[2][5] = Pv_mod_par.rho_round_MDA;
-
-    Pv_mod_par.V_int[3][0] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[3][1] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[3][2] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[3][3] = 1.0;
-    Pv_mod_par.V_int[3][4] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[3][5] = Pv_mod_par.rho_round_MDA;
-
-    Pv_mod_par.V_int[4][0] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[4][1] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[4][2] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[4][3] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[4][4] = 1.0;
-    Pv_mod_par.V_int[4][5] = Pv_mod_par.rho_round_MDA;
-
-    Pv_mod_par.V_int[5][0] = Pv_mod_par.rho_MDA_LLIN;
-    Pv_mod_par.V_int[5][1] = Pv_mod_par.rho_MDA_IRS;
-    Pv_mod_par.V_int[5][2] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[5][3] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[5][4] = Pv_mod_par.rho_round_MDA;
-    Pv_mod_par.V_int[5][5] = 1.0;
-
-
-    /////////////////////////////////////////////////////////
-    // We need to make a dummy covariance matrix for intervention
-    // distribution because of the way genmn works
-
-    for (int p = 0; p<N_int; p++)
-    {
-        for (int q = 0; q<N_int; q++)
-        {
-            Pv_mod_par.V_int_dummy[p][q] = Pv_mod_par.V_int[p][q];
-        }
-    }
-
-    parameter_Stream.close();
-
-    cout << "Parameter values read in from file!" << endl;
-    cout << endl;
-
-
-    ////////////////////////////////////////////
-    //                                        //
-    // 1.4. Read in mosquito parameters       //
-    //                                        //
-    ////////////////////////////////////////////
-
-    cout << "Reading in mosquito files............." << endl;
-    cout << endl;
-
-    for (int g = 0; g < N_spec; g++)
-    {
-        std::ifstream mosquito_Stream(mosquito_File[g]);
-
-        if (mosquito_Stream.fail())
-        {
-            std::cout << "Failure reading in mosquito parameters." << endl;
-        }
-
-
-        /////////////////////////////////
-        // Death rate and duration of sporogony
-
-        mosquito_Stream >> discard >> Pv_mod_par.mu_M[g] >> discard;      // mosquito death rate
-        mosquito_Stream >> discard >> Pv_mod_par.tau_M[g] >> discard;     // duration of sporogony
-
-        Pv_mod_par.M_track = int(Pv_mod_par.tau_M[g] * mosq_steps / t_step);
-
-
-        /////////////////////////////////
-        // Larval paramters
-        // From White et al (2011) P&V
-
-        mosquito_Stream >> discard >> Pv_mod_par.d_E_larvae >> discard;      // Development time of early larval instars
-        mosquito_Stream >> discard >> Pv_mod_par.d_L_larvae >> discard;      // Development time of late larval instars
-        mosquito_Stream >> discard >> Pv_mod_par.d_pupae >> discard;         // Development time of pupae
-        mosquito_Stream >> discard >> Pv_mod_par.mu_E0 >> discard;           // Mortality rate of early larval instars (low density)
-        mosquito_Stream >> discard >> Pv_mod_par.mu_L0 >> discard;           // Mortality rate of late larval instars (low density)
-        mosquito_Stream >> discard >> Pv_mod_par.mu_P >> discard;            // Mortality rate of pupae
-        mosquito_Stream >> discard >> Pv_mod_par.beta_larvae >> discard;     // Number of eggs laid per day per mosquito
-        mosquito_Stream >> discard >> Pv_mod_par.gamma_larvae >> discard;    // Effect of density dependence on late instars relative to early instars
-
-        Pv_mod_par.omega_larvae[g] = Pv_mod_par.gamma_larvae*Pv_mod_par.mu_L0 / Pv_mod_par.mu_E0 - Pv_mod_par.d_E_larvae / Pv_mod_par.d_L_larvae + (Pv_mod_par.gamma_larvae - 1.0)*Pv_mod_par.mu_L0*Pv_mod_par.d_E_larvae;
-        Pv_mod_par.omega_larvae[g] = - 0.5*Pv_mod_par.omega_larvae[g] + sqrt(0.25*Pv_mod_par.omega_larvae[g] * Pv_mod_par.omega_larvae[g] + 0.5*Pv_mod_par.gamma_larvae*Pv_mod_par.beta_larvae*Pv_mod_par.mu_L0*Pv_mod_par.d_E_larvae /
-                                       (Pv_mod_par.mu_E0*Pv_mod_par.mu_M[g] * Pv_mod_par.d_L_larvae*(1.0 + Pv_mod_par.d_pupae*Pv_mod_par.mu_P)));
-
-
-        /////////////////////////////////
-        // Seasonality paramters
-        // Denominator for seasonality - see Griffin (2015) PLoS Comp Biol
-
-        mosquito_Stream >> discard >> Pv_mod_par.dry_seas[g] >> discard;      // Proportion of dry season transmission compared to mean 
-        mosquito_Stream >> discard >> Pv_mod_par.kappa_seas[g] >> discard;    // Shape parameter for seasonality
-        mosquito_Stream >> discard >> Pv_mod_par.t_peak_seas[g] >> discard;   // Timing of peak for seasonal transmission
-
-        Pv_mod_par.denom_seas[g] = exp(gammln(0.5) + gammln(Pv_mod_par.kappa_seas[g] + 0.5) - gammln(Pv_mod_par.kappa_seas[g] + 1.0)) / 3.14159265359;
-
-
-        //////////////////////////////////////////////
-        // Entomology paramters
-
-        mosquito_Stream >> discard >> Pv_mod_par.Q_0[g] >> discard;           // Human Blood Index (proportion of blood meals taken on humans)
-        mosquito_Stream >> discard >> Pv_mod_par.CHI_endo[g] >> discard;      // Endophily - proportion of mosquitoes resting indoors after feeding (no intervention)
-        mosquito_Stream >> discard >> Pv_mod_par.PSI_indoors[g] >> discard;   // Proportion of bites taken on humans indoors
-        mosquito_Stream >> discard >> Pv_mod_par.PSI_bed[g] >> discard;       // Proportion of bites taken on humans in bed
-
-        mosquito_Stream >> discard >> Pv_mod_par.delta_1 >> discard;          // Time spent foraging for a blood meal
-        mosquito_Stream >> discard >> Pv_mod_par.delta >> discard;            // Duration of gonotrophic cycle
-
-        Pv_mod_par.delta_2 = Pv_mod_par.delta - Pv_mod_par.delta_1;
-
-        Pv_mod_par.p_1[g] = exp(-Pv_mod_par.mu_M[g] * Pv_mod_par.delta_1);
-        Pv_mod_par.p_2[g] = exp(-Pv_mod_par.mu_M[g] * Pv_mod_par.delta_2);
-
-        Pv_mod_par.aa[g] = Pv_mod_par.Q_0[g] / (Pv_mod_par.delta_1 + Pv_mod_par.delta_2);
-
-        Pv_mod_par.eps_max[g] = Pv_mod_par.beta_larvae*(exp(Pv_mod_par.delta*Pv_mod_par.mu_M[g]) - 1.0) / Pv_mod_par.mu_M[g];
-
-
-        //////////////////////////////////////////////
-        // LLIN paramters
-
-        mosquito_Stream >> discard >> Pv_mod_par.LLIN_half_life >> discard;
-
-        mosquito_Stream >> discard >> Pv_mod_par.PYR_half_life >> discard;
-
-        mosquito_Stream >> discard >> Pv_mod_par.r_LLIN_0[g] >> discard;       // Probability mosquito repelled (with full insecticide activity)
-        mosquito_Stream >> discard >> Pv_mod_par.r_LLIN_net[g] >> discard;     // Probability mosquito repelled due to barrier effect of net (no insecticide)
-        mosquito_Stream >> discard >> Pv_mod_par.d_LLIN_0[g] >> discard;       // Probability mosquito dies during feeding attempt
-
-
-        Pv_mod_par.P_LLIN_loss = 1.0 - exp(-t_step*log(2.0) / Pv_mod_par.LLIN_half_life);   // Probability of losing LLIN in a time step
-        Pv_mod_par.PYR_decay = log(2.0) / Pv_mod_par.PYR_half_life;                            // Rate of pyrethroid decay
-
-        Pv_mod_par.s_LLIN_0[g] = 1.0 - Pv_mod_par.r_LLIN_0[g] - Pv_mod_par.d_LLIN_0[g];     // Probability mosquito feeds successfully
-
-
-        ////////////////////////////////////////////////////////
-        // IRS parameters
-
-        mosquito_Stream >> discard >> Pv_mod_par.IRS_half_life >> discard;    // IRS insecticide half-life
-
-        mosquito_Stream >> discard >> Pv_mod_par.r_IRS_0[g] >> discard;          // IRS repellency
-        mosquito_Stream >> discard >> Pv_mod_par.d_IRS_0[g] >> discard;          // IRS death
-
-        Pv_mod_par.IRS_decay = log(2.0) / Pv_mod_par.IRS_half_life;         // IRS decay rate
-
-        Pv_mod_par.s_IRS_0[g] = 1.0 - Pv_mod_par.d_IRS_0[g] - Pv_mod_par.s_IRS_0[g];   // Feeding success of mosquito on IRS protected person
-    }
-
-    cout << "Mosquito parameter values read in from file!" << endl;
-    cout << endl;
-
-
-    //////////////////////////////////////////////
-    // Normalise relative proprotions of 
-    // different mosquito species
-
-    double Prop_mosq_denom = 0.0;
-
-    for (int g = 0; g < N_spec; g++)
-    {
-        Prop_mosq_denom = Prop_mosq_denom + Pv_mod_par.Prop_mosq[g];
-    }
-
-    for (int g = 0; g < N_spec; g++)
-    {
-        Pv_mod_par.Prop_mosq[g] = Pv_mod_par.Prop_mosq[g] / Prop_mosq_denom;
-    }
-
-
-    ///////////////////////////////////////////////////////////
-    //                                                       //
-    // 1.5. Pre-multiplication of quantities for efficiency  //
-    //                                                       //
-    ///////////////////////////////////////////////////////////
-
-    Pv_mod_par.A_par_decay  = exp(-Pv_mod_par.r_par*t_step);
-    Pv_mod_par.A_clin_decay = exp(-Pv_mod_par.r_clin*t_step);
-    Pv_mod_par.mat_decay    = exp(-Pv_mod_par.d_mat*t_step);
-
-    Pv_mod_par.age_0_inv = 1.0 / Pv_mod_par.age_0;                 // Inverse of age-dependent biting parameter
-
-    Pv_mod_par.A_PCR_50pc_inv = log2 / Pv_mod_par.A_PCR_50pc;      // Immune scalar for clearance of infection
-    Pv_mod_par.A_LM_50pc_inv  = 1.0 / Pv_mod_par.A_LM_50pc;        // Immune scalar for BS infection
-    Pv_mod_par.A_D_50pc_inv   = 1.0 / Pv_mod_par.A_D_50pc;         // Immune scalar for clinical disease
-
-    Pv_mod_par.P_dead = 1.0 - exp(-t_step*Pv_mod_par.mu_H);
-    Pv_mod_par.P_preg = 0.0014189;
-
-
-    Pv_mod_par.P_PYR_decay = exp(-Pv_mod_par.PYR_decay*t_step);
-    Pv_mod_par.P_IRS_decay = exp(-Pv_mod_par.IRS_decay*t_step);
-
-
-    ///////////////////////////////////////////////////////////
-    //                                                       //
-    // 1.6. Fill out hypnozoite transition matrices          //
-    //                                                       //
-    ///////////////////////////////////////////////////////////
-
-    for (int k1 = 0; k1<(K_max + 1); k1++)
-    {
-        for (int k2 = 0; k2 < (K_max + 1); k2++)
-        {
-            Pv_mod_par.D_MAT[k1][k2] = 0.0;
-            Pv_mod_par.OD_MAT[k1][k2] = 0.0;
-            Pv_mod_par.K_MAT[k1][k2] = 0.0;
-            Pv_mod_par.L_MAT[k1][k2] = 0.0;
-            Pv_mod_par.H_MAT[k1][k2] = 0.0;
-        }
-    }
-
-    for (int k = 0; k < (K_max + 1); k++)
-    {
-        Pv_mod_par.D_MAT[k][k] = 1.0;
-    }
-
-    for (int k = 0; k < K_max; k++)
-    {
-        Pv_mod_par.OD_MAT[k + 1][k] = 1.0;
-    }
-    Pv_mod_par.OD_MAT[K_max][K_max] = 1.0;
-
-    for (int k = 0; k < (K_max + 1); k++)
-    {
-        Pv_mod_par.K_MAT[k][k] = (double)(k);
-    }
-
-    for (int k = 0; k < K_max; k++)
-    {
-        Pv_mod_par.L_MAT[k][k + 1] = +(double)(k + 1);
-        Pv_mod_par.L_MAT[k + 1][k + 1] = -(double)(k + 1);
-    }
-
-    for (int k = 0; k < K_max; k++)
-    {
-        Pv_mod_par.H_MAT[k][k] = -1.0;
-        Pv_mod_par.H_MAT[k + 1][k] = +1.0;
-    }
-
+    Pv_mod_par.read(parameter_File, mosquito_File);
+    PNG_pop.N_pop = Pv_mod_par.N_pop;
 
     /////////////////////////////////////////////////////////////////////////
     //                                                                     //
@@ -1426,6 +679,8 @@ int main(int argc, char** argv)
     // 1.7.3. Note that the matrix we read in may have variable size.
 
     std::ifstream coverage_Stream2(coverage_File);
+
+    string discard;
 
     vector<vector<double>> coverage;
     coverage.resize(0);
@@ -1608,11 +863,14 @@ int main(int argc, char** argv)
     /////////////////////////////////////////////////////////////////////////
     // 1.9.1. Vector of simulation times
 
+    // Number of time steps for simulation:
+    int N_time = (1 / t_step)*(Pv_mod_par.burnin_time + Pv_mod_par.time_end - Pv_mod_par.time_start) * 365;
+
     PNG_sim.N_time = N_time;
 
     for (int i = 0; i<N_time; i++)
     {
-        PNG_sim.t_vec.push_back((double)(time_start * 365 - burnin_time * 365 + i*t_step));
+        PNG_sim.t_vec.push_back((double)(Pv_mod_par.time_start * 365 - Pv_mod_par.burnin_time * 365 + i*t_step));
     }
 
 
@@ -1695,7 +953,7 @@ int main(int argc, char** argv)
 
     ofstream output_Stream(output_File);
 
-    for (int i = (int) (1/t_step)*(burnin_time)*365; i<N_time; i++)
+    for (int i = (int) (1/t_step)*(Pv_mod_par.burnin_time)*365; i<N_time; i++)
     {
         output_Stream << PNG_sim.t_vec[i] << "\t";
 
@@ -3440,33 +2698,6 @@ double phi_inv(double pp, double mu, double sigma)
     }
 
     return mu + sigma*temp;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-//         //                                                        //
-//  2.10.  //  Log gamma function, based on gamma.h from NRC3        //
-//         //                                                        //
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-double gammln(const double xx)
-{
-    int j;
-    double x, tmp, y, ser;
-    static const double cof[14] = { 57.1562356658629235, -59.5979603554754912,
-        14.1360979747417471, -0.491913816097620199, 0.339946499848118887e-4,
-        0.465236289270485756e-4, -0.983744753048795646e-4, 0.158088703224912494e-3,
-        -0.210264441724104883e-3, 0.217439618115212643e-3, -0.164318106536763890e-3,
-        0.844182239838527433e-4, -0.261908384015814087e-4, 0.368991826595316234e-5 };
-    if (xx <= 0) throw("bad arg in gammln");
-    y = x = xx;
-    tmp = x + 5.242187500000000;
-    tmp = (x + 0.5)*log(tmp) - tmp;
-    ser = 0.999999999999997092;
-    for (j = 0; j<14; j++) ser += cof[j] / ++y;
-    return tmp + log(2.5066282746310005*ser / x);
 }
 
 
