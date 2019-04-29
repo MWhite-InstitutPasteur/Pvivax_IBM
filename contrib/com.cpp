@@ -33,7 +33,7 @@ static long qrgnin;
     gsrgs(0L,&qrgnin);
     if(qrgnin) goto S10;
     fputs(" ADVNST called before random generator initialized - ABORT\n",
-	  stderr);
+          stderr);
     exit(1);
 S10:
     gscgn(0L,&g);
