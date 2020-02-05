@@ -1,3 +1,8 @@
+<!-- badges: start -->
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/vivax?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/vivax)
+<!-- badges: end -->
+
 # P Vivax individual based model
 
 This is an R wrapper for Dr. Michael White's model for P. Vivax malaria
