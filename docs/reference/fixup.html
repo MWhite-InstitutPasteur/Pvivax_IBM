@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Entrypoint for the simulation — run_simulation_from_path • vivax</title>
+<title>Fixup a data table — fixup • vivax</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Entrypoint for the simulation — run_simulation_from_path" />
-<meta property="og:description" content="Entrypoint for the simulation" />
+<meta property="og:title" content="Fixup a data table — fixup" />
+<meta property="og:description" content="overrides parameter entries in a table with alternatives from a list" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -100,50 +100,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Entrypoint for the simulation</h1>
+    <h1>Fixup a data table</h1>
     
-    <div class="hidden name"><code>run_simulation_from_path.Rd</code></div>
+    <div class="hidden name"><code>fixup.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Entrypoint for the simulation</p>
+    <p>overrides parameter entries in a table with alternatives from a list</p>
     </div>
 
-    <pre class="usage"><span class='fu'>run_simulation_from_path</span>(
-  <span class='no'>model_param_path</span>,
-  <span class='no'>fara_param_path</span>,
-  <span class='no'>punc_param_path</span>,
-  <span class='no'>koli_param_path</span>,
-  <span class='no'>coverage_param_path</span>,
-  <span class='no'>output_path</span>
-)</pre>
+    <pre class="usage"><span class='fu'>fixup</span>(<span class='no'>table</span>, <span class='no'>overrides</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>model_param_path, </th>
-      <td><p>the path of the model parameter file</p></td>
+      <th>table</th>
+      <td><p>the parameter table to override</p></td>
     </tr>
     <tr>
-      <th>fara_param_path, </th>
-      <td><p>the path to the farauti mosquito parameter files.</p></td>
-    </tr>
-    <tr>
-      <th>punc_param_path, </th>
-      <td><p>the path to the punctulatus mosquito parameter files.</p></td>
-    </tr>
-    <tr>
-      <th>koli_param_path, </th>
-      <td><p>the path to the koliensis mosquito parameter files.</p></td>
-    </tr>
-    <tr>
-      <th>coverage_param_path, </th>
-      <td><p>the path of the coverage parameter file</p></td>
-    </tr>
-    <tr>
-      <th>output_path, </th>
-      <td><p>the path to write the results to</p></td>
+      <th>overrides</th>
+      <td><p>the replacement parameters and values</p></td>
     </tr>
     </table>
 

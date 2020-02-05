@@ -29,7 +29,7 @@ run_simulation <- function(
 
   paths <- vapply(tables, function(table) {
     path <- tempfile()
-    write.table(table, path)
+    write.table(table, path, row.names = FALSE, col.names = FALSE)
     path
   }, character(1))
 
@@ -45,6 +45,10 @@ run_simulation <- function(
   read.table(out_path)
 }
 
+#'@title Fixup a data table
+#'@description overrides parameter entries in a table with alternatives from a list
+#'@param table the parameter table to override
+#'@param overrides the replacement parameters and values
 fixup <- function(table, overrides) {
   if (is.null(overrides)) {
     return(table)

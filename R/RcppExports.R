@@ -4,9 +4,11 @@
 #' Entrypoint for the simulation
 #' 
 #' @param model_param_path, the path of the model parameter file
-#' @param mosq_param_paths, a list of paths to the mosquito parameter files.
-#' The simulation requires 3 to run
+#' @param fara_param_path, the path to the farauti mosquito parameter files.
+#' @param punc_param_path, the path to the punctulatus mosquito parameter files.
+#' @param koli_param_path, the path to the koliensis mosquito parameter files.
 #' @param coverage_param_path, the path of the coverage parameter file
+#' @param output_path, the path to write the results to
 #' @export
 run_simulation_from_path <- function(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path) {
     .Call(`_vivax_run_simulation_from_path`, model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path)

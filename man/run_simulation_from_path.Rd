@@ -16,10 +16,15 @@ run_simulation_from_path(
 \arguments{
 \item{model_param_path, }{the path of the model parameter file}
 
+\item{fara_param_path, }{the path to the farauti mosquito parameter files.}
+
+\item{punc_param_path, }{the path to the punctulatus mosquito parameter files.}
+
+\item{koli_param_path, }{the path to the koliensis mosquito parameter files.}
+
 \item{coverage_param_path, }{the path of the coverage parameter file}
 
-\item{mosq_param_paths, }{a list of paths to the mosquito parameter files.
-The simulation requires 3 to run}
+\item{output_path, }{the path to write the results to}
 }
 \description{
 Entrypoint for the simulation

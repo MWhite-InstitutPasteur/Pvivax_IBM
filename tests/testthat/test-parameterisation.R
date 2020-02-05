@@ -9,23 +9,23 @@ test_that("default parameters set up correctly", {
     run_simulation()
   )
   args <- mockery::mock_args(m)
-  expect_tableequal(
+  expect_mapequal(
     read.table(file.path(defaultdir, 'model_parameters.txt')),
     read.table(args[[1]][[1]])
   )
-  expect_tableequal(
+  expect_mapequal(
     read.table(file.path(defaultdir, 'farauti_parameters.txt')),
     read.table(args[[1]][[2]])
   )
-  expect_tableequal(
+  expect_mapequal(
     read.table(file.path(defaultdir, 'punctulatus_parameters.txt')),
     read.table(args[[1]][[3]])
   )
-  expect_tableequal(
+  expect_mapequal(
     read.table(file.path(defaultdir, 'koliensis_parameters.txt')),
     read.table(args[[1]][[4]])
   )
-  expect_tableequal(
+  expect_mapequal(
     read.table(file.path(defaultdir, 'intervention_coverage.txt')),
     read.table(args[[1]][[5]])
   )
@@ -54,11 +54,11 @@ test_that("you can override parameters", {
     fara_params[fara_params$V1 == 'mu_M', 'V2'],
     .5
   )
-  expect_tableequal(
+  expect_mapequal(
     default_model_params[default_model_params$V1 != 'bb',],
     model_params[model_params$V1 != 'bb',]
   )
-  expect_tableequal(
+  expect_mapequal(
     default_fara_params[default_fara_params$V1 != 'mu_M',],
     fara_params[fara_params$V1 != 'mu_M',]
   )
