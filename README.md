@@ -1,6 +1,5 @@
 <!-- badges: start -->
-[![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/vivax?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/vivax)
+[![Build Status](https://travis-ci.org/mrc-ide/vivax.svg?branch=master)](https://travis-ci.org/mrc-ide/vivax)[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/vivax?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/vivax)[![codecov](https://codecov.io/github/mrc-ide/vivax/branch/master/graphs/badge.svg)](https://codecov.io/github/mrc-ide/vivax)
 <!-- badges: end -->
 
 # P Vivax individual based model
