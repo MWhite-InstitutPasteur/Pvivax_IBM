@@ -23,7 +23,7 @@ run_simulation <- function(
   punctulatus = NULL,
   koliensis = NULL
   ) {
-  basedir <- system.file('defaults', package = 'vivax')
+  basedir <- system.file('defaults', package = 'vivax', mustWork = TRUE)
   param_specs <- list(
     list(name='model_parameters.txt', overrides=model),
     list(name='farauti_parameters.txt', overrides=farauti),

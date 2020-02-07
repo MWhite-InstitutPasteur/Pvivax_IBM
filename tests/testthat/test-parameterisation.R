@@ -1,8 +1,8 @@
 test_that("default parameters set up correctly", {
-  defaultdir <- system.file('defaults', package = 'vivax')
+  defaultdir <- system.file('defaults', package = 'vivax', mustWork = TRUE)
   m <- mockery::mock()
   with_mock(
-    run_simulation_from_path = function(...) {
+    `vivax::run_simulation_from_path` = function(...) {
       write.table(table(seq(10)), list(...)[[6]])
       m(...)
     },
@@ -32,10 +32,10 @@ test_that("default parameters set up correctly", {
 })
 
 test_that("you can override parameters", {
-  defaultdir <- system.file('defaults', package = 'vivax')
+  defaultdir <- system.file('defaults', package = 'vivax', mustWork = TRUE)
   m <- mockery::mock()
   with_mock(
-    run_simulation_from_path = function(...) {
+    `vivax::run_simulation_from_path` = function(...) {
       write.table(table(seq(10)), list(...)[[6]])
       m(...)
     },
@@ -68,7 +68,7 @@ test_that("overriding kindly lets you know if you've made a typo", {
   m <- mockery::mock()
   expect_error(
     with_mock(
-      run_simulation_from_path = function(...) {
+      `vivax::run_simulation_from_path` = function(...) {
         write.table(table(seq(10)), list(...)[[6]])
         m(...)
       },

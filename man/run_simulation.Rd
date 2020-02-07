@@ -15,7 +15,7 @@ run_simulation(
 \item{model, }{A named list of parameters to override in the
 "model_parameters.txt" file}
 
-\item{farauti}{, A named list of parameters to override in the
+\item{farauti, }{A named list of parameters to override in the
 "farauti_parameters.txt" file}
 
 \item{punctulatus, }{A named list of parameters to override in the
