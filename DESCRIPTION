@@ -5,9 +5,14 @@ Version: 0.0.1
 Date: 2020-01-31
 Authors@R: c(
   person(
+    given = "Michael",
+    family = "White",
+    role = c('aut', 'cre')
+  ),
+  person(
     given = "Giovanni",
     family = "Charles",
-    role = c('aut', 'cre'),
+    role = c('aut'),
     email = 'giovanni.charles@gmail.com'
   ),
   person(
