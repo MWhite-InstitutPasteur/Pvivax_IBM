@@ -1,0 +1,32 @@
+Package: vivax
+Type: Package
+Title: An R wrapper for a P. Vivax malaria transmission model
+Version: 0.0.1
+Date: 2020-01-31
+Authors@R: c(
+  person(
+    given = "Michael",
+    family = "White",
+    role = c('aut'),
+    email = 'michael.white@pasteur.fr'
+  ),
+  person(
+    given = "Giovanni",
+    family = "Charles",
+    role = c('aut', 'cre'),
+    email = 'giovanni.charles@gmail.com'
+  ),
+  person(
+    given = "Imperial College of Science, Technology and Medicine",
+    family = "",
+    role = c('cph'),
+    email = 'giovanni.charles10@imperial.ac.uk'
+  ))
+Description: C++ code for an individual-based model of Plasmodium vivax malaria transmission as first described in the article "Impact of expanding levels of malaria control interventions on Plasmodium vivax, a mathematical modelling study". 
+License: MIT + file LICENSE
+Imports: Rcpp (>= 1.0.3)
+LinkingTo: Rcpp
+RoxygenNote: 7.0.2
+Suggests: 
+    testthat (>= 2.1.0),
+    mockery
