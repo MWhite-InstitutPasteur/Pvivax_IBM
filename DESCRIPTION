@@ -7,12 +7,13 @@ Authors@R: c(
   person(
     given = "Michael",
     family = "White",
-    role = c('aut', 'cre')
+    role = c('aut'),
+    email = 'michael.white@pasteur.fr'
   ),
   person(
     given = "Giovanni",
     family = "Charles",
-    role = c('aut'),
+    role = c('aut', 'cre'),
     email = 'giovanni.charles@gmail.com'
   ),
   person(

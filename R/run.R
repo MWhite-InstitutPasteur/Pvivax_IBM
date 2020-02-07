@@ -1,10 +1,22 @@
 
 #'@title Run the simulation
-#'@description parameterises and runs the model. The output will be returned
-#'@param model parameters to override
-#'@param farauti parameters to override
-#'@param punctulatus parameters to override
-#'@param koliensis parameters to override
+#'@description parameterises and runs the model. A table with the simulation
+#'output for each timestep will be returned.
+#'
+#'Default parameters can be found in the inst/default/ directory
+#'
+#'@param model, A named list of parameters to override in the
+#'"model_parameters.txt" file
+#'@param farauti, A named list of parameters to override in the
+#'"farauti_parameters.txt" file
+#'@param punctulatus, A named list of parameters to override in the
+#'"punctulatus_parameters.txt" file
+#'@param koliensis, A named list of parameters to override in the
+#'"koliensis_parameters.txt" file
+#'@examples
+#'output <- run_simulation(model = list(end_time = 1991, bb = 2), farauti=list(mu_M = .5))
+#'dim(output)
+#'
 run_simulation <- function(
   model = NULL,
   farauti = NULL,

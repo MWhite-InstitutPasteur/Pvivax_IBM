@@ -12,14 +12,26 @@ run_simulation(
 )
 }
 \arguments{
-\item{model}{parameters to override}
+\item{model, }{A named list of parameters to override in the
+"model_parameters.txt" file}
 
-\item{farauti}{parameters to override}
+\item{farauti}{, A named list of parameters to override in the
+"farauti_parameters.txt" file}
 
-\item{punctulatus}{parameters to override}
+\item{punctulatus, }{A named list of parameters to override in the
+"punctulatus_parameters.txt" file}
 
-\item{koliensis}{parameters to override}
+\item{koliensis, }{A named list of parameters to override in the
+"koliensis_parameters.txt" file}
 }
 \description{
-parameterises and runs the model. The output will be returned
+parameterises and runs the model. A table with the simulation
+output for each timestep will be returned.
+
+Default parameters can be found in the inst/default/ directory
+}
+\examples{
+output <- run_simulation(model = list(end_time = 1991, bb = 2), farauti=list(mu_M = .5))
+dim(output)
+
 }
