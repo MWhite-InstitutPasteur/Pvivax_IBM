@@ -1,0 +1,9 @@
+*.sw*
+.RData
+.rhistory
+vivax.Rcheck
+vivax_*.tar.gz
+.Rd2pdf*
+*.o
+*.so
+.DS_Store

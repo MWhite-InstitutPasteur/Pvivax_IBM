@@ -776,6 +776,20 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
+int run_simulation(
+  const char* parameter_File,
+  const char** mosquito_File,
+  const char* coverage_File,
+  const char* output_File
+);
+int run_simulation_from_path(
+    string model_param_path,
+    string fara_param_path,
+    string punc_param_path,
+    string koli_param_path,
+    string coverage_param_path,
+    string output_path
+);
 
 
 ///////////////////////////////////////////
@@ -805,50 +819,50 @@ void equi_pop_setup(population* POP, params* theta);
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 
-int main(int argc, char** argv)
-{
+
+//' Entrypoint for the simulation
+//' 
+//' @param model_param_path, the path of the model parameter file
+//' @param fara_param_path, the path to the farauti mosquito parameter files.
+//' @param punc_param_path, the path to the punctulatus mosquito parameter files.
+//' @param koli_param_path, the path to the koliensis mosquito parameter files.
+//' @param coverage_param_path, the path of the coverage parameter file
+//' @param output_path, the path to write the results to
+//' @export
+// [[Rcpp::export]]
+int run_simulation_from_path(
+    std::string model_param_path,
+    std::string fara_param_path,
+    std::string punc_param_path,
+    std::string koli_param_path,
+    std::string coverage_param_path,
+    std::string output_path
+) {
+
+  const char* mosquito_File[N_spec_max] = {
+    fara_param_path.c_str(),
+    punc_param_path.c_str(),
+    koli_param_path.c_str()
+  };
+
+  return run_simulation(
+    model_param_path.c_str(),
+    mosquito_File,
+    coverage_param_path.c_str(),
+    output_path.c_str()
+  );
+}
+
+int run_simulation(
+  const char* parameter_File,
+  const char** mosquito_File,
+  const char* coverage_File,
+  const char* output_File
+) {
 	setall(time(NULL), 7);
 
 	clock_t clock_time;
 	clock_time = clock();
-
-
-	////////////////////////////////////////////
-	//                                        //  
-	//  1.1 Read in file names                //
-	//                                        //
-	////////////////////////////////////////////
-
-	// do we have the correct command line?
-	if (argc != 7)
-	{
-		std::cout << "Incorrect command line.\n";
-		return 0;
-	}
-
-	char* parameter_File = argv[1];
-
-	char* mosquito_File[N_spec_max];
-	for (int g = 0; g < N_spec_max; g++)
-	{
-		mosquito_File[g] = argv[2 + g];
-	}
-
-	char* coverage_File = argv[5];
-	char* output_File = argv[6];
-
-
-	/*
-	char* parameter_File = "C:/U/Pv_mod/IB_mod/Mod_4/model_parameters.txt";
-
-	char* mosquito_File[N_spec_max];
-	mosquito_File[0] = "C:/U/Pv_mod/IB_mod/Mod_4/farauti_parameters.txt";
-	mosquito_File[1] = "C:/U/Pv_mod/IB_mod/Mod_4/punctulatus_parameters.txt";
-	mosquito_File[2] = "C:/U/Pv_mod/IB_mod/Mod_4/koliensis_parameters.txt";
-
-	char* coverage_File = "C:/U/Pv_mod/IB_mod/Mod_4/intervention_coverage.txt";
-	char* output_File = "C:/U\Pv_mod/IB_mod\Mod_4/Output/model_output.txt";
-	*/
 
 
 	////////////////////////////////////////////
