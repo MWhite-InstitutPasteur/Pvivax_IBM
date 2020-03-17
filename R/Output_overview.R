@@ -1,17 +1,12 @@
+N_spec = 3
 
-present_output <- function(OUTPUT) {
-
-  N_spec = 3
-
-  mosq_species = c("faruati", "punctulatus", "koliensis")
-
-  mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far",
+mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far",
         "EL_M_pun", "LL_M_pun", "P_M_pun", "S_M_pun", "E_M_pun", "I_M_pun",
                 "EL_M_kol", "LL_M_kol", "P_M_kol", "S_M_kol", "E_M_kol", "I_M_kol")
 
-  mosq_comp = mosq_comp[1:(N_spec*6)]
+mosq_comp = mosq_comp[1:(N_spec*6)]
 
-
+present_output <- function(OUTPUT) {
 
   colnames(OUTPUT) <- c("time",
                         "S", "I_PCR", "I_LM", "D", "T", "P",
@@ -23,9 +18,13 @@ present_output <- function(OUTPUT) {
                         "N_pop_U10", "PvPR_PCR_U10", "PvPR_LM_U10", "Pv_clin_U10", "PvHR_U10",
                         "PvHR_batch_U10", "new_PCR_U10", "new_LM_U10", "new_D_U10", "new_T_U10",
             "EIR", "LLIN_cov", "IRS_cov", "ACT_treat", "PQ_treat", "pregnant", "A_par", "A_clin")
+  OUTPUT
+}
 
-  par(ask=TRUE)
-
+#'@title Make some standard plots for the simulation
+#'@description takes the simulation output and plots standard graphs. For use in
+#'interactive mode only!
+plot_outputs <- function(OUTPUT) {
   #############################################
   #############################################
   ##          ##                             ##
@@ -168,7 +167,8 @@ present_output <- function(OUTPUT) {
   #############################
   ## PANEL 7: Intervention coverage
 
-  INT_COV <- read.table("intervention_coverage.txt")
+  # Unsupported graph
+  #INT_COV <- read.table("intervention_coverage.txt")
 
   plot(x=OUTPUT$time/365, y=OUTPUT$LLIN_cov/OUTPUT$N_pop, type='l', ylim=c(0,1),
   xlab="time (years)", ylab="coverage", main="Intervention coverage")
