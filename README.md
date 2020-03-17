@@ -38,6 +38,29 @@ can execute the following code:
 library('vivax')
 output <- run_simulation()
 ```
+## Parameterisation
+
+You can find the default paramters
+[here](https://github.com/mrc-ide/vivax/tree/master/inst/defaults).
+
+To override either the model, farauti, koliensis, punctulatis parameters buy
+passing named lists to the `run_simulation` function as below:
+
+```R
+output <- run_simulation(model=list(EIR_equil=.1), koliensis=list(mu_P=.5, dry_seas=.2))
+```
+
+## Plotting standard graphs (temporary)
+
+To quickly explore the output you can plot some standard graphs with the
+following command. This is only available in RStudio.
+
+```R
+plot_outputs(output)
+```
+
+It will open 5 pages in your plot window.
+
 ## Code organisation
 
 *src/model.cpp* - this is the original model code. `run_simulation_from_path` is the

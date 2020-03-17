@@ -54,7 +54,7 @@ run_simulation <- function(
     paths[[5]],
     out_path
   )
-  read.table(out_path)
+  present_output(read.table(out_path))
 }
 
 #'@title Fixup a data table
