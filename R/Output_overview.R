@@ -6,9 +6,12 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
 mosq_comp = mosq_comp[1:(N_spec*6)]
 
-present_output <- function(OUTPUT) {
 
-  colnames(OUTPUT) <- c("time",
+#'@title present output
+#' Adds column names to the model output
+#'@param output, the model output
+present_output <- function(output) {
+  colnames(output) <- c("time",
                         "S", "I_PCR", "I_LM", "D", "T", "P",
                         mosq_comp,
                         "N_pop", "PvPR_PCR", "PvPR_LM", "Pv_clin", "PvHR",
@@ -18,7 +21,7 @@ present_output <- function(OUTPUT) {
                         "N_pop_U10", "PvPR_PCR_U10", "PvPR_LM_U10", "Pv_clin_U10", "PvHR_U10",
                         "PvHR_batch_U10", "new_PCR_U10", "new_LM_U10", "new_D_U10", "new_T_U10",
             "EIR", "LLIN_cov", "IRS_cov", "ACT_treat", "PQ_treat", "pregnant", "A_par", "A_clin")
-  OUTPUT
+  output
 }
 
 #'@title Make some standard plots for the simulation
