@@ -8,7 +8,8 @@ run_simulation(
   model = NULL,
   farauti = NULL,
   punctulatus = NULL,
-  koliensis = NULL
+  koliensis = NULL,
+  interventions = list()
 )
 }
 \arguments{

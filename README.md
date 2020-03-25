@@ -38,6 +38,29 @@ can execute the following code:
 library('vivax')
 output <- run_simulation()
 ```
+## Parameterisation
+
+You can find the default paramters
+[here](https://github.com/mrc-ide/vivax/tree/master/inst/defaults).
+
+To override either the model, farauti, koliensis, punctulatis parameters by
+passing named lists to the `run_simulation` function as below:
+
+```R
+output <- run_simulation(model=list(EIR_equil=.1), koliensis=list(mu_P=.5, dry_seas=.2))
+```
+
+### Interventions
+
+The available interventions are documented
+[here](https://github.com/mrc-ide/vivax/tree/master/R/interventions.R).
+
+To override interventions pass your named list of parameters to `run_simulation` function as below:
+
+```R
+output <- run_simulation(interventions = list(LLIN_years=c(1995, 1996), LLIN_cover=c(.6, .8)))
+```
+
 ## Code organisation
 
 *src/model.cpp* - this is the original model code. `run_simulation_from_path` is the
