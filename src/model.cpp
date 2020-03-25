@@ -57,7 +57,7 @@
 #include <math.h>
 #include <string>
 #include <time.h>
-#include "randlib.h"
+#include "rng.h"
 #include <omp.h>
 #include <vector>
 #include <algorithm>
@@ -2825,7 +2825,7 @@ double gammln(const double xx)
 //  Given a matrix a[1..n][1..n], this routine replaces it by the LU decomposition of a rowwise       //
 //  permutation of itself. a and n are input. a is output, arranged as in equation (2.3.14) above;    //
 //  indx[1..n] is an output vector that records the row permutation effected by the partial           //
-//  pivoting; d is output as ±1 depending on whether the number of row interchanges was even          //
+//  pivoting; d is output as ï¿½1 depending on whether the number of row interchanges was even          //
 //  or odd, respectively. This routine is used in combination with lubksb to solve linear equations   //
 //  or invert a matrix                                                                                //
 //                                                                                                    // 
