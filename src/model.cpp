@@ -57,6 +57,7 @@
 #include <math.h>
 #include <string>
 #include <time.h>
+#include "randlib.h"
 #include "rng.h"
 #include <omp.h>
 #include <vector>
@@ -1842,7 +1843,7 @@ void human_step(params* theta, population* POP)
 		/////////////////////////////////////////////
 		// Everyone has an equal probability of dying
 
-		if (theta->P_dead > genunf(0, 1))
+		if (theta->P_dead > rgenunf(0, 1))
 		{
 			POP->people.erase(POP->people.begin() + n);
 			
@@ -1885,11 +1886,11 @@ void human_step(params* theta, population* POP)
 
 	for (int n = 0; n<N_dead; n++)
 	{
-		zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+		zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 
 		while (zeta_start > theta->het_max)
 		{
-			zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+			zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 		}
 
 		individual HH(0.0, zeta_start);
@@ -1916,7 +1917,7 @@ void human_step(params* theta, population* POP)
 
 		HH.Hyp = 0;
 
-		if (genunf(0.0, 1.0) < 0.5)
+		if (rgenunf(0.0, 1.0) < 0.5)
 		{
 			HH.gender = 0;
 		}
@@ -1926,7 +1927,7 @@ void human_step(params* theta, population* POP)
 
 		if (HH.gender == 0)
 		{
-			if (genunf(0.0, 1.0) < theta->G6PD_prev)
+			if (rgenunf(0.0, 1.0) < theta->G6PD_prev)
 			{
 				HH.G6PD_def = 1;
 			} else {
@@ -1934,7 +1935,7 @@ void human_step(params* theta, population* POP)
 			}
 		} else {
 
-			q_rand = genunf(0.0, 1.0);
+			q_rand = rgenunf(0.0, 1.0);
 
 			if(q_rand <= theta->G6PD_prev*theta->G6PD_prev)
 			{
@@ -1952,7 +1953,7 @@ void human_step(params* theta, population* POP)
 			}
 		}
 
-		if (genunf(0.0, 1.0) < theta->CYP2D6_prev)
+		if (rgenunf(0.0, 1.0) < theta->CYP2D6_prev)
 		{
 			HH.CYP2D6 = 1;
 		}
@@ -2013,7 +2014,7 @@ void human_step(params* theta, population* POP)
 
 		setgmn(GMN_zero, *theta->V_int_dummy, N_int, GMN_parm);
 
-		genmn(GMN_parm, zz_GMN, GMN_work);
+		rgenmn(GMN_parm, zz_GMN, GMN_work);
 
 		for (int k = 0; k<N_int; k++)
 		{
@@ -2448,7 +2449,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[0], theta->sig_round_LLIN) < QQ)
+				if (rgennor(POP->people[n].zz_int[0], theta->sig_round_LLIN) < QQ)
 				{
 					POP->people[n].LLIN = 1;
 					POP->people[n].LLIN_age = 0.0;
@@ -2479,7 +2480,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[1], theta->sig_round_IRS) < QQ)
+				if (rgennor(POP->people[n].zz_int[1], theta->sig_round_IRS) < QQ)
 				{
 					POP->people[n].IRS = 1;
 					POP->people[n].IRS_age = 0.0;
@@ -2514,13 +2515,13 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
+				if (rgennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
 				{
 					POP->people[n].ACT_new = 1;
 
-					if (genunf(0.0, 1.0) < theta->MDA_BS_BSeff)
+					if (rgenunf(0.0, 1.0) < theta->MDA_BS_BSeff)
 					{
-						if (gennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
+						if (rgennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
 						{
 							if (POP->people[n].S == 1    ) { POP->people[n].S = 0;     POP->people[n].P = 1; }
 							if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1;  }
@@ -2555,11 +2556,11 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
+				if (rgennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
 				{
 					POP->people[n].ACT_new = 1;
 
-					if (genunf(0.0, 1.0) < theta->MDA_PQ_BSeff)
+					if (rgenunf(0.0, 1.0) < theta->MDA_PQ_BSeff)
 					{
 						if (POP->people[n].S == 1    ) { POP->people[n].S = 0;     POP->people[n].P = 1; }
 						if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1; }
@@ -2573,7 +2574,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 						if (theta->MDA_PQ_CYP2D6 == 0)    // Is CYP2D6 low metabolization a problem? No = 0, e.g. TQ; Otherwise Yes = 1, e.g. PQ
 						{
-							if (genunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
+							if (rgenunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
 							{
 								POP->people[n].Hyp = 0;
 
@@ -2583,7 +2584,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						}else{
 							if (POP->people[n].CYP2D6 == 0)          // If CYP2D6 low metabolization is a problem - it only effects the low metabolizers
 							{
-								if (genunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
+								if (rgenunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
 								{
 									POP->people[n].Hyp = 0;
 
@@ -2707,7 +2708,7 @@ int CH_sample(double *xx, int nn)
 	}
 
 	int index = 0;
-	double unif = genunf(0, 1);
+	double unif = rgenunf(0, 1);
 
 	if (unif < xx_cum[0])
 	{
@@ -4266,18 +4267,18 @@ void equi_pop_setup(population* POP, params* theta)
 		//////////////////////////////////////////////////////////////////
 		// 3.7.4.2.1. Assign age and heterogeneity 
 
-		age_start = genexp(theta->age_mean);
+		age_start = rgenexp(theta->age_mean);
 
 		while (age_start > theta->age_max)
 		{
-			age_start = genexp(theta->age_mean);
+			age_start = rgenexp(theta->age_mean);
 		}
 
-		zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+		zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 
 		while (zeta_start > theta->het_max)
 		{
-			zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+			zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 		}
 
 
@@ -4320,7 +4321,7 @@ void equi_pop_setup(population* POP, params* theta)
 		HH.P = 0;
 
 
-		if (genunf(0.0, 1.0) < 0.5)
+		if (rgenunf(0.0, 1.0) < 0.5)
 		{
 			HH.gender = 0;
 		}
@@ -4330,7 +4331,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		if (HH.gender == 0)
 		{
-			if (genunf(0.0, 1.0) < theta->G6PD_prev)
+			if (rgenunf(0.0, 1.0) < theta->G6PD_prev)
 			{
 				HH.G6PD_def = 1;
 			}
@@ -4338,7 +4339,7 @@ void equi_pop_setup(population* POP, params* theta)
 				HH.G6PD_def = 0;
 			}
 		} else {
-			q_rand = genunf(0.0, 1.0);
+			q_rand = rgenunf(0.0, 1.0);
 
 			if (q_rand <= theta->G6PD_prev*theta->G6PD_prev)
 			{
@@ -4357,7 +4358,7 @@ void equi_pop_setup(population* POP, params* theta)
 		}
 
 
-		if (genunf(0.0, 1.0) < theta->CYP2D6_prev)
+		if (rgenunf(0.0, 1.0) < theta->CYP2D6_prev)
 		{
 			HH.CYP2D6 = 1;
 		}
@@ -4388,7 +4389,7 @@ void equi_pop_setup(population* POP, params* theta)
 		///////////////////////////////////////////////////////////////////
 		// Randomly assign a state according to equilibrium probabilities
 
-		rand_comp = genunf(0.0, 1.0);
+		rand_comp = rgenunf(0.0, 1.0);
 
 		if (rand_comp <= yH_eq_cumsum[i_index][j_index][0])
 		{
@@ -4454,7 +4455,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		if ((HH.age > 6570.0) && (HH.age < 14600.0))
 		{
-			if (genunf(0.0, 1.0) < 0.05)
+			if (rgenunf(0.0, 1.0) < 0.05)
 			{
 				HH.pregnant = 1;
 				HH.preg_timer = 0;
@@ -4489,7 +4490,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		setgmn(GMN_zero, *theta->V_int_dummy, N_int, GMN_parm);
 
-		genmn(GMN_parm, zz_GMN, GMN_work);
+		rgenmn(GMN_parm, zz_GMN, GMN_work);
 
 		for (int k = 0; k<N_int; k++)
 		{
@@ -4722,7 +4723,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.S_out = lam_H_lag;
 
-		if (exp(-t_step*theta.S_out) < genunf(0, 1))
+		if (exp(-t_step*theta.S_out) < rgenunf(0, 1))
 		{
 
 			//theta.r_PCR   = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) )); 
@@ -4742,7 +4743,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 0)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4777,7 +4778,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4813,7 +4814,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4850,7 +4851,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4880,14 +4881,14 @@ void individual::state_mover(params theta, double lam_bite)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -4895,7 +4896,7 @@ void individual::state_mover(params theta, double lam_bite)
 							}else{                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -4914,7 +4915,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new = 1;
 
 				S = 0;
-				if (genunf(0.0, 1.0) < theta.treat_eff)
+				if (rgenunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				} else {
@@ -4939,7 +4940,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 		theta.I_PCR_out = lam_H_lag + theta.r_PCR;
 
-		if (exp(-t_step*theta.I_PCR_out) < genunf(0, 1))
+		if (exp(-t_step*theta.I_PCR_out) < rgenunf(0, 1))
 		{
 			theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
 			theta.phi_D = theta.phi_D_min + (theta.phi_D_max - theta.phi_D_min) / (1.0 + pow((A_clin + A_clin_mat)*theta.A_D_50pc_inv, theta.K_D));
@@ -4971,7 +4972,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5001,7 +5002,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5037,7 +5038,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5074,7 +5075,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 4)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5101,13 +5102,13 @@ void individual::state_mover(params theta, double lam_bite)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -5116,7 +5117,7 @@ void individual::state_mover(params theta, double lam_bite)
 							else {                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -5135,7 +5136,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new   = 1;
 
 				I_PCR = 0;
-				if (genunf(0.0, 1.0) < theta.treat_eff)
+				if (rgenunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				}else {
@@ -5158,7 +5159,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.I_LM_out = lam_H_lag + theta.r_LM;
 
-		if (exp(-t_step*theta.I_LM_out) < genunf(0, 1))
+		if (exp(-t_step*theta.I_LM_out) < rgenunf(0, 1))
 		{
 			//theta.r_PCR = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) ) ); 
 			theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
@@ -5191,7 +5192,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5222,7 +5223,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5260,7 +5261,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5286,13 +5287,13 @@ void individual::state_mover(params theta, double lam_bite)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -5300,7 +5301,7 @@ void individual::state_mover(params theta, double lam_bite)
 							} else {                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -5319,7 +5320,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new = 1;
 
 				I_LM = 0;
-				if (genunf(0.0, 1.0) < theta.treat_eff)
+				if (rgenunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				} else {
@@ -5342,7 +5343,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.I_D_out = lam_H_lag + theta.r_D;
 
-		if (exp(-t_step*theta.I_D_out) < genunf(0, 1))
+		if (exp(-t_step*theta.I_D_out) < rgenunf(0, 1))
 		{
 			theta.I_D_move[0] = theta.r_D / theta.I_D_out;              // Move to I_LM
 			theta.I_D_move[1] = lam_H_lag / theta.I_D_out;              // Move to D
@@ -5366,7 +5367,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5405,7 +5406,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.T_out = lam_H_lag + theta.r_T;
 
-		if (exp(-t_step*theta.T_out) < genunf(0, 1))
+		if (exp(-t_step*theta.T_out) < rgenunf(0, 1))
 		{
 			theta.T_move[0] = theta.r_T / theta.T_out;              // Move to P
 			theta.T_move[1] = lam_H_lag / theta.T_out;              // Move to T
@@ -5433,7 +5434,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5474,7 +5475,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.P_out = lam_H_lag + theta.r_P;
 
-		if (exp(-t_step*theta.P_out) < genunf(0, 1))
+		if (exp(-t_step*theta.P_out) < rgenunf(0, 1))
 		{
 			theta.P_move[0] = theta.r_P / theta.P_out;              // Move to S
 			theta.P_move[1] = lam_H_lag / theta.P_out;              // Move to P
@@ -5502,7 +5503,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5559,7 +5560,7 @@ void individual::ager(params theta)
 		Hyp = K_max;
 	}
 
-	if (1.0 - exp(-t_step*theta.gamma_L*Hyp) > genunf(0, 1))
+	if (1.0 - exp(-t_step*theta.gamma_L*Hyp) > rgenunf(0, 1))
 	{
 		Hyp = Hyp - 1;
 	}
@@ -5609,7 +5610,7 @@ void individual::ager(params theta)
 		{
 			if (preg_age == 1)
 			{
-				if (genunf(0.0, 1.0) < theta.P_preg)
+				if (rgenunf(0.0, 1.0) < theta.P_preg)
 				{
 					pregnant = 1;
 					preg_timer = 0.0;
@@ -5684,7 +5685,7 @@ void individual::intervention_updater(params theta)
 
 	if (LLIN == 1)
 	{
-		if (theta.P_LLIN_loss > genunf(0, 1))
+		if (theta.P_LLIN_loss > rgenunf(0, 1))
 		{
 			LLIN = 0;
 		}

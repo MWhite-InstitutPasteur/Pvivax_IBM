@@ -8,11 +8,9 @@
 #ifndef SRC_RNG_H_
 #define SRC_RNG_H_
 
-extern float genexp(float av);
-extern void genmn(float *parm,float *x,float *work);
-extern float gennor(float av,float sd);
-extern float genunf(float low,float high);
-extern void setall(long iseed1,long iseed2);
-extern void setgmn(float *meanv,float *covm,long p,float *parm);
+float rgenexp(float av);
+float rgennor(float av,float sd);
+float rgenunf(float low,float high);
+void rgenmn(float *parm,float *x,float *work);
 
 #endif /* SRC_RNG_H_ */
