@@ -53,12 +53,20 @@ generate_intervention_file <- function(overrides, outpath) {
     params[[name]] <- overrides[[name]]
   }
 
-  if(length(params$LLIN_years) != length(params$LLIN_cover)) {
+  if (length(params$LLIN_years) != length(params$LLIN_cover)) {
     stop('LLIN vectors are not the same size')
   }
 
-  if(length(params$IRS_years) != length(params$IRS_cover)) {
+  if (!all(params$LLIN_cover >= 0 & params$LLIN_cover <= 1)) {
+    stop('LLIN_cover values must be between 0 and 1')
+  }
+
+  if (length(params$IRS_years) != length(params$IRS_cover)) {
     stop('IRS vectors are not the same size')
+  }
+
+  if (!all(params$IRS_cover >= 0 & params$IRS_cover >= 1)) {
+    stop('IRS_cover values must be between 0 and 1')
   }
 
   years <- sort(unique(c(
@@ -69,9 +77,9 @@ generate_intervention_file <- function(overrides, outpath) {
   )))
 
   if (length(years) == 0) {
-    INT_cov <- matrix(-1, nrow=1, ncol=24)
+    intervention_table <- matrix(-1, nrow=1, ncol=24)
     write.table(
-      INT_cov,
+      intervention_table,
       file=outpath,
       row.names=FALSE,
       col.names=FALSE
@@ -79,9 +87,9 @@ generate_intervention_file <- function(overrides, outpath) {
     return()
   }
 
-  INT_cov <- matrix(-1, nrow=length(years), ncol=24)
+  intervention_table <- matrix(-1, nrow=length(years), ncol=24)
 
-  colnames(INT_cov) <- c(
+  colnames(intervention_table) <- c(
     "year_on",
     "LLIN_cov",
     "IRS_cov",
@@ -108,45 +116,45 @@ generate_intervention_file <- function(overrides, outpath) {
     "PQ_year_off"
   )
 
-  INT_cov[,1] = years
+  intervention_table[,1] = years
 
-  for(i in 1:nrow(INT_cov))
+  for(i in 1:nrow(intervention_table))
   {
-    if( INT_cov[i,1] %in% params$LLIN_years )
+    if( intervention_table[i,1] %in% params$LLIN_years )
     {
-      INT_cov[i,2] = params$LLIN_cover[which(params$LLIN_years==INT_cov[i,1])]
+      intervention_table[i,2] = params$LLIN_cover[which(params$LLIN_years==intervention_table[i,1])]
     }
 
-    if( INT_cov[i,1] %in% params$IRS_years )
+    if( intervention_table[i,1] %in% params$IRS_years )
     {
-      INT_cov[i,3] = params$IRS_cover[which(params$IRS_years==INT_cov[i,1])]
+      intervention_table[i,3] = params$IRS_cover[which(params$IRS_years==intervention_table[i,1])]
     }
 
-    if( INT_cov[i,1] %in% params$BS_treat_year_on )
+    if( intervention_table[i,1] %in% params$BS_treat_year_on )
     {
-      INT_cov[i,13] = params$BS_treat_cover[which(params$BS_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,14] = params$BS_treat_BSeff[which(params$BS_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,15] = params$BS_treat_BSproph[which(params$BS_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,16] = params$BS_treat_year_off[which(params$BS_treat_year_on==INT_cov[i,1])]
+      intervention_table[i,13] = params$BS_treat_cover[which(params$BS_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,14] = params$BS_treat_BSeff[which(params$BS_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,15] = params$BS_treat_BSproph[which(params$BS_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,16] = params$BS_treat_year_off[which(params$BS_treat_year_on==intervention_table[i,1])]
     }
 
-    if( INT_cov[i,1] %in% params$PQ_treat_year_on )
+    if( intervention_table[i,1] %in% params$PQ_treat_year_on )
     {
-      INT_cov[i,17] = params$PQ_treat_cover[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,18] = params$PQ_treat_PQcover[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,19] = params$PQ_treat_BSeff[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,20] = params$PQ_treat_PQeff[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,21] = params$PQ_treat_BSproph[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,22] = params$PQ_treat_PQproph[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,23] = params$PQ_treat_CYP2D6[which(params$PQ_treat_year_on==INT_cov[i,1])]
-      INT_cov[i,24] = params$PQ_treat_year_off[which(params$PQ_treat_year_on==INT_cov[i,1])]
+      intervention_table[i,17] = params$PQ_treat_cover[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,18] = params$PQ_treat_PQcover[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,19] = params$PQ_treat_BSeff[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,20] = params$PQ_treat_PQeff[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,21] = params$PQ_treat_BSproph[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,22] = params$PQ_treat_PQproph[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,23] = params$PQ_treat_CYP2D6[which(params$PQ_treat_year_on==intervention_table[i,1])]
+      intervention_table[i,24] = params$PQ_treat_year_off[which(params$PQ_treat_year_on==intervention_table[i,1])]
     }
   }
 
-  INT_cov <- rbind( INT_cov, rep(-1, ncol(INT_cov)) )
+  intervention_table <- rbind( intervention_table, rep(-1, ncol(intervention_table)) )
 
   write.table(
-    INT_cov,
+    intervention_table,
     file=outpath,
     row.names=FALSE,
     col.names=FALSE

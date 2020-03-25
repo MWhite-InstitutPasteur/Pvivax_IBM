@@ -58,7 +58,7 @@ The available interventions are documented
 To override interventions pass your named list of parameters to `run_simulation` function as below:
 
 ```R
-output <- run_simulation(interventions = list(LLIN_years=c(1995, 1996), LLIN_cover=c(.6, .8))
+output <- run_simulation(interventions = list(LLIN_years=c(1995, 1996), LLIN_cover=c(.6, .8)))
 ```
 
 ## Code organisation

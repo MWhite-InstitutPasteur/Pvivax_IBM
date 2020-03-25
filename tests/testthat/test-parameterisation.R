@@ -108,3 +108,18 @@ test_that("intervention file generator tells you if your vectors don't match up"
     'LLIN vectors are not the same size'
   )
 })
+
+test_that("intervention file generator errors on bad coverage", {
+  path <- tempfile()
+  expect_error(
+    generate_intervention_file(
+      list(
+        LLIN_years = c(1995, 1996),
+        LLIN_cover = c(.6, 30)
+      ),
+      path
+    ),
+    'LLIN_cover values must be between 0 and 1'
+  )
+})
+
