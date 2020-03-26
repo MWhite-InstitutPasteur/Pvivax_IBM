@@ -60,6 +60,9 @@ To override interventions pass your named list of parameters to `run_simulation`
 ```R
 output <- run_simulation(interventions = list(LLIN_years=c(1995, 1996), LLIN_cover=c(.6, .8)))
 ```
+## Plotting standard graphs
+
+You can plot standard graphs by following the `plot_graphs` vignette.
 
 ## Code organisation
 

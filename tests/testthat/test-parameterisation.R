@@ -3,7 +3,7 @@ test_that("default parameters set up correctly", {
   m <- mockery::mock()
   with_mock(
     `vivax::run_simulation_from_path` = function(...) {
-      write.table(table(seq(10)), list(...)[[6]])
+      fake_model_output(list(...)[[6]])
       m(...)
     },
     run_simulation()
@@ -36,7 +36,7 @@ test_that("you can override parameters", {
   m <- mockery::mock()
   with_mock(
     `vivax::run_simulation_from_path` = function(...) {
-      write.table(table(seq(10)), list(...)[[6]])
+      fake_model_output(list(...)[[6]])
       m(...)
     },
     run_simulation(model = list(bb = 2), farauti=list(mu_M = .5))
@@ -67,13 +67,7 @@ test_that("you can override parameters", {
 test_that("overriding kindly lets you know if you've made a typo", {
   m <- mockery::mock()
   expect_error(
-    with_mock(
-      `vivax::run_simulation_from_path` = function(...) {
-        write.table(table(seq(10)), list(...)[[6]])
-        m(...)
-      },
-      run_simulation(model = list(bbb = 2), farauti=list(mu_M = .5))
-    ),
+    run_simulation(model = list(bbb = 2), farauti=list(mu_M = .5)),
     'unknown parameter bbb'
   )
 })
