@@ -7,15 +7,15 @@
 
 #include <Rcpp.h>
 
-float genexp(float av) {
+double genexp(double av) {
 	return R::rexp(av);
 }
 
-float gennor(float av, float sd) {
+double gennor(double av, double sd) {
 	return R::rnorm(av, sd);
 }
 
-float genunf(float low, float high) {
+double genunf(double low, double high) {
 	return R::runif(low, high);
 }
 

@@ -8,9 +8,9 @@
 #ifndef SRC_RNG_H_
 #define SRC_RNG_H_
 
-float genexp(float av);
-float gennor(float av,float sd);
-float genunf(float low,float high);
+double genexp(double av);
+double gennor(double av, double sd);
+double genunf(double low, double high);
 void genmn(float *parm,float *x,float *work);
 void setgmn(float *meanv,float *covm,long p,float *parm);
 
