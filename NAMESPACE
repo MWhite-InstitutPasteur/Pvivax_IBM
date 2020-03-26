@@ -1,5 +1,4 @@
 useDynLib(vivax, .registration=TRUE)
 export(run_simulation)
-export(plot_outputs)
 importFrom(Rcpp, evalCpp)
 importFrom("utils", "read.table", "write.table")
