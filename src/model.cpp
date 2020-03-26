@@ -61,6 +61,7 @@
 #include <omp.h>
 #include <vector>
 #include <algorithm>
+#include <Rcpp.h>
 
 using namespace std;
 
@@ -2359,6 +2360,11 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 
 	for (int i = 0; i<SIM->N_time; i++)
 	{
+		//check for a user interupt every 100 timesteps
+		if (i % 100 == 0) {
+			Rcpp::checkUserInterrupt();
+		}
+
 		if (SIM->t_vec[i] / 365.0 - floor(SIM->t_vec[i] / 365.0) < 0.5*t_step / 365.0)
 		{
 			cout << "time = " << SIM->t_vec[i] / 365.0 << "\t" << 100.0*(SIM->t_vec[i] - SIM->t_vec[0]) / (double(t_step*SIM->N_time)) << "% complete" << endl;
