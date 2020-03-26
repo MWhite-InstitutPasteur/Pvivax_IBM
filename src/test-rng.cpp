@@ -11,10 +11,7 @@
 // header file.
 #include <testthat.h>
 #include "rng.h"
-#include "randlib.h"
 #include <Rcpp.h>
-
-using namespace Rcpp;
 
 void set_seed(double seed) {
     Rcpp::Environment base_env("package:base");
@@ -29,17 +26,17 @@ bool almost_equal(double a, double b, double delta) {
 context("Random number generation") {
   test_that("Exponential generation is reproducible") {
 	  set_seed(42);
-	  expect_true(almost_equal(rgenexp(1), 0.1983368, .0001));
+	  expect_true(almost_equal(genexp(1), 0.1983368, .0001));
   }
 
   test_that("Normal generation is reproducible") {
   	  set_seed(42);
-  	  expect_true(almost_equal(rgennor(0, 1), 1.370958, .0001));
+  	  expect_true(almost_equal(gennor(0, 1), 1.370958, .0001));
   }
 
   test_that("Uniform generation is reproducible") {
 	  set_seed(42);
-	  expect_true(almost_equal(rgenunf(0, 1), 0.914806, .0001));
+	  expect_true(almost_equal(genunf(0, 1), 0.914806, .0001));
   }
 
   test_that("Multivariate normal generation is reproducible") {
@@ -51,7 +48,7 @@ context("Random number generation") {
   	  setgmn(meanv, covm, p, param);
   	  float result[2];
   	  float work[2];
-  	  rgenmn(param, result, work);
+  	  genmn(param, result, work);
   	  expect_true(almost_equal(result[0], 1.37096, .0001));
   	  expect_true(almost_equal(result[1], -0.564698, .0001));
   }

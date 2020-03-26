@@ -57,7 +57,6 @@
 #include <math.h>
 #include <string>
 #include <time.h>
-#include "randlib.h"
 #include "rng.h"
 #include <omp.h>
 #include <vector>
@@ -861,7 +860,6 @@ int run_simulation(
   const char* coverage_File,
   const char* output_File
 ) {
-	setall(time(NULL), 7);
 
 	clock_t clock_time;
 	clock_time = clock();
@@ -885,8 +883,8 @@ int run_simulation(
 	//                                        //
 	////////////////////////////////////////////
 
-	cout << "Reading in parameter file............." << endl;
-	cout << endl;
+	Rcpp::Rcout << "Reading in parameter file............." << endl;
+	Rcpp::Rcout << endl;
 
 	string discard;
 
@@ -894,7 +892,7 @@ int run_simulation(
 
 	if (parameter_Stream.fail())
 	{
-		std::cout << "Failure reading in data." << endl;
+		Rcpp::Rcout << "Failure reading in data." << endl;
 	}
 
 
@@ -1107,8 +1105,8 @@ int run_simulation(
 
 	parameter_Stream.close();
 
-	cout << "Parameter values read in from file!" << endl;
-	cout << endl;
+	Rcpp::Rcout << "Parameter values read in from file!" << endl;
+	Rcpp::Rcout << endl;
 
 
 	////////////////////////////////////////////
@@ -1117,8 +1115,8 @@ int run_simulation(
 	//                                        //
 	////////////////////////////////////////////
 
-	cout << "Reading in mosquito files............." << endl;
-	cout << endl;
+	Rcpp::Rcout << "Reading in mosquito files............." << endl;
+	Rcpp::Rcout << endl;
 
 	for (int g = 0; g < N_spec; g++)
 	{
@@ -1127,7 +1125,7 @@ int run_simulation(
 
 		if (mosquito_Stream.fail())
 		{
-			std::cout << "Failure reading in mosquito parameters." << endl;
+			Rcpp::Rcout << "Failure reading in mosquito parameters." << endl;
 		}
 
 
@@ -1221,8 +1219,8 @@ int run_simulation(
 		Pv_mod_par.s_IRS_0[g] = 1.0 - Pv_mod_par.d_IRS_0[g] - Pv_mod_par.s_IRS_0[g];   // Feeding success of mosquito on IRS protected person
 	}
 
-	cout << "Mosquito parameter values read in from file!" << endl;
-	cout << endl;
+	Rcpp::Rcout << "Mosquito parameter values read in from file!" << endl;
+	Rcpp::Rcout << endl;
 
 
 	//////////////////////////////////////////////
@@ -1325,13 +1323,13 @@ int run_simulation(
 
 	int N_cov_rounds = 0;
 
-	cout << "Read in intervention coverage file............" << endl;
+	Rcpp::Rcout << "Read in intervention coverage file............" << endl;
 
 	std::ifstream coverage_Stream(coverage_File);
 
 	if (coverage_Stream.fail())
 	{
-		std::cout << "Failure reading in data." << endl;
+		Rcpp::Rcout << "Failure reading in data." << endl;
 	}
 
 
@@ -1352,7 +1350,7 @@ int run_simulation(
 		}
 	} while (cov_read[0] > -0.5);
 
-	cout << "Intervention coverage file successfully read in!" << endl;
+	Rcpp::Rcout << "Intervention coverage file successfully read in!" << endl;
 
 
 	/////////////////////////////////////////////////////////////////////////
@@ -1448,13 +1446,13 @@ int run_simulation(
 	//                                                                       // 
 	///////////////////////////////////////////////////////////////////////////
 
-	cout << "Initialise population of individuals for simulation at equilbirium EIR of " << 365.0*Pv_mod_par.EIR_equil << endl;
-	cout << endl;
+	Rcpp::Rcout << "Initialise population of individuals for simulation at equilbirium EIR of " << 365.0*Pv_mod_par.EIR_equil << endl;
+	Rcpp::Rcout << endl;
 
 	equi_pop_setup(&PNG_pop, &Pv_mod_par);
 
-	cout << "Population of size " << PNG_pop.N_pop << " initialised!" << endl;
-	cout << endl;
+	Rcpp::Rcout << "Population of size " << PNG_pop.N_pop << " initialised!" << endl;
+	Rcpp::Rcout << endl;
 
 
 	/////////////////////////////////////////////////////////////////////////
@@ -1534,12 +1532,12 @@ int run_simulation(
 	//                                                  //
 	////////////////////////////////////////////////////// 
 
-	cout << "Starting model simulations......." << endl;
+	Rcpp::Rcout << "Starting model simulations......." << endl;
 
 	model_simulator(&Pv_mod_par, &PNG_pop, &PNG_intven, &PNG_sim);
 
-	cout << "Model simulations completed....." << endl;
-	cout << endl;
+	Rcpp::Rcout << "Model simulations completed....." << endl;
+	Rcpp::Rcout << endl;
 
 
 	//////////////////////////////////////////////////////
@@ -1548,8 +1546,8 @@ int run_simulation(
 	//                                                  //
 	////////////////////////////////////////////////////// 
 
-	cout << "Start writing output to file......" << endl;
-	cout << endl;
+	Rcpp::Rcout << "Start writing output to file......" << endl;
+	Rcpp::Rcout << endl;
 
 	ofstream output_Stream(output_File);
 
@@ -1601,11 +1599,11 @@ int run_simulation(
 	output_Stream.close();
 
 
-	cout << "Output successfully written to file......" << endl;
-	cout << endl;
+	Rcpp::Rcout << "Output successfully written to file......" << endl;
+	Rcpp::Rcout << endl;
 
 
-	cout << "Time taken: " << ( (double) clock() - clock_time)/( (double) CLOCKS_PER_SEC ) << " seconds" << endl;
+	Rcpp::Rcout << "Time taken: " << ( (double) clock() - clock_time)/( (double) CLOCKS_PER_SEC ) << " seconds" << endl;
 
 
 	return 0;
@@ -1843,7 +1841,7 @@ void human_step(params* theta, population* POP)
 		/////////////////////////////////////////////
 		// Everyone has an equal probability of dying
 
-		if (theta->P_dead > rgenunf(0, 1))
+		if (theta->P_dead > genunf(0, 1))
 		{
 			POP->people.erase(POP->people.begin() + n);
 			
@@ -1886,11 +1884,11 @@ void human_step(params* theta, population* POP)
 
 	for (int n = 0; n<N_dead; n++)
 	{
-		zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+		zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 
 		while (zeta_start > theta->het_max)
 		{
-			zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+			zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 		}
 
 		individual HH(0.0, zeta_start);
@@ -1917,7 +1915,7 @@ void human_step(params* theta, population* POP)
 
 		HH.Hyp = 0;
 
-		if (rgenunf(0.0, 1.0) < 0.5)
+		if (genunf(0.0, 1.0) < 0.5)
 		{
 			HH.gender = 0;
 		}
@@ -1927,7 +1925,7 @@ void human_step(params* theta, population* POP)
 
 		if (HH.gender == 0)
 		{
-			if (rgenunf(0.0, 1.0) < theta->G6PD_prev)
+			if (genunf(0.0, 1.0) < theta->G6PD_prev)
 			{
 				HH.G6PD_def = 1;
 			} else {
@@ -1935,7 +1933,7 @@ void human_step(params* theta, population* POP)
 			}
 		} else {
 
-			q_rand = rgenunf(0.0, 1.0);
+			q_rand = genunf(0.0, 1.0);
 
 			if(q_rand <= theta->G6PD_prev*theta->G6PD_prev)
 			{
@@ -1953,7 +1951,7 @@ void human_step(params* theta, population* POP)
 			}
 		}
 
-		if (rgenunf(0.0, 1.0) < theta->CYP2D6_prev)
+		if (genunf(0.0, 1.0) < theta->CYP2D6_prev)
 		{
 			HH.CYP2D6 = 1;
 		}
@@ -2014,7 +2012,7 @@ void human_step(params* theta, population* POP)
 
 		setgmn(GMN_zero, *theta->V_int_dummy, N_int, GMN_parm);
 
-		rgenmn(GMN_parm, zz_GMN, GMN_work);
+		genmn(GMN_parm, zz_GMN, GMN_work);
 
 		for (int k = 0; k<N_int; k++)
 		{
@@ -2368,7 +2366,7 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 
 		if (SIM->t_vec[i] / 365.0 - floor(SIM->t_vec[i] / 365.0) < 0.5*t_step / 365.0)
 		{
-			cout << "time = " << SIM->t_vec[i] / 365.0 << "\t" << 100.0*(SIM->t_vec[i] - SIM->t_vec[0]) / (double(t_step*SIM->N_time)) << "% complete" << endl;
+			Rcpp::Rcout << "time = " << SIM->t_vec[i] / 365.0 << "\t" << 100.0*(SIM->t_vec[i] - SIM->t_vec[0]) / (double(t_step*SIM->N_time)) << "% complete" << endl;
 		}
 
 		human_step(theta, POP);
@@ -2443,13 +2441,13 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->LLIN_year[m] - 0.5*t_step) &&
 			(t < INTVEN->LLIN_year[m] + 0.51*t_step))
 		{
-			cout << "LLIN distribution" << endl;
+			Rcpp::Rcout << "LLIN distribution" << endl;
 
 			QQ = phi_inv(INTVEN->LLIN_cover[m], 0.0, sqrt(1.0 + theta->sig_round_LLIN*theta->sig_round_LLIN));
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (rgennor(POP->people[n].zz_int[0], theta->sig_round_LLIN) < QQ)
+				if (gennor(POP->people[n].zz_int[0], theta->sig_round_LLIN) < QQ)
 				{
 					POP->people[n].LLIN = 1;
 					POP->people[n].LLIN_age = 0.0;
@@ -2474,13 +2472,13 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->IRS_year[m] - 0.5*t_step) &&
 			(t < INTVEN->IRS_year[m] + 0.51*t_step))
 		{
-			cout << "IRS distribution" << endl;
+			Rcpp::Rcout << "IRS distribution" << endl;
 
 			QQ = phi_inv(INTVEN->IRS_cover[m], 0.0, sqrt(1.0 + theta->sig_round_IRS*theta->sig_round_IRS));
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (rgennor(POP->people[n].zz_int[1], theta->sig_round_IRS) < QQ)
+				if (gennor(POP->people[n].zz_int[1], theta->sig_round_IRS) < QQ)
 				{
 					POP->people[n].IRS = 1;
 					POP->people[n].IRS_age = 0.0;
@@ -2505,7 +2503,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->MDA_BS_year[m] - 0.5*t_step) &&
 			(t < INTVEN->MDA_BS_year[m] + 0.51*t_step))
 		{
-			cout << "MDA (BS) distribution" << endl;
+			Rcpp::Rcout << "MDA (BS) distribution" << endl;
 
 			theta->MDA_BS_cover   = INTVEN->MDA_BS_cover[m];
 			theta->MDA_BS_BSeff   = INTVEN->MDA_BS_BSeff[m];
@@ -2515,13 +2513,13 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (rgennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
 				{
 					POP->people[n].ACT_new = 1;
 
-					if (rgenunf(0.0, 1.0) < theta->MDA_BS_BSeff)
+					if (genunf(0.0, 1.0) < theta->MDA_BS_BSeff)
 					{
-						if (rgennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
+						if (gennor(POP->people[n].zz_int[2], theta->sig_round_MDA) < QQ)
 						{
 							if (POP->people[n].S == 1    ) { POP->people[n].S = 0;     POP->people[n].P = 1; }
 							if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1;  }
@@ -2543,7 +2541,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->MDA_PQ_year[m] - 0.5*t_step) &&
 			(t < INTVEN->MDA_PQ_year[m] + 0.51*t_step))
 		{
-			cout << "MDA (BS+PQ) distribution" << endl;
+			Rcpp::Rcout << "MDA (BS+PQ) distribution" << endl;
 
 			theta->MDA_PQ_cover   = INTVEN->MDA_PQ_cover[m];
 			theta->MDA_PQ_BSeff   = INTVEN->MDA_PQ_BSeff[m];
@@ -2556,11 +2554,11 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 			for (int n = 0; n<POP->N_pop; n++)
 			{
-				if (rgennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
+				if (gennor(POP->people[n].zz_int[3], theta->sig_round_MDA) < QQ)
 				{
 					POP->people[n].ACT_new = 1;
 
-					if (rgenunf(0.0, 1.0) < theta->MDA_PQ_BSeff)
+					if (genunf(0.0, 1.0) < theta->MDA_PQ_BSeff)
 					{
 						if (POP->people[n].S == 1    ) { POP->people[n].S = 0;     POP->people[n].P = 1; }
 						if (POP->people[n].I_PCR == 1) { POP->people[n].I_PCR = 0; POP->people[n].P = 1; }
@@ -2574,7 +2572,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 
 						if (theta->MDA_PQ_CYP2D6 == 0)    // Is CYP2D6 low metabolization a problem? No = 0, e.g. TQ; Otherwise Yes = 1, e.g. PQ
 						{
-							if (rgenunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
+							if (genunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
 							{
 								POP->people[n].Hyp = 0;
 
@@ -2584,7 +2582,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 						}else{
 							if (POP->people[n].CYP2D6 == 0)          // If CYP2D6 low metabolization is a problem - it only effects the low metabolizers
 							{
-								if (rgenunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
+								if (genunf(0.0, 1.0) < theta->MDA_PQ_PQeff)
 								{
 									POP->people[n].Hyp = 0;
 
@@ -2609,7 +2607,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->BS_treat_year_on[m] - 0.5*t_step) &&
 			(t < INTVEN->BS_treat_year_on[m] + 0.51*t_step))
 		{
-			cout << "New front-line BS treatment" << endl;
+			Rcpp::Rcout << "New front-line BS treatment" << endl;
 
 			theta->BS_treat_cover   = INTVEN->BS_treat_cover[m];
 			theta->BS_treat_BSeff   = INTVEN->BS_treat_BSeff[m];
@@ -2630,7 +2628,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->BS_treat_year_off[m] - 0.5*t_step) &&
 			(t < INTVEN->BS_treat_year_off[m] + 0.51*t_step))
 		{
-			cout << "End of changing front-line BS treatment" << endl;
+			Rcpp::Rcout << "End of changing front-line BS treatment" << endl;
 
 			theta->treat_cov = theta->BS_treat_cov_base;
 			theta->treat_eff = theta->BS_treat_eff_base;
@@ -2647,7 +2645,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->PQ_treat_year_on[m] - 0.5*t_step) &&
 			(t < INTVEN->PQ_treat_year_on[m] + 0.51*t_step))
 		{
-			cout << "New front-line PQ treatment" << endl;
+			Rcpp::Rcout << "New front-line PQ treatment" << endl;
 
 			theta->PQ_treat_cover   = INTVEN->PQ_treat_cover[m];
 			theta->PQ_treat_PQcover = INTVEN->PQ_treat_PQcover[m];
@@ -2672,7 +2670,7 @@ void intervention_dist(double t, params* theta, population* POP, intervention* I
 		if ((t > INTVEN->PQ_treat_year_off[m] - 0.5*t_step) &&
 			(t < INTVEN->PQ_treat_year_off[m] + 0.51*t_step))
 		{
-			cout << "End of changing front-line PQ treatment" << endl;
+			Rcpp::Rcout << "End of changing front-line PQ treatment" << endl;
 
 			theta->PQ_treat_cover = 0.0;
 			theta->PQ_treat_PQeff = 0.0;
@@ -2708,7 +2706,7 @@ int CH_sample(double *xx, int nn)
 	}
 
 	int index = 0;
-	double unif = rgenunf(0, 1);
+	double unif = genunf(0, 1);
 
 	if (unif < xx_cum[0])
 	{
@@ -4012,7 +4010,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 	/*
 
-	cout << "Testing yH sum......" << endl;
+	Rcpp::Rcout << "Testing yH sum......" << endl;
 
 	double yH_sum = 0.0;
 
@@ -4031,7 +4029,7 @@ void equi_pop_setup(population* POP, params* theta)
 	}
 
 
-	cout << "yH_sum = " << yH_sum << endl;
+	Rcpp::Rcout << "yH_sum = " << yH_sum << endl;
 	system("PAUSE");
 
 	*/
@@ -4134,28 +4132,28 @@ void equi_pop_setup(population* POP, params* theta)
 
 	for (int g = 0; g < N_spec; g++)
 	{
-		if (g == 0) { cout << "An. farauti:  " << 100.0 * theta->Prop_mosq[0] << "%" << endl; }
-		if (g == 1) { cout << "An. punctulatus:  " << 100.0 * theta->Prop_mosq[1] << "%" << endl; }
-		if (g == 2) { cout << "An. koliensis:  " << 100.0 * theta->Prop_mosq[2] << "%" << endl; }
+		if (g == 0) { Rcpp::Rcout << "An. farauti:  " << 100.0 * theta->Prop_mosq[0] << "%" << endl; }
+		if (g == 1) { Rcpp::Rcout << "An. punctulatus:  " << 100.0 * theta->Prop_mosq[1] << "%" << endl; }
+		if (g == 2) { Rcpp::Rcout << "An. koliensis:  " << 100.0 * theta->Prop_mosq[2] << "%" << endl; }
 
-		cout << "EL_M  " << POP->yM[g][0] <<  endl;
-		cout << "LL_M  " << POP->yM[g][1] <<  endl;
-		cout << "P_M  " << POP->yM[g][2]  <<  endl;
-		cout << "S_M  " << POP->yM[g][3]  <<  endl;
-		cout << "E_M  " << POP->yM[g][4]  <<  endl;
-		cout << "I_M  " << POP->yM[g][5]  <<  endl;
+		Rcpp::Rcout << "EL_M  " << POP->yM[g][0] <<  endl;
+		Rcpp::Rcout << "LL_M  " << POP->yM[g][1] <<  endl;
+		Rcpp::Rcout << "P_M  " << POP->yM[g][2]  <<  endl;
+		Rcpp::Rcout << "S_M  " << POP->yM[g][3]  <<  endl;
+		Rcpp::Rcout << "E_M  " << POP->yM[g][4]  <<  endl;
+		Rcpp::Rcout << "I_M  " << POP->yM[g][5]  <<  endl;
 
-		cout << "lam_M = " << theta->lam_M[g] << endl;
+		Rcpp::Rcout << "lam_M = " << theta->lam_M[g] << endl;
 
-		cout << "I_M = " << POP->yM[g][5] << endl;
+		Rcpp::Rcout << "I_M = " << POP->yM[g][5] << endl;
 	
-		cout << "mm = " << theta->mm_0[g] << endl;
+		Rcpp::Rcout << "mm = " << theta->mm_0[g] << endl;
 
-		cout << endl;
+		Rcpp::Rcout << endl;
 	}
-	cout << endl;
+	Rcpp::Rcout << endl;
 
-	cout << "lam_H = " << theta->bb*theta->EIR_equil << endl;
+	Rcpp::Rcout << "lam_H = " << theta->bb*theta->EIR_equil << endl;
 
 	double EIR_out = 0.0;
 	for (int g = 0; g < N_spec; g++)
@@ -4163,7 +4161,7 @@ void equi_pop_setup(population* POP, params* theta)
 		EIR_out = EIR_out + 365.0*theta->aa[g] * POP->yM[g][5];
 	}
 
-	cout << "EIR = " << EIR_out << endl;
+	Rcpp::Rcout << "EIR = " << EIR_out << endl;
 
 
 	//////////////////////////////////////////////////////////////
@@ -4267,18 +4265,18 @@ void equi_pop_setup(population* POP, params* theta)
 		//////////////////////////////////////////////////////////////////
 		// 3.7.4.2.1. Assign age and heterogeneity 
 
-		age_start = rgenexp(theta->age_mean);
+		age_start = genexp(theta->age_mean);
 
 		while (age_start > theta->age_max)
 		{
-			age_start = rgenexp(theta->age_mean);
+			age_start = genexp(theta->age_mean);
 		}
 
-		zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+		zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 
 		while (zeta_start > theta->het_max)
 		{
-			zeta_start = exp(rgennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
+			zeta_start = exp(gennor(-0.5*theta->sig_het*theta->sig_het, theta->sig_het));
 		}
 
 
@@ -4321,7 +4319,7 @@ void equi_pop_setup(population* POP, params* theta)
 		HH.P = 0;
 
 
-		if (rgenunf(0.0, 1.0) < 0.5)
+		if (genunf(0.0, 1.0) < 0.5)
 		{
 			HH.gender = 0;
 		}
@@ -4331,7 +4329,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		if (HH.gender == 0)
 		{
-			if (rgenunf(0.0, 1.0) < theta->G6PD_prev)
+			if (genunf(0.0, 1.0) < theta->G6PD_prev)
 			{
 				HH.G6PD_def = 1;
 			}
@@ -4339,7 +4337,7 @@ void equi_pop_setup(population* POP, params* theta)
 				HH.G6PD_def = 0;
 			}
 		} else {
-			q_rand = rgenunf(0.0, 1.0);
+			q_rand = genunf(0.0, 1.0);
 
 			if (q_rand <= theta->G6PD_prev*theta->G6PD_prev)
 			{
@@ -4358,7 +4356,7 @@ void equi_pop_setup(population* POP, params* theta)
 		}
 
 
-		if (rgenunf(0.0, 1.0) < theta->CYP2D6_prev)
+		if (genunf(0.0, 1.0) < theta->CYP2D6_prev)
 		{
 			HH.CYP2D6 = 1;
 		}
@@ -4389,7 +4387,7 @@ void equi_pop_setup(population* POP, params* theta)
 		///////////////////////////////////////////////////////////////////
 		// Randomly assign a state according to equilibrium probabilities
 
-		rand_comp = rgenunf(0.0, 1.0);
+		rand_comp = genunf(0.0, 1.0);
 
 		if (rand_comp <= yH_eq_cumsum[i_index][j_index][0])
 		{
@@ -4455,7 +4453,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		if ((HH.age > 6570.0) && (HH.age < 14600.0))
 		{
-			if (rgenunf(0.0, 1.0) < 0.05)
+			if (genunf(0.0, 1.0) < 0.05)
 			{
 				HH.pregnant = 1;
 				HH.preg_timer = 0;
@@ -4490,7 +4488,7 @@ void equi_pop_setup(population* POP, params* theta)
 
 		setgmn(GMN_zero, *theta->V_int_dummy, N_int, GMN_parm);
 
-		rgenmn(GMN_parm, zz_GMN, GMN_work);
+		genmn(GMN_parm, zz_GMN, GMN_work);
 
 		for (int k = 0; k<N_int; k++)
 		{
@@ -4616,7 +4614,7 @@ void equi_pop_setup(population* POP, params* theta)
 	/////////////////////////////////////////////////////////////////////////
 	// 3.7.5.3. Output an overview of the initial set up
 
-	cout << "Equilibrium set up......." << endl;
+	Rcpp::Rcout << "Equilibrium set up......." << endl;
 
 	double S_ind = 0.0, I_PCR_ind = 0.0, I_LM_ind = 0.0, I_D_ind = 0.0, T_ind = 0.0, P_ind = 0.0;
 	double S_eqq = 0.0, I_PCR_eqq = 0.0, I_LM_eqq = 0.0, I_D_eqq = 0.0, T_eqq = 0.0, P_eqq = 0.0;
@@ -4649,12 +4647,12 @@ void equi_pop_setup(population* POP, params* theta)
 	}
 
 
-	cout << "S = " << ((double)S_ind) / POP->N_pop << "\t" << S_eqq << endl;
-	cout << "I_PCR = " << ((double)I_PCR_ind) / POP->N_pop << "\t" << I_PCR_eqq << endl;
-	cout << "I_LM = " << ((double)I_LM_ind) / POP->N_pop << "\t" << I_LM_eqq << endl;
-	cout << "I_D = " << ((double)I_D_ind) / POP->N_pop << "\t" << I_D_eqq << endl;
-	cout << "T = " << ((double)T_ind) / POP->N_pop << "\t" << T_eqq << endl;
-	cout << "P = " << ((double)P_ind) / POP->N_pop << "\t" << P_eqq << endl;
+	Rcpp::Rcout << "S = " << ((double)S_ind) / POP->N_pop << "\t" << S_eqq << endl;
+	Rcpp::Rcout << "I_PCR = " << ((double)I_PCR_ind) / POP->N_pop << "\t" << I_PCR_eqq << endl;
+	Rcpp::Rcout << "I_LM = " << ((double)I_LM_ind) / POP->N_pop << "\t" << I_LM_eqq << endl;
+	Rcpp::Rcout << "I_D = " << ((double)I_D_ind) / POP->N_pop << "\t" << I_D_eqq << endl;
+	Rcpp::Rcout << "T = " << ((double)T_ind) / POP->N_pop << "\t" << T_eqq << endl;
+	Rcpp::Rcout << "P = " << ((double)P_ind) / POP->N_pop << "\t" << P_eqq << endl;
 
 }
 
@@ -4723,7 +4721,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.S_out = lam_H_lag;
 
-		if (exp(-t_step*theta.S_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.S_out) < genunf(0, 1))
 		{
 
 			//theta.r_PCR   = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) )); 
@@ -4743,7 +4741,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 0)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4778,7 +4776,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4814,7 +4812,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4851,7 +4849,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -4873,22 +4871,22 @@ void individual::state_mover(params theta, double lam_bite)
 					A_clin_boost = 0;
 				}
 
-				//cout << theta.PQ_treat_cover << "\t" << theta.PQ_treat_eff << endl;
-				//cout << G6PD_def << "\t" << CYP2D6 << "\t" << pregnant << "\t" << age << endl;
+				//Rcpp::Rcout << theta.PQ_treat_cover << "\t" << theta.PQ_treat_eff << endl;
+				//Rcpp::Rcout << G6PD_def << "\t" << CYP2D6 << "\t" << pregnant << "\t" << age << endl;
 
 
 				if (theta.PQ_treat_PQcover > 0.0)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -4896,7 +4894,7 @@ void individual::state_mover(params theta, double lam_bite)
 							}else{                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -4915,7 +4913,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new = 1;
 
 				S = 0;
-				if (rgenunf(0.0, 1.0) < theta.treat_eff)
+				if (genunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				} else {
@@ -4940,7 +4938,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 		theta.I_PCR_out = lam_H_lag + theta.r_PCR;
 
-		if (exp(-t_step*theta.I_PCR_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.I_PCR_out) < genunf(0, 1))
 		{
 			theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
 			theta.phi_D = theta.phi_D_min + (theta.phi_D_max - theta.phi_D_min) / (1.0 + pow((A_clin + A_clin_mat)*theta.A_D_50pc_inv, theta.K_D));
@@ -4972,7 +4970,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5002,7 +5000,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5038,7 +5036,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5075,7 +5073,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 4)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5102,13 +5100,13 @@ void individual::state_mover(params theta, double lam_bite)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -5117,7 +5115,7 @@ void individual::state_mover(params theta, double lam_bite)
 							else {                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -5136,7 +5134,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new   = 1;
 
 				I_PCR = 0;
-				if (rgenunf(0.0, 1.0) < theta.treat_eff)
+				if (genunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				}else {
@@ -5159,7 +5157,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.I_LM_out = lam_H_lag + theta.r_LM;
 
-		if (exp(-t_step*theta.I_LM_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.I_LM_out) < genunf(0, 1))
 		{
 			//theta.r_PCR = 1.0/( theta.d_PCR_min + (theta.d_PCR_max-theta.d_PCR_min)/( 1.0 + pow((A_par+A_par_mat)*theta.A_PCR_50pc_inv,theta.K_PCR) ) ); 
 			theta.phi_LM = theta.phi_LM_min + (theta.phi_LM_max - theta.phi_LM_min) / (1.0 + pow((A_par + A_par_mat)*theta.A_LM_50pc_inv, theta.K_LM));
@@ -5192,7 +5190,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5223,7 +5221,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 2)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5261,7 +5259,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 3)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5287,13 +5285,13 @@ void individual::state_mover(params theta, double lam_bite)
 				{
 					if ((G6PD_def == 0) && (pregnant == 0) && (age > 180.0))
 					{
-						if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQcover)
+						if (genunf(0.0, 1.0) < theta.PQ_treat_PQcover)
 						{
 							PQ_new = 1;
 
 							if (theta.PQ_treat_CYP2D6 == 0)   // Case where CYP2D6 low met is not be a problem (e.g. TQ) 
 							{
-								if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+								if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 								{
 									Hyp = 0;
 									PQ_proph = 1;
@@ -5301,7 +5299,7 @@ void individual::state_mover(params theta, double lam_bite)
 							} else {                            // Otherwise CYP2D6 low met might be a problem (e.g. PQ)
 								if (CYP2D6 == 0)
 								{
-									if (rgenunf(0.0, 1.0) < theta.PQ_treat_PQeff)
+									if (genunf(0.0, 1.0) < theta.PQ_treat_PQeff)
 									{
 										Hyp = 0;
 										PQ_proph = 1;
@@ -5320,7 +5318,7 @@ void individual::state_mover(params theta, double lam_bite)
 				ACT_new = 1;
 
 				I_LM = 0;
-				if (rgenunf(0.0, 1.0) < theta.treat_eff)
+				if (genunf(0.0, 1.0) < theta.treat_eff)
 				{
 					T = 1;
 				} else {
@@ -5343,7 +5341,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.I_D_out = lam_H_lag + theta.r_D;
 
-		if (exp(-t_step*theta.I_D_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.I_D_out) < genunf(0, 1))
 		{
 			theta.I_D_move[0] = theta.r_D / theta.I_D_out;              // Move to I_LM
 			theta.I_D_move[1] = lam_H_lag / theta.I_D_out;              // Move to D
@@ -5367,7 +5365,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5406,7 +5404,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.T_out = lam_H_lag + theta.r_T;
 
-		if (exp(-t_step*theta.T_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.T_out) < genunf(0, 1))
 		{
 			theta.T_move[0] = theta.r_T / theta.T_out;              // Move to P
 			theta.T_move[1] = lam_H_lag / theta.T_out;              // Move to T
@@ -5434,7 +5432,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5475,7 +5473,7 @@ void individual::state_mover(params theta, double lam_bite)
 	{
 		theta.P_out = lam_H_lag + theta.r_P;
 
-		if (exp(-t_step*theta.P_out) < rgenunf(0, 1))
+		if (exp(-t_step*theta.P_out) < genunf(0, 1))
 		{
 			theta.P_move[0] = theta.r_P / theta.P_out;              // Move to S
 			theta.P_move[1] = lam_H_lag / theta.P_out;              // Move to P
@@ -5503,7 +5501,7 @@ void individual::state_mover(params theta, double lam_bite)
 
 			if (CH_move == 1)
 			{
-				if (lam_bite_lag / lam_H_lag > rgenunf(0.0, 1.0))
+				if (lam_bite_lag / lam_H_lag > genunf(0.0, 1.0))
 				{
 					if (PQ_proph == 0)
 					{
@@ -5560,7 +5558,7 @@ void individual::ager(params theta)
 		Hyp = K_max;
 	}
 
-	if (1.0 - exp(-t_step*theta.gamma_L*Hyp) > rgenunf(0, 1))
+	if (1.0 - exp(-t_step*theta.gamma_L*Hyp) > genunf(0, 1))
 	{
 		Hyp = Hyp - 1;
 	}
@@ -5610,7 +5608,7 @@ void individual::ager(params theta)
 		{
 			if (preg_age == 1)
 			{
-				if (rgenunf(0.0, 1.0) < theta.P_preg)
+				if (genunf(0.0, 1.0) < theta.P_preg)
 				{
 					pregnant = 1;
 					preg_timer = 0.0;
@@ -5685,7 +5683,7 @@ void individual::intervention_updater(params theta)
 
 	if (LLIN == 1)
 	{
-		if (theta.P_LLIN_loss > rgenunf(0, 1))
+		if (theta.P_LLIN_loss > genunf(0, 1))
 		{
 			LLIN = 0;
 		}
