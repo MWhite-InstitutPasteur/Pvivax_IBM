@@ -24,6 +24,8 @@ run_simulation(
 
 \item{koliensis, }{A named list of parameters to override in the
 "koliensis_parameters.txt" file}
+
+\item{interventions, }{A named list of intervention parameters}
 }
 \description{
 parameterises and runs the model. A table with the simulation
