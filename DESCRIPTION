@@ -25,8 +25,13 @@ Authors@R: c(
 Description: C++ code for an individual-based model of Plasmodium vivax malaria transmission as first described in the article "Impact of expanding levels of malaria control interventions on Plasmodium vivax, a mathematical modelling study". 
 License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.3)
-LinkingTo: Rcpp
+LinkingTo:
+    Rcpp,
+    testthat
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0),
-    mockery
+    mockery,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

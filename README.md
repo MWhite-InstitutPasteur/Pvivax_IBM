@@ -43,23 +43,26 @@ output <- run_simulation()
 You can find the default paramters
 [here](https://github.com/mrc-ide/vivax/tree/master/inst/defaults).
 
-To override either the model, farauti, koliensis, punctulatis parameters buy
+To override either the model, farauti, koliensis, punctulatis parameters by
 passing named lists to the `run_simulation` function as below:
 
 ```R
 output <- run_simulation(model=list(EIR_equil=.1), koliensis=list(mu_P=.5, dry_seas=.2))
 ```
 
-## Plotting standard graphs (temporary)
+### Interventions
 
-To quickly explore the output you can plot some standard graphs with the
-following command. This is only available in RStudio.
+The available interventions are documented
+[here](https://github.com/mrc-ide/vivax/tree/master/R/interventions.R).
+
+To override interventions pass your named list of parameters to `run_simulation` function as below:
 
 ```R
-plot_outputs(output)
+output <- run_simulation(interventions = list(LLIN_years=c(1995, 1996), LLIN_cover=c(.6, .8)))
 ```
+## Plotting standard graphs
 
-It will open 5 pages in your plot window.
+You can plot standard graphs by following the `plot_graphs` vignette.
 
 ## Code organisation
 

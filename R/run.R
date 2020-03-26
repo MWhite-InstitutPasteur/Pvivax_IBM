@@ -13,6 +13,7 @@
 #'"punctulatus_parameters.txt" file
 #'@param koliensis, A named list of parameters to override in the
 #'"koliensis_parameters.txt" file
+#'@param interventions, A named list of intervention parameters
 #'@examples
 #'output <- run_simulation(model = list(end_time = 1991, bb = 2), farauti=list(mu_M = .5))
 #'dim(output)
@@ -21,37 +22,40 @@ run_simulation <- function(
   model = NULL,
   farauti = NULL,
   punctulatus = NULL,
-  koliensis = NULL
+  koliensis = NULL,
+  interventions = list()
   ) {
   basedir <- system.file('defaults', package = 'vivax', mustWork = TRUE)
-  param_specs <- list(
+  model_param_specs <- list(
     list(name='model_parameters.txt', overrides=model),
     list(name='farauti_parameters.txt', overrides=farauti),
     list(name='punctulatus_parameters.txt', overrides=punctulatus),
-    list(name='koliensis_parameters.txt', overrides=koliensis),
-    list(name='intervention_coverage.txt', overrides=NULL)
+    list(name='koliensis_parameters.txt', overrides=koliensis)
   )
 
-  tables <- lapply(param_specs, function(spec) {
+  tables <- lapply(model_param_specs, function(spec) {
     fixup(
       read.table(file.path(basedir, spec$name)),
       spec$overrides
     )
   })
 
-  paths <- vapply(tables, function(table) {
+  model_param_paths <- vapply(tables, function(table) {
     path <- tempfile()
     write.table(table, path, row.names = FALSE, col.names = FALSE)
     path
   }, character(1))
 
+  intervention_param_path <- tempfile()
+  generate_intervention_file(interventions, intervention_param_path)
+
   out_path <- tempfile()
   run_simulation_from_path(
-    paths[[1]],
-    paths[[2]],
-    paths[[3]],
-    paths[[4]],
-    paths[[5]],
+    model_param_paths[[1]],
+    model_param_paths[[2]],
+    model_param_paths[[3]],
+    model_param_paths[[4]],
+    intervention_param_path,
     out_path
   )
   present_output(read.table(out_path))

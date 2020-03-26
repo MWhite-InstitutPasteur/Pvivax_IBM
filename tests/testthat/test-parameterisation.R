@@ -4,7 +4,7 @@ test_that("default parameters set up correctly", {
   m2 <- mockery::mock()
   with_mock(
     `vivax::run_simulation_from_path` = function(...) {
-      write.table(table(seq(10)), list(...)[[6]])
+      fake_model_output(list(...)[[6]])
       m(...)
     },
     `vivax::present_output` = m2,
@@ -28,7 +28,7 @@ test_that("default parameters set up correctly", {
     read.table(args[[1]][[4]])
   )
   expect_mapequal(
-    read.table(file.path(defaultdir, 'intervention_coverage.txt')),
+    as.data.frame(matrix(-1, nrow=1, ncol=24)),
     read.table(args[[1]][[5]])
   )
 })
@@ -39,7 +39,7 @@ test_that("you can override parameters", {
   m2 <- mockery::mock()
   with_mock(
     `vivax::run_simulation_from_path` = function(...) {
-      write.table(table(seq(10)), list(...)[[6]])
+      fake_model_output(list(...)[[6]])
       m(...)
     },
     `vivax::present_output` = m2,
@@ -71,13 +71,53 @@ test_that("you can override parameters", {
 test_that("overriding kindly lets you know if you've made a typo", {
   m <- mockery::mock()
   expect_error(
-    with_mock(
-      `vivax::run_simulation_from_path` = function(...) {
-        write.table(table(seq(10)), list(...)[[6]])
-        m(...)
-      },
-      run_simulation(model = list(bbb = 2), farauti=list(mu_M = .5))
-    ),
+    run_simulation(model = list(bbb = 2), farauti=list(mu_M = .5)),
     'unknown parameter bbb'
   )
 })
+
+test_that("you can model bed nets", {
+  path <- tempfile()
+  generate_intervention_file(
+    list(
+      LLIN_years = c(1995, 1996),
+      LLIN_cover = c(.6, .9)
+    ),
+    path
+  )
+  expected <- as.data.frame(matrix(c(
+    1995, .6, rep(-1, 22),
+    1996, .9, rep(-1, 22),
+    rep(-1, 24)
+  ), nrow=3, ncol=24, byrow=TRUE))
+  expect_mapequal(expected, read.table(path))
+})
+
+test_that("intervention file generator tells you if your vectors don't match up", {
+  path <- tempfile()
+  expect_error(
+    generate_intervention_file(
+      list(
+        LLIN_years = c(1995, 1996),
+        LLIN_cover = c(.6)
+      ),
+      path
+    ),
+    'LLIN vectors are not the same size'
+  )
+})
+
+test_that("intervention file generator errors on bad coverage", {
+  path <- tempfile()
+  expect_error(
+    generate_intervention_file(
+      list(
+        LLIN_years = c(1995, 1996),
+        LLIN_cover = c(.6, 30)
+      ),
+      path
+    ),
+    'LLIN_cover values must be between 0 and 1'
+  )
+})
+
