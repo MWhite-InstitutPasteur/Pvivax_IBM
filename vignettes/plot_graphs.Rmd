@@ -97,7 +97,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
   plot(x=output$time/365, y=output$PvPR_PCR/output$N_pop, type='l', ylim=c(0,0.6),
   xlab="time (years)", ylab="prevalence", main="Prevalence by PCR")
 
-  points(x=output$time/365, y=output$PvPR_PCR_U10/output$N_pop_U10, type='l', col="orange")
+  points(x=output$time/365, y=output$PvPR_PCR_2_10/output$N_pop_2_10, type='l', col="orange")
 
   points(x=output$time/365, y=output$PvPR_PCR_U5/output$N_pop_U5, type='l', col="red")
 
@@ -108,7 +108,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
   plot(x=output$time/365, y=output$PvPR_LM/output$N_pop, type='l', ylim=c(0,0.2),
   xlab="time (years)", ylab="prevalence", main="Prevalence by LM")
 
-  points(x=output$time/365, y=output$PvPR_LM_U10/output$N_pop_U10, type='l', col="orange")
+  points(x=output$time/365, y=output$PvPR_LM_2_10/output$N_pop_2_10, type='l', col="orange")
 
   points(x=output$time/365, y=output$PvPR_LM_U5/output$N_pop_U5, type='l', col="red")
 
@@ -119,7 +119,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
   plot(x=output$time/365, y=output$Pv_clin/output$N_pop, type='l', ylim=c(0,0.05),
   xlab="time (years)", ylab="prevalence", main="Prevalence of clinical disease")
 
-  points(x=output$time/365, y=output$Pv_clin_U10/output$N_pop_U10, type='l', col="orange")
+  points(x=output$time/365, y=output$Pv_clin_2_10/output$N_pop_2_10, type='l', col="orange")
 
   points(x=output$time/365, y=output$Pv_clin_U5/output$N_pop_U5, type='l', col="red")
 
@@ -139,7 +139,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
   plot(x=output$time/365, y=output$PvHR/output$N_pop, type='l', ylim=c(0,1),
   xlab="time (years)", ylab="prevalence", main="Prevalence of hypnozoites")
 
-  points(x=output$time/365, y=output$PvHR_U10/output$N_pop_U10, type='l', col="orange")
+  points(x=output$time/365, y=output$PvHR_2_10/output$N_pop_2_10, type='l', col="orange")
 
   points(x=output$time/365, y=output$PvHR_U5/output$N_pop_U5, type='l', col="red")
 
@@ -150,7 +150,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
   plot(x=output$time/365, y=output$PvHR_batch/output$N_pop, type='l', ylim=c(0,max(output$PvHR_batch/output$N_pop)),
   xlab="time (years)", ylab="", main="Mean number of hypnozoite batches per person")
 
-  points(x=output$time/365, y=output$PvHR_batch_U10/output$N_pop_U10, type='l', col="orange")
+  points(x=output$time/365, y=output$PvHR_batch_2_10/output$N_pop_2_10, type='l', col="orange")
 
   points(x=output$time/365, y=output$PvHR_batch_U5/output$N_pop_U5, type='l', col="red")
 ```

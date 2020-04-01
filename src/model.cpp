@@ -594,7 +594,7 @@ struct population
 
 	int prev_all[11];   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ} 
 	int prev_U5[11];    // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ} 
-	int prev_U10[11];   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ} 
+	int prev_2_10[11];   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ}
 
 	double EIR_t;       // EIR
 	int LLIN_cov_t;     // LLIN coverage
@@ -740,7 +740,7 @@ struct simulation
 
 	vector<vector<int>> prev_all;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
 	vector<vector<int>> prev_U5;    // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
-	vector<vector<int>> prev_U10;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T} 
+	vector<vector<int>> prev_2_10;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T}
 
 
 	/////////////////////////////////////////
@@ -1508,10 +1508,10 @@ int run_simulation(
 		PNG_sim.prev_U5[i].resize(11);
 	}
 
-	PNG_sim.prev_U10.resize(N_time);
+	PNG_sim.prev_2_10.resize(N_time);
 	for (int i = 0; i<N_time; i++)
 	{
-		PNG_sim.prev_U10[i].resize(11);
+		PNG_sim.prev_2_10[i].resize(11);
 	}
 
 	PNG_sim.EIR_t.resize(N_time);
@@ -1580,7 +1580,7 @@ int run_simulation(
 
 		for (int k = 0; k<10; k++)
 		{
-			output_Stream << PNG_sim.prev_U10[i][k] << "\t";
+			output_Stream << PNG_sim.prev_2_10[i][k] << "\t";
 		}
 
 		output_Stream << PNG_sim.EIR_t[i] << "\t";
@@ -2196,7 +2196,7 @@ void POP_summary(population* POP, simulation* SIM)
 	{
 		POP->prev_all[k] = 0.0;
 		POP->prev_U5[k] = 0.0;
-		POP->prev_U10[k] = 0.0;
+		POP->prev_2_10[k] = 0.0;
 	}
 
 
@@ -2279,35 +2279,35 @@ void POP_summary(population* POP, simulation* SIM)
 
 		//////////////////////////////////////////////
 		//////////////////////////////////////////////
-		// Summary - under 10's
+		// Summary - between 2 and 10's
 
-		if (POP->people[n].age < 3650.0)
+		if (POP->people[n].age < 730.0 && POP->people[n].age < 3650.0)
 		{
 			////////////////////////////////////////
 			// Prevalence
 
-			POP->prev_U10[0] = POP->prev_U10[0] + 1;                                                            // Numbers - denominator
-			POP->prev_U10[1] = POP->prev_U10[1] + POP->people[n].I_PCR + POP->people[n].I_LM
+			POP->prev_2_10[0] = POP->prev_2_10[0] + 1;                                                            // Numbers - denominator
+			POP->prev_2_10[1] = POP->prev_2_10[1] + POP->people[n].I_PCR + POP->people[n].I_LM
 				                                + POP->people[n].I_D + POP->people[n].T;                          // PCR detectable infections
-			POP->prev_U10[2] = POP->prev_U10[2] + POP->people[n].I_LM + POP->people[n].I_D + POP->people[n].T;    // LM detectable infections
-			POP->prev_U10[3] = POP->prev_U10[3] + POP->people[n].I_D + POP->people[n].T;                          // Clinical episodes
+			POP->prev_2_10[2] = POP->prev_2_10[2] + POP->people[n].I_LM + POP->people[n].I_D + POP->people[n].T;    // LM detectable infections
+			POP->prev_2_10[3] = POP->prev_2_10[3] + POP->people[n].I_D + POP->people[n].T;                          // Clinical episodes
 
 			if (POP->people[n].Hyp > 0)
 			{
-				POP->prev_U10[4] = POP->prev_U10[4] + 1;                     // Hypnozoite positive
+				POP->prev_2_10[4] = POP->prev_2_10[4] + 1;                     // Hypnozoite positive
 
-				POP->prev_U10[5] = POP->prev_U10[5] + POP->people[n].Hyp;    // Number of batches of hypnozoites
+				POP->prev_2_10[5] = POP->prev_2_10[5] + POP->people[n].Hyp;    // Number of batches of hypnozoites
 			}
 
 
 			////////////////////////////////////////
 			// Incidence
 
-			POP->prev_U10[6]  = POP->prev_U10[6]  + POP->people[n].I_PCR_new;
-			POP->prev_U10[7]  = POP->prev_U10[7]  + POP->people[n].I_LM_new;
-			POP->prev_U10[8]  = POP->prev_U10[8]  + POP->people[n].I_D_new;
-			POP->prev_U10[9]  = POP->prev_U10[9]  + POP->people[n].ACT_new;
-			POP->prev_U10[10] = POP->prev_U10[10] + POP->people[n].PQ_new;
+			POP->prev_2_10[6]  = POP->prev_2_10[6]  + POP->people[n].I_PCR_new;
+			POP->prev_2_10[7]  = POP->prev_2_10[7]  + POP->people[n].I_LM_new;
+			POP->prev_2_10[8]  = POP->prev_2_10[8]  + POP->people[n].I_D_new;
+			POP->prev_2_10[9]  = POP->prev_2_10[9]  + POP->people[n].ACT_new;
+			POP->prev_2_10[10] = POP->prev_2_10[10] + POP->people[n].PQ_new;
 		}
 	}
 
@@ -2397,7 +2397,7 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 		{
 			SIM->prev_all[i][k] = POP->prev_all[k];
 			SIM->prev_U5[i][k]  = POP->prev_U5[k];
-			SIM->prev_U10[i][k] = POP->prev_U10[k];
+			SIM->prev_2_10[i][k] = POP->prev_2_10[k];
 		}
 
 
