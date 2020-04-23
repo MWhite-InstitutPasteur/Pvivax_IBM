@@ -724,19 +724,17 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
-int run_simulation(
+Rcpp::DataFrame run_simulation(
   const char* parameter_File,
   const char** mosquito_File,
-  const char* coverage_File,
-  const char* output_File
+  const char* coverage_File
 );
-int run_simulation_from_path(
+Rcpp::DataFrame run_simulation_from_path(
     string model_param_path,
     string fara_param_path,
     string punc_param_path,
     string koli_param_path,
-    string coverage_param_path,
-    string output_path
+    string coverage_param_path
 );
 
 

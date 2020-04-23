@@ -59,6 +59,7 @@
 #include <time.h>
 #include "rng.h"
 #include "model.h"
+#include "output.h"
 #include <omp.h>
 #include <vector>
 #include <algorithm>
@@ -89,13 +90,12 @@ using namespace std;
 //' @param output_path, the path to write the results to
 //' @export
 // [[Rcpp::export]]
-int run_simulation_from_path(
+Rcpp::DataFrame run_simulation_from_path(
     std::string model_param_path,
     std::string fara_param_path,
     std::string punc_param_path,
     std::string koli_param_path,
-    std::string coverage_param_path,
-    std::string output_path
+    std::string coverage_param_path
 ) {
 
   const char* mosquito_File[N_spec_max] = {
@@ -107,16 +107,14 @@ int run_simulation_from_path(
   return run_simulation(
     model_param_path.c_str(),
     mosquito_File,
-    coverage_param_path.c_str(),
-    output_path.c_str()
+    coverage_param_path.c_str()
   );
 }
 
-int run_simulation(
+Rcpp::DataFrame run_simulation(
   const char* parameter_File,
   const char** mosquito_File,
-  const char* coverage_File,
-  const char* output_File
+  const char* coverage_File
 ) {
 
 	clock_t clock_time;
@@ -798,73 +796,11 @@ int run_simulation(
 	Rcpp::Rcout << endl;
 
 
-	//////////////////////////////////////////////////////
-	//                                                  //
-	// 1.11. Output to file                             //
-	//                                                  //
-	////////////////////////////////////////////////////// 
-
-	Rcpp::Rcout << "Start writing output to file......" << endl;
-	Rcpp::Rcout << endl;
-
-	ofstream output_Stream(output_File);
-
-	for (int i = 0; i<N_time; i++)
-	{
-		output_Stream << PNG_sim.t_vec[i] << "\t";
-
-		for (int k = 0; k<N_H_comp; k++)
-		{
-			output_Stream << PNG_sim.yH_t[i][k] << "\t";
-		}
-
-		for (int g = 0; g < N_spec; g++)
-		{
-			for (int k = 0; k < N_M_comp; k++)
-			{
-				output_Stream << PNG_sim.yM_t[i][g][k] << "\t";
-			}
-		}
-
-		for (int k = 0; k<10; k++)
-		{
-			output_Stream << PNG_sim.prev_all[i][k] << "\t";
-		}
-
-		for (int k = 0; k<10; k++)
-		{
-			output_Stream << PNG_sim.prev_U5[i][k] << "\t";
-		}
-
-		for (int k = 0; k<10; k++)
-		{
-			output_Stream << PNG_sim.prev_2_10[i][k] << "\t";
-		}
-
-		output_Stream << PNG_sim.EIR_t[i] << "\t";
-		output_Stream << PNG_sim.LLIN_cov_t[i] << "\t";
-		output_Stream << PNG_sim.IRS_cov_t[i] << "\t";
-		output_Stream << PNG_sim.ACT_treat_t[i] << "\t";
-		output_Stream << PNG_sim.PQ_treat_t[i] << "\t";
-		output_Stream << PNG_sim.pregnant_t[i] << "\t";
-
-		output_Stream << PNG_sim.A_par_mean_t[i] << "\t";
-		output_Stream << PNG_sim.A_clin_mean_t[i] << "\t";
-
-		output_Stream << endl;
-	}
-
-	output_Stream.close();
-
-
-	Rcpp::Rcout << "Output successfully written to file......" << endl;
-	Rcpp::Rcout << endl;
-
 
 	Rcpp::Rcout << "Time taken: " << ( (double) clock() - clock_time)/( (double) CLOCKS_PER_SEC ) << " seconds" << endl;
 
 
-	return 0;
+	return create_output_frame(PNG_sim);
 }
 
 

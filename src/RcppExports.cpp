@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // run_simulation_from_path
-int run_simulation_from_path(std::string model_param_path, std::string fara_param_path, std::string punc_param_path, std::string koli_param_path, std::string coverage_param_path, std::string output_path);
-RcppExport SEXP _vivax_run_simulation_from_path(SEXP model_param_pathSEXP, SEXP fara_param_pathSEXP, SEXP punc_param_pathSEXP, SEXP koli_param_pathSEXP, SEXP coverage_param_pathSEXP, SEXP output_pathSEXP) {
+Rcpp::DataFrame run_simulation_from_path(std::string model_param_path, std::string fara_param_path, std::string punc_param_path, std::string koli_param_path, std::string coverage_param_path);
+RcppExport SEXP _vivax_run_simulation_from_path(SEXP model_param_pathSEXP, SEXP fara_param_pathSEXP, SEXP punc_param_pathSEXP, SEXP koli_param_pathSEXP, SEXP coverage_param_pathSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,8 +16,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type punc_param_path(punc_param_pathSEXP);
     Rcpp::traits::input_parameter< std::string >::type koli_param_path(koli_param_pathSEXP);
     Rcpp::traits::input_parameter< std::string >::type coverage_param_path(coverage_param_pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type output_path(output_pathSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_simulation_from_path(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path));
+    rcpp_result_gen = Rcpp::wrap(run_simulation_from_path(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -25,7 +24,7 @@ END_RCPP
 RcppExport SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_vivax_run_simulation_from_path", (DL_FUNC) &_vivax_run_simulation_from_path, 6},
+    {"_vivax_run_simulation_from_path", (DL_FUNC) &_vivax_run_simulation_from_path, 5},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
     {NULL, NULL, 0}
 };

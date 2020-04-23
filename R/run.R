@@ -55,10 +55,8 @@ run_simulation <- function(
     model_param_paths[[2]],
     model_param_paths[[3]],
     model_param_paths[[4]],
-    intervention_param_path,
-    out_path
+    intervention_param_path
   )
-  present_output(read.table(out_path))
 }
 
 #'@title Fixup a data table
