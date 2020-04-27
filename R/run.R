@@ -23,7 +23,11 @@ run_simulation <- function(
   farauti = NULL,
   punctulatus = NULL,
   koliensis = NULL,
-  interventions = list()
+  interventions = list(),
+  prev_min_ages = c(0, 5),
+  prev_max_ages = c(5, 15),
+  incidence_min_ages = c(0, 2),
+  incidence_max_ages = c(2, 10)
   ) {
   basedir <- system.file('defaults', package = 'vivax', mustWork = TRUE)
   model_param_specs <- list(
@@ -32,6 +36,23 @@ run_simulation <- function(
     list(name='punctulatus_parameters.txt', overrides=punctulatus),
     list(name='koliensis_parameters.txt', overrides=koliensis)
   )
+
+  if (!all(vapply(c(
+      prev_min_ages,
+      prev_max_ages,
+      incidence_min_ages,
+      incidence_max_ages
+    ), is.numeric, logical(1)))) {
+    stop('summary ages must be numeric')
+  }
+
+  if (!length(prev_min_ages) == length(prev_max_ages)) {
+    stop('prevalence ages should match up')
+  }
+
+  if (!length(incidence_min_ages) == length(incidence_max_ages)) {
+    stop('incidence ages should match up')
+  }
 
   tables <- lapply(model_param_specs, function(spec) {
     fixup(
@@ -55,7 +76,11 @@ run_simulation <- function(
     model_param_paths[[2]],
     model_param_paths[[3]],
     model_param_paths[[4]],
-    intervention_param_path
+    intervention_param_path,
+    prev_max_ages,
+    prev_min_ages,
+    incidence_max_ages,
+    incidence_min_ages
   )
 }
 

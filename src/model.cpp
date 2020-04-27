@@ -95,7 +95,11 @@ Rcpp::DataFrame run_simulation_from_path(
     std::string fara_param_path,
     std::string punc_param_path,
     std::string koli_param_path,
-    std::string coverage_param_path
+    std::string coverage_param_path,
+    std::vector<int> prev_max_ages,
+    std::vector<int> prev_min_ages,
+    std::vector<int> incidence_max_ages,
+    std::vector<int> incidence_min_ages
 ) {
 
   const char* mosquito_File[N_spec_max] = {
@@ -107,14 +111,22 @@ Rcpp::DataFrame run_simulation_from_path(
   return run_simulation(
     model_param_path.c_str(),
     mosquito_File,
-    coverage_param_path.c_str()
+    coverage_param_path.c_str(),
+    prev_max_ages,
+    prev_min_ages,
+    incidence_max_ages,
+    incidence_min_ages
   );
 }
 
 Rcpp::DataFrame run_simulation(
-  const char* parameter_File,
-  const char** mosquito_File,
-  const char* coverage_File
+    const char* parameter_File,
+    const char** mosquito_File,
+    const char* coverage_File,
+    std::vector<int> prev_max_ages,
+    std::vector<int> prev_min_ages,
+    std::vector<int> incidence_max_ages,
+    std::vector<int> incidence_min_ages
 ) {
 
 	clock_t clock_time;
@@ -138,6 +150,20 @@ Rcpp::DataFrame run_simulation(
 	// 1.3. Read in model parameters          //
 	//                                        //
 	////////////////////////////////////////////
+
+	//set up age groups for summarisation
+	PNG_pop.prev_groups = { std::pair<int,int>(-1, -1) };
+	PNG_pop.incidence_groups = { std::pair<int,int>(-1, -1) };
+	for (auto g = 0u; g < prev_max_ages.size(); ++g) {
+	    PNG_pop.prev_groups.push_back(
+	        std::pair<int, int>(prev_min_ages[g], prev_max_ages[g])
+        );
+	}
+    for (auto g = 0u; g < incidence_max_ages.size(); ++g) {
+	    PNG_pop.incidence_groups.push_back(
+	        std::pair<int, int>(incidence_min_ages[g], incidence_max_ages[g])
+        );
+	}
 
 	Rcpp::Rcout << "Reading in parameter file............." << endl;
 	Rcpp::Rcout << endl;
@@ -752,23 +778,8 @@ Rcpp::DataFrame run_simulation(
 	}
 
 
-	PNG_sim.prev_all.resize(N_time);
-	for (int i = 0; i<N_time; i++)
-	{
-		PNG_sim.prev_all[i].resize(11);
-	}
-
-	PNG_sim.prev_U5.resize(N_time);
-	for (int i = 0; i<N_time; i++)
-	{
-		PNG_sim.prev_U5[i].resize(11);
-	}
-
-	PNG_sim.prev_2_10.resize(N_time);
-	for (int i = 0; i<N_time; i++)
-	{
-		PNG_sim.prev_2_10[i].resize(11);
-	}
+	PNG_sim.prev_summaries.resize(N_time);
+	PNG_sim.incidence_summaries.resize(N_time);
 
 	PNG_sim.EIR_t.resize(N_time);
 
@@ -1379,149 +1390,108 @@ void human_step(params* theta, population* POP)
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-void POP_summary(population* POP, simulation* SIM)
+void POP_summary(population* pop, simulation* SIM)
 {
 	for (int k = 0; k<N_H_comp; k++)
 	{
-		POP->yH[k] = 0.0;
+		pop->yH[k] = 0.0;
 	}
 
-	for (int k = 0; k<10; k++)
-	{
-		POP->prev_all[k] = 0.0;
-		POP->prev_U5[k] = 0.0;
-		POP->prev_2_10[k] = 0.0;
+    pop->prev_summaries.resize(pop->prev_groups.size());
+	for (auto g = 0u; g < pop->prev_summaries.size(); ++g) {
+	    pop->prev_summaries[g].resize(6);
+        for (auto i = 0u; i < pop->prev_summaries[g].size(); ++i) {
+            pop->prev_summaries[g][i] = 0.0;
+		}
 	}
 
+    pop->incidence_summaries.resize(pop->incidence_groups.size());
+	for (auto g = 0u; g < pop->incidence_summaries.size(); ++g) {
+	    pop->incidence_summaries[g].resize(5);
+        for (auto i = 0u; i < pop->incidence_summaries[g].size(); ++i) {
+            pop->incidence_summaries[g][i] = 0.0;
+		}
+	}
 
-	for (int n = 0; n<POP->N_pop; n++)
+	for (int n = 0; n<pop->N_pop; n++)
 	{
 		////////////////////////////////////////
 		// Numbers in each compartment
 
-		POP->yH[0] = POP->yH[0] + POP->people[n].S;
-		POP->yH[1] = POP->yH[1] + POP->people[n].I_PCR;
-		POP->yH[2] = POP->yH[2] + POP->people[n].I_LM;
-		POP->yH[3] = POP->yH[3] + POP->people[n].I_D;
-		POP->yH[4] = POP->yH[4] + POP->people[n].T;
-		POP->yH[5] = POP->yH[5] + POP->people[n].P;
+		pop->yH[0] += pop->people[n].S;
+		pop->yH[1] += pop->people[n].I_PCR;
+		pop->yH[2] += pop->people[n].I_LM;
+		pop->yH[3] += pop->people[n].I_D;
+		pop->yH[4] += pop->people[n].T;
+		pop->yH[5] += pop->people[n].P;
 
+
+        auto age_days = pop->people[n].age;
 
 		//////////////////////////////////////////////
 		//////////////////////////////////////////////
-		// Summary - full population
+		// Summary - disaggregated by age
+		for(auto i = 0u; i < pop->prev_groups.size(); ++i) {
+		    auto in_group = (
+		        (age_days >= (pop->prev_groups[i].first * 365)) &&
+		        (age_days < (pop->prev_groups[i].second * 365))
+            );
+		    auto all_group = (pop->prev_groups[i].first == pop->prev_groups[i].second) &&
+		        (pop->prev_groups[i].first == -1);
+            if (in_group || all_group) {
+                ////////////////////////////////////////
+                // Prevalence
 
-		////////////////////////////////////////
-		// Prevalence
+                pop->prev_summaries[i][0] += 1;                                                                // Numbers - denominator
+                pop->prev_summaries[i][1] += pop->people[n].I_PCR + pop->people[n].I_LM
+                                      + pop->people[n].I_D + pop->people[n].T;                              // PCR detectable infections
+                pop->prev_summaries[i][2] += pop->people[n].I_LM + pop->people[n].I_D + pop->people[n].T;        // LM detectable infections
+                pop->prev_summaries[i][3] += pop->people[n].I_D + pop->people[n].T;                              // Clinical episodes
 
-		POP->prev_all[0] = POP->prev_all[0] + 1;                                                                        // Numbers - denominator
-		POP->prev_all[1] = POP->prev_all[1] + POP->people[n].I_PCR + POP->people[n].I_LM +
-			                                + POP->people[n].I_D + POP->people[n].T;                                      // PCR detectable infections
-		POP->prev_all[2] = POP->prev_all[2] + POP->people[n].I_LM + POP->people[n].I_D + POP->people[n].T;                // LM detectable infections
-		POP->prev_all[3] = POP->prev_all[3] + POP->people[n].I_D + POP->people[n].T;                                      // Clinical episodes
-
-		if (POP->people[n].Hyp > 0)
-		{
-			POP->prev_all[4] = POP->prev_all[4] + 1;                     // Hypnozoite positive
-
-			POP->prev_all[5] = POP->prev_all[5] + POP->people[n].Hyp;    // Number of batches of hypnozoites
+                if (pop->people[n].Hyp > 0)
+                {
+                    pop->prev_summaries[i][4] += 1;                     // Hypnozoite positive
+                    pop->prev_summaries[i][5] += pop->people[n].Hyp;    // Number of batches of hypnozoites
+                }
+            }
 		}
 
-
-		////////////////////////////////////////
-		// Incidence
-
-		POP->prev_all[6]  = POP->prev_all[6]  + POP->people[n].I_PCR_new;
-		POP->prev_all[7]  = POP->prev_all[7]  + POP->people[n].I_LM_new;
-		POP->prev_all[8]  = POP->prev_all[8]  + POP->people[n].I_D_new;
-		POP->prev_all[9]  = POP->prev_all[9]  + POP->people[n].ACT_new;
-		POP->prev_all[10] = POP->prev_all[10] + POP->people[n].PQ_new;
-
-
-		//////////////////////////////////////////////
-		//////////////////////////////////////////////
-		// Summary - under 5's
-
-		if (POP->people[n].age < 1825.0)
-		{
-			////////////////////////////////////////
-			// Prevalence
-
-			POP->prev_U5[0] = POP->prev_U5[0] + 1;                                                                // Numbers - denominator
-			POP->prev_U5[1] = POP->prev_U5[1] + POP->people[n].I_PCR + POP->people[n].I_LM
-				                              + POP->people[n].I_D + POP->people[n].T;                              // PCR detectable infections
-			POP->prev_U5[2] = POP->prev_U5[2] + POP->people[n].I_LM + POP->people[n].I_D + POP->people[n].T;        // LM detectable infections
-			POP->prev_U5[3] = POP->prev_U5[3] + POP->people[n].I_D + POP->people[n].T;                              // Clinical episodes
-
-			if (POP->people[n].Hyp > 0)
-			{
-				POP->prev_U5[4] = POP->prev_U5[4] + 1;                     // Hypnozoite positive
-
-				POP->prev_U5[5] = POP->prev_U5[5] + POP->people[n].Hyp;    // Number of batches of hypnozoites
-			}
-
-
-			////////////////////////////////////////
-			// Incidence
-
-			POP->prev_U5[6]  = POP->prev_U5[6]  + POP->people[n].I_PCR_new;
-			POP->prev_U5[7]  = POP->prev_U5[7]  + POP->people[n].I_LM_new;
-			POP->prev_U5[8]  = POP->prev_U5[8]  + POP->people[n].I_D_new;
-			POP->prev_U5[9]  = POP->prev_U5[9]  + POP->people[n].ACT_new;
-			POP->prev_U5[10] = POP->prev_U5[10] + POP->people[n].PQ_new;
-		}
-
-		//////////////////////////////////////////////
-		//////////////////////////////////////////////
-		// Summary - between 2 and 10's
-
-		if (POP->people[n].age > 730.0 && POP->people[n].age < 3650.0)
-		{
-			////////////////////////////////////////
-			// Prevalence
-
-			POP->prev_2_10[0] = POP->prev_2_10[0] + 1;                                                            // Numbers - denominator
-			POP->prev_2_10[1] = POP->prev_2_10[1] + POP->people[n].I_PCR + POP->people[n].I_LM
-				                                + POP->people[n].I_D + POP->people[n].T;                          // PCR detectable infections
-			POP->prev_2_10[2] = POP->prev_2_10[2] + POP->people[n].I_LM + POP->people[n].I_D + POP->people[n].T;    // LM detectable infections
-			POP->prev_2_10[3] = POP->prev_2_10[3] + POP->people[n].I_D + POP->people[n].T;                          // Clinical episodes
-
-			if (POP->people[n].Hyp > 0)
-			{
-				POP->prev_2_10[4] = POP->prev_2_10[4] + 1;                     // Hypnozoite positive
-
-				POP->prev_2_10[5] = POP->prev_2_10[5] + POP->people[n].Hyp;    // Number of batches of hypnozoites
-			}
-
-
-			////////////////////////////////////////
-			// Incidence
-
-			POP->prev_2_10[6]  = POP->prev_2_10[6]  + POP->people[n].I_PCR_new;
-			POP->prev_2_10[7]  = POP->prev_2_10[7]  + POP->people[n].I_LM_new;
-			POP->prev_2_10[8]  = POP->prev_2_10[8]  + POP->people[n].I_D_new;
-			POP->prev_2_10[9]  = POP->prev_2_10[9]  + POP->people[n].ACT_new;
-			POP->prev_2_10[10] = POP->prev_2_10[10] + POP->people[n].PQ_new;
-		}
+		for(auto i = 0u; i < pop->incidence_groups.size(); ++i) {
+		    auto in_group = (
+		        (age_days >= (pop->incidence_groups[i].first * 365)) &&
+		        (age_days < (pop->incidence_groups[i].second * 365))
+            );
+		    auto all_group = (pop->incidence_groups[i].first == pop->incidence_groups[i].second) &&
+		        (pop->incidence_groups[i].first == -1);
+            if (in_group || all_group) {
+                ////////////////////////////////////////
+                // Incidence
+                pop->incidence_summaries[i][0] += pop->people[n].I_PCR_new;
+                pop->incidence_summaries[i][0] += pop->people[n].I_LM_new;
+                pop->incidence_summaries[i][0] += pop->people[n].I_D_new;
+                pop->incidence_summaries[i][0] += pop->people[n].ACT_new;
+                pop->incidence_summaries[i][0] += pop->people[n].PQ_new;
+            }
+        }
 	}
 
 
 	//////////////////////////////
 	// Intervention coverage
 
-	POP->LLIN_cov_t = 0;
-	POP->IRS_cov_t = 0;
-	POP->ACT_treat_t = 0;
-	POP->PQ_treat_t = 0;
-	POP->pregnant_t = 0;
+	pop->LLIN_cov_t = 0;
+	pop->IRS_cov_t = 0;
+	pop->ACT_treat_t = 0;
+	pop->PQ_treat_t = 0;
+	pop->pregnant_t = 0;
 
-	for (int n = 0; n<POP->N_pop; n++)
+	for (int n = 0; n<pop->N_pop; n++)
 	{
-		POP->LLIN_cov_t  = POP->LLIN_cov_t  + POP->people[n].LLIN;
-		POP->IRS_cov_t   = POP->IRS_cov_t   + POP->people[n].IRS;
-		POP->ACT_treat_t = POP->ACT_treat_t + POP->people[n].ACT_new;
-		POP->PQ_treat_t  = POP->PQ_treat_t + POP->people[n].PQ_new;
-		POP->pregnant_t  = POP->pregnant_t  + POP->people[n].pregnant;
+		pop->LLIN_cov_t  = pop->LLIN_cov_t  + pop->people[n].LLIN;
+		pop->IRS_cov_t   = pop->IRS_cov_t   + pop->people[n].IRS;
+		pop->ACT_treat_t = pop->ACT_treat_t + pop->people[n].ACT_new;
+		pop->PQ_treat_t  = pop->PQ_treat_t + pop->people[n].PQ_new;
+		pop->pregnant_t  = pop->pregnant_t  + pop->people[n].pregnant;
 	}
 
 
@@ -1530,14 +1500,14 @@ void POP_summary(population* POP, simulation* SIM)
 
 	double A_par_mean = 0.0, A_clin_mean = 0.0;
 
-	for (int n = 0; n<POP->N_pop; n++)
+	for (int n = 0; n<pop->N_pop; n++)
 	{
-		A_par_mean = A_par_mean + POP->people[n].A_par;
-		A_clin_mean = A_clin_mean + POP->people[n].A_clin;
+		A_par_mean = A_par_mean + pop->people[n].A_par;
+		A_clin_mean = A_clin_mean + pop->people[n].A_clin;
 	}
 
-	POP->A_par_mean_t = A_par_mean / ((double)POP->N_pop);
-	POP->A_clin_mean_t = A_clin_mean / ((double)POP->N_pop);
+	pop->A_par_mean_t = A_par_mean / ((double)pop->N_pop);
+	pop->A_clin_mean_t = A_clin_mean / ((double)pop->N_pop);
 }
 
 
@@ -1587,13 +1557,8 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 			}
 		}
 
-		for (int k = 0; k<11; k++)
-		{
-			SIM->prev_all[i][k] = POP->prev_all[k];
-			SIM->prev_U5[i][k]  = POP->prev_U5[k];
-			SIM->prev_2_10[i][k] = POP->prev_2_10[k];
-		}
-
+		SIM->prev_summaries[i] = POP->prev_summaries;
+		SIM->incidence_summaries[i] = POP->incidence_summaries;
 
 		SIM->LLIN_cov_t[i]  = POP->LLIN_cov_t;
 		SIM->IRS_cov_t[i]   = POP->IRS_cov_t;

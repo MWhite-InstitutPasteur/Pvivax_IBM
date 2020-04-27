@@ -42,12 +42,12 @@ Rcpp::DataFrame create_output_frame(const simulation& sim) {
     };
 
     for (auto i = 0u; i < mosquito_varieties.size(); ++i) {
-        for (auto j = 0u; j < mosquito_states.size(); ++j) {
+        for (auto prev_type = 0u; prev_type < mosquito_states.size(); ++prev_type) {
             auto column = std::vector<double>();
             std::stringstream colname;
-            colname << mosquito_states[j] << "_M_"  << mosquito_varieties[i];
+            colname << mosquito_states[prev_type] << "_M_"  << mosquito_varieties[i];
             for (auto t = 0u; t < sim.yM_t.size(); ++t) {
-                column.push_back(sim.yM_t[t][i][j]);
+                column.push_back(sim.yM_t[t][i][prev_type]);
             }
             columns.push_back(
                 column_descriptor(
@@ -58,40 +58,56 @@ Rcpp::DataFrame create_output_frame(const simulation& sim) {
         }
     }
 
-    const auto summary_types = std::vector<std::string>{
-        "N_pop",
-        "PvPR_PCR",
-        "PvPR_LM",
-        "Pv_clin",
-        "PvHR",
-        "PvHR_batch",
-        "new_PCR",
-        "new_LM",
-        "new_D",
-        "new_T"
+    const auto prev_types = std::vector<std::vector<std::string>>{
+        {
+            "N_pop",
+            "PvPR_PCR",
+            "PvPR_LM",
+            "Pv_clin",
+            "PvHR",
+            "PvHR_batch"
+        },
+        {
+            "new_PCR",
+            "new_LM",
+            "new_D",
+            "new_T"
+        }
     };
 
-
-    const auto suffix_vector_map = std::vector<suffix_vector_pair>{
-        suffix_vector_pair("", sim.prev_all),
-        suffix_vector_pair("_U5", sim.prev_U5),
-        suffix_vector_pair("_2_10", sim.prev_2_10)
+    const auto prev_groups = std::vector<std::vector<std::pair<int,int>>>{
+        sim.prev_groups,
+        sim.incidence_groups
     };
 
-    for (auto i = 0u; i < suffix_vector_map.size(); ++i) {
-        for (auto j = 0u; j < summary_types.size(); ++j) {
-            auto column = std::vector<double>();
-            std::stringstream colname;
-            colname << summary_types[j] << suffix_vector_map[i].first;
-            for (auto t = 0u; t < suffix_vector_map[i].second.size(); ++t) {
-                column.push_back(suffix_vector_map[i].second[t][j]);
+    const auto prev_summaries = std::vector<std::vector<std::vector<std::vector<int>>>>{
+        sim.prev_summaries,
+        sim.incidence_summaries
+    };
+
+    for (auto inc_prev = 0u; inc_prev < prev_groups.size(); ++inc_prev) {
+        for (auto prev_group = 0u; prev_group < prev_groups[inc_prev].size(); ++prev_group) {
+            for (auto prev_type = 0u; prev_type < prev_types[inc_prev].size(); ++prev_type) {
+                auto column = std::vector<double>();
+                std::stringstream colname;
+                if (prev_group == 0) {
+                    colname << prev_types[inc_prev][prev_type];
+                } else {
+                    colname << prev_types[inc_prev][prev_type];
+                    colname << '_' << prev_groups[inc_prev][prev_group].first;
+                    colname << '_' << prev_groups[inc_prev][prev_group].second;
+                }
+                const auto& summary = prev_summaries[inc_prev][prev_group];
+                for (auto t = 0u; t < summary.size(); ++t) {
+                    column.push_back(summary[t][prev_type]);
+                }
+                columns.push_back(
+                    column_descriptor(
+                        colname.str(),
+                        Rcpp::wrap(column)
+                    )
+                );
             }
-            columns.push_back(
-                column_descriptor(
-                    colname.str(),
-                    Rcpp::wrap(column)
-                )
-            );
         }
     }
 

@@ -539,9 +539,11 @@ struct population
 
     int yH[N_H_comp];   // Human compartmental states
 
-    int prev_all[11];   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ}
-    int prev_U5[11];    // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ}
-    int prev_2_10[11];   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_ACT, new_PQ}
+    std::vector<std::pair<int, int>> prev_groups; // Contains age groups for prevalence summaries
+    std::vector<std::pair<int, int>> incidence_groups; // Contains age groups for incidence summaries
+    std::vector<std::vector<int>> prev_summaries;// Contains N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches,
+    std::vector<std::vector<int>> incidence_summaries; // Contains new_PCR, new_LM, new_D, new_T
+
 
     double EIR_t;       // EIR
     int LLIN_cov_t;     // LLIN coverage
@@ -685,10 +687,10 @@ struct simulation
 
     vector<double> EIR_t;
 
-    vector<vector<int>> prev_all;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T}
-    vector<vector<int>> prev_U5;    // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T}
-    vector<vector<int>> prev_2_10;   // Contains {N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches, new_PCR, new_LM, new_D, new_T}
-
+    std::vector<std::pair<int, int>> prev_groups; // Contains age groups for prevalence summaries
+    std::vector<std::pair<int, int>> incidence_groups; // Contains age groups for incidence summaries
+    std::vector<std::vector<std::vector<int>>> prev_summaries;// Contains N_pop, PvPR_PCR, PvPR_LM, Pv_clin, PvHR, PvHR_batches,
+    std::vector<std::vector<std::vector<int>>> incidence_summaries; // Contains new_PCR, new_LM, new_D, new_T
 
     /////////////////////////////////////////
     // 0.5.3. Tracking coverage over time
@@ -725,16 +727,24 @@ int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
 Rcpp::DataFrame run_simulation(
-  const char* parameter_File,
-  const char** mosquito_File,
-  const char* coverage_File
+    const char*,
+    const char**,
+    const char*,
+    std::vector<int>,
+    std::vector<int>,
+    std::vector<int>,
+    std::vector<int>
 );
 Rcpp::DataFrame run_simulation_from_path(
-    string model_param_path,
-    string fara_param_path,
-    string punc_param_path,
-    string koli_param_path,
-    string coverage_param_path
+    string,
+    string,
+    string,
+    string,
+    string,
+    std::vector<int>,
+    std::vector<int>,
+    std::vector<int>,
+    std::vector<int>
 );
 
 

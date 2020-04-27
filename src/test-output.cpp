@@ -21,7 +21,7 @@ void expect_dataframes_equal(Rcpp::DataFrame observed, Rcpp::DataFrame expected)
     auto observed_names = static_cast<Rcpp::CharacterVector>(observed.names());
     auto expected_names = static_cast<Rcpp::CharacterVector>(expected.names());
     CATCH_REQUIRE(observed_names.length() == expected_names.length());
-    CATCH_REQUIRE(all_sug(observed_names == expected_names));
+    CATCH_REQUIRE(setequal(observed_names, expected_names));
     for (auto name : expected_names) {
         auto string_name = Rcpp::as<std::string>(name);
         Rcpp::NumericVector observed_vector = observed[string_name];
@@ -43,11 +43,21 @@ context("Model outputs") {
             individual(235., 1.),
             individual(4262., 1.)
         };
+        pop.prev_groups = {
+            std::pair<int,int>(-1, -1),
+            std::pair<int,int>(0, 5),
+            std::pair<int,int>(5, 15)
+        };
+        pop.incidence_groups = {
+            std::pair<int,int>(-1, -1),
+            std::pair<int,int>(2, 10),
+        };
+
         pop.N_pop = 5;
         POP_summary(&pop, &sim);
-        CATCH_CHECK(pop.prev_all[0] == 5);
-        CATCH_CHECK(pop.prev_U5[0] == 4);
-        CATCH_CHECK(pop.prev_2_10[0] == 1);
+        CATCH_CHECK(pop.prev_summaries[0][0] == 5);
+        CATCH_CHECK(pop.prev_summaries[1][0] == 4);
+        CATCH_CHECK(pop.prev_summaries[2][0] == 1);
     }
 
     test_that("Default model output has correct columns") {
@@ -69,17 +79,38 @@ context("Model outputs") {
                 {1, 2, 1, 1, 0, 0}
             } //t = 1
         };
-        sim.prev_all = {
-            {5, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0},
-            {5, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2}
+        sim.prev_groups = {
+            std::pair<int,int>(-1, -1),
+            std::pair<int,int>(0, 5),
+            std::pair<int,int>(5, 15)
         };
-        sim.prev_U5 = {
-            {4, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0},
-            {4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2}
+        sim.incidence_groups = {
+            std::pair<int,int>(-1, -1),
+            std::pair<int,int>(2, 10),
         };
-        sim.prev_2_10 = {
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        sim.prev_summaries = {
+            {
+                {5, 2, 2, 2, 2, 2},
+                {5, 4, 4, 4, 4, 4}
+            },
+            {
+                {4, 2, 2, 2, 2, 2},
+                {4, 4, 4, 4, 4, 4}
+            },
+            {
+                {1, 0, 0, 0, 0, 0},
+                {1, 0, 0, 0, 0, 0}
+            }
+        };
+        sim.incidence_summaries = {
+            {
+                {0, 0, 0, 0, 0},
+                {2, 2, 2, 2, 2}
+            },
+            {
+                {0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0}
+            }
         };
         sim.EIR_t = { 2.3, 5 };
         sim.LLIN_cov_t = { 4, 1 };
@@ -126,22 +157,18 @@ context("Model outputs") {
             column_descriptor("new_LM", Rcpp::NumericVector::create(0, 2)),
             column_descriptor("new_D", Rcpp::NumericVector::create(0, 2)),
             column_descriptor("new_T", Rcpp::NumericVector::create(0, 2)),
-            column_descriptor("N_pop_U5", Rcpp::NumericVector::create(4, 4)),
-            column_descriptor("PvPR_PCR_U5", Rcpp::NumericVector::create(2, 4)),
-            column_descriptor("PvPR_LM_U5", Rcpp::NumericVector::create(2, 4)),
-            column_descriptor("Pv_clin_U5", Rcpp::NumericVector::create(2, 4)),
-            column_descriptor("PvHR_U5", Rcpp::NumericVector::create(2, 4)),
-            column_descriptor("PvHR_batch_U5", Rcpp::NumericVector::create(2, 4)),
-            column_descriptor("new_PCR_U5", Rcpp::NumericVector::create(0, 2)),
-            column_descriptor("new_LM_U5", Rcpp::NumericVector::create(0, 2)),
-            column_descriptor("new_D_U5", Rcpp::NumericVector::create(0, 2)),
-            column_descriptor("new_T_U5", Rcpp::NumericVector::create(0, 2)),
-            column_descriptor("N_pop_2_10", Rcpp::NumericVector::create(1, 1)),
-            column_descriptor("PvPR_PCR_2_10", Rcpp::NumericVector::create(0, 0)),
-            column_descriptor("PvPR_LM_2_10", Rcpp::NumericVector::create(0, 0)),
-            column_descriptor("Pv_clin_2_10", Rcpp::NumericVector::create(0, 0)),
-            column_descriptor("PvHR_2_10", Rcpp::NumericVector::create(0, 0)),
-            column_descriptor("PvHR_batch_2_10", Rcpp::NumericVector::create(0, 0)),
+            column_descriptor("N_pop_0_5", Rcpp::NumericVector::create(4, 4)),
+            column_descriptor("PvPR_PCR_0_5", Rcpp::NumericVector::create(2, 4)),
+            column_descriptor("PvPR_LM_0_5", Rcpp::NumericVector::create(2, 4)),
+            column_descriptor("Pv_clin_0_5", Rcpp::NumericVector::create(2, 4)),
+            column_descriptor("PvHR_0_5", Rcpp::NumericVector::create(2, 4)),
+            column_descriptor("PvHR_batch_0_5", Rcpp::NumericVector::create(2, 4)),
+            column_descriptor("N_pop_5_15", Rcpp::NumericVector::create(1, 1)),
+            column_descriptor("PvPR_PCR_5_15", Rcpp::NumericVector::create(0, 0)),
+            column_descriptor("PvPR_LM_5_15", Rcpp::NumericVector::create(0, 0)),
+            column_descriptor("Pv_clin_5_15", Rcpp::NumericVector::create(0, 0)),
+            column_descriptor("PvHR_5_15", Rcpp::NumericVector::create(0, 0)),
+            column_descriptor("PvHR_batch_5_15", Rcpp::NumericVector::create(0, 0)),
             column_descriptor("new_PCR_2_10", Rcpp::NumericVector::create(0, 0)),
             column_descriptor("new_LM_2_10", Rcpp::NumericVector::create(0, 0)),
             column_descriptor("new_D_2_10", Rcpp::NumericVector::create(0, 0)),
