@@ -23,7 +23,12 @@ This document shows how to interpret the output from the p. vivax model.
 You can run the default model and store the output like so:
 
 ```{r}
-output <- run_simulation()
+output <- run_simulation(
+  prev_min_ages = c(0, 2),
+  prev_max_ages = c(5, 10),
+  incidence_min_ages = c(0, 2),
+  incidence_max_ages = c(5, 10)
+)
 ```
 
 Let's define some variables:
@@ -67,22 +72,22 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   for(g in 1:N_spec)
   {
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[1+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[1+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[1+(g-1)*6])
 
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[2+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[2+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[2+(g-1)*6])
 
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[3+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[3+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[3+(g-1)*6])
 
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[4+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[4+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[4+(g-1)*6])
 
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[5+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[5+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[5+(g-1)*6])
 
-    plot(x=output$time/365, y=output[,which( colnames(output)==mosq_comp[6+(g-1)*6] )], type='l',
+    plot(x=output$time/365, y=output[[mosq_comp[6+(g-1)*6]]], type='l',
     xlab="time (years)", ylab="number", main=mosq_comp[6+(g-1)*6])
   }
 ```
@@ -99,7 +104,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   points(x=output$time/365, y=output$PvPR_PCR_2_10/output$N_pop_2_10, type='l', col="orange")
 
-  points(x=output$time/365, y=output$PvPR_PCR_U5/output$N_pop_U5, type='l', col="red")
+  points(x=output$time/365, y=output$PvPR_PCR_0_5/output$N_pop_0_5, type='l', col="red")
 
 
   #############################
@@ -110,7 +115,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   points(x=output$time/365, y=output$PvPR_LM_2_10/output$N_pop_2_10, type='l', col="orange")
 
-  points(x=output$time/365, y=output$PvPR_LM_U5/output$N_pop_U5, type='l', col="red")
+  points(x=output$time/365, y=output$PvPR_LM_0_5/output$N_pop_0_5, type='l', col="red")
 
 
   #############################
@@ -121,7 +126,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   points(x=output$time/365, y=output$Pv_clin_2_10/output$N_pop_2_10, type='l', col="orange")
 
-  points(x=output$time/365, y=output$Pv_clin_U5/output$N_pop_U5, type='l', col="red")
+  points(x=output$time/365, y=output$Pv_clin_0_5/output$N_pop_0_5, type='l', col="red")
 
 
   #############################
@@ -141,7 +146,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   points(x=output$time/365, y=output$PvHR_2_10/output$N_pop_2_10, type='l', col="orange")
 
-  points(x=output$time/365, y=output$PvHR_U5/output$N_pop_U5, type='l', col="red")
+  points(x=output$time/365, y=output$PvHR_0_5/output$N_pop_0_5, type='l', col="red")
 
 
   #############################
@@ -152,7 +157,7 @@ mosq_comp = c("EL_M_far", "LL_M_far", "P_M_far", "S_M_far", "E_M_far", "I_M_far"
 
   points(x=output$time/365, y=output$PvHR_batch_2_10/output$N_pop_2_10, type='l', col="orange")
 
-  points(x=output$time/365, y=output$PvHR_batch_U5/output$N_pop_U5, type='l', col="red")
+  points(x=output$time/365, y=output$PvHR_batch_0_5/output$N_pop_0_5, type='l', col="red")
 ```
 
 ## Immunity

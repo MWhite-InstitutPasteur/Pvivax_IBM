@@ -97,9 +97,9 @@ Rcpp::DataFrame create_output_frame(const simulation& sim) {
                     colname << '_' << prev_groups[inc_prev][prev_group].first;
                     colname << '_' << prev_groups[inc_prev][prev_group].second;
                 }
-                const auto& summary = prev_summaries[inc_prev][prev_group];
+                const auto & summary = prev_summaries[inc_prev];
                 for (auto t = 0u; t < summary.size(); ++t) {
-                    column.push_back(summary[t][prev_type]);
+                    column.push_back(summary[t][prev_group][prev_type]);
                 }
                 columns.push_back(
                     column_descriptor(

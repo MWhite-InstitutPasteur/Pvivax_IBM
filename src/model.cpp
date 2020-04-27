@@ -780,6 +780,8 @@ Rcpp::DataFrame run_simulation(
 
 	PNG_sim.prev_summaries.resize(N_time);
 	PNG_sim.incidence_summaries.resize(N_time);
+	PNG_sim.prev_groups = PNG_pop.prev_groups;
+	PNG_sim.incidence_groups = PNG_pop.incidence_groups;
 
 	PNG_sim.EIR_t.resize(N_time);
 

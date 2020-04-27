@@ -9,7 +9,11 @@ run_simulation(
   farauti = NULL,
   punctulatus = NULL,
   koliensis = NULL,
-  interventions = list()
+  interventions = list(),
+  prev_min_ages = c(0, 5),
+  prev_max_ages = c(5, 15),
+  incidence_min_ages = c(0, 2),
+  incidence_max_ages = c(2, 10)
 )
 }
 \arguments{

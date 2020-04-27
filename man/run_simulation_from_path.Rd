@@ -9,7 +9,11 @@ run_simulation_from_path(
   fara_param_path,
   punc_param_path,
   koli_param_path,
-  coverage_param_path
+  coverage_param_path,
+  prev_max_ages,
+  prev_min_ages,
+  incidence_max_ages,
+  incidence_min_ages
 )
 }
 \arguments{

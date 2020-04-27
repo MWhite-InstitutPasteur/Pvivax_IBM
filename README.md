@@ -50,6 +50,18 @@ passing named lists to the `run_simulation` function as below:
 output <- run_simulation(model=list(EIR_equil=.1), koliensis=list(mu_P=.5, dry_seas=.2))
 ```
 
+You can control the disaggregation of prevalence statistics using the
+prevalence/incidence paramteters like below:
+
+```R
+output <- run_simulation(
+  prev_min_ages = c(0, 5),
+  prev_max_ages = c(5, 15),
+  incidence_min_ages = c(0, 2),
+  incidence_max_ages = c(2, 10)
+)  
+```
+
 ### Interventions
 
 The available interventions are documented
