@@ -14,6 +14,14 @@
 #'@param koliensis, A named list of parameters to override in the
 #'"koliensis_parameters.txt" file
 #'@param interventions, A named list of intervention parameters
+#'@param prev_min_ages, A vector of minimum ages to disaggregate prevalence
+#'statistics by
+#'@param prev_max_ages, A vector of maximum ages to disaggregate prevalence
+#'statistics by
+#'@param incidence_min_ages, A vector of minimum ages to disaggregate incidence 
+#'statistics by
+#'@param incidence_max_ages, A vector of maximum ages to disaggregate incidence
+#'statistics by
 #'@examples
 #'output <- run_simulation(model = list(end_time = 1991, bb = 2), farauti=list(mu_M = .5))
 #'dim(output)

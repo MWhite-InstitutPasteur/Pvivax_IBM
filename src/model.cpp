@@ -87,7 +87,14 @@ using namespace std;
 //' @param punc_param_path, the path to the punctulatus mosquito parameter files.
 //' @param koli_param_path, the path to the koliensis mosquito parameter files.
 //' @param coverage_param_path, the path of the coverage parameter file
-//' @param output_path, the path to write the results to
+//' @param prev_min_ages, A vector of minimum ages to disaggregate prevalence
+//' statistics by
+//' @param prev_max_ages, A vector of maximum ages to disaggregate prevalence
+//' statistics by
+//' @param incidence_min_ages, A vector of minimum ages to disaggregate incidence
+//' statistics by
+//' @param incidence_max_ages, A vector of maximum ages to disaggregate incidence
+//' statistics by
 //' @export
 // [[Rcpp::export]]
 Rcpp::DataFrame run_simulation_from_path(

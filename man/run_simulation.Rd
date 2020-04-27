@@ -30,6 +30,18 @@ run_simulation(
 "koliensis_parameters.txt" file}
 
 \item{interventions, }{A named list of intervention parameters}
+
+\item{prev_min_ages, }{A vector of minimum ages to disaggregate prevalence
+statistics by}
+
+\item{prev_max_ages, }{A vector of maximum ages to disaggregate prevalence
+statistics by}
+
+\item{incidence_min_ages, }{A vector of minimum ages to disaggregate incidence 
+statistics by}
+
+\item{incidence_max_ages, }{A vector of maximum ages to disaggregate incidence
+statistics by}
 }
 \description{
 parameterises and runs the model. A table with the simulation
