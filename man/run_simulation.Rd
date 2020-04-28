@@ -10,10 +10,10 @@ run_simulation(
   punctulatus = NULL,
   koliensis = NULL,
   interventions = list(),
-  prev_min_ages = c(0, 5),
-  prev_max_ages = c(5, 15),
-  incidence_min_ages = c(0, 2),
-  incidence_max_ages = c(2, 10)
+  prev_min_ages = 2,
+  prev_max_ages = 10,
+  incidence_min_ages = c(0, 5, 15),
+  incidence_max_ages = c(5, 15, 80)
 )
 }
 \arguments{
@@ -31,17 +31,19 @@ run_simulation(
 
 \item{interventions, }{A named list of intervention parameters}
 
-\item{prev_min_ages, }{A vector of minimum ages to disaggregate prevalence
+\item{prev_min_ages, }{A vector of minimum ages (in years) to disaggregate prevalence
+statistics by.}
+
+\item{prev_max_ages, }{A vector of maximum ages (in years) to disaggregate prevalence
+statistics by. Individuals will be summarised by the interval:
+[prev_min_ages[i], prev_max_ages[i])}
+
+\item{incidence_min_ages, }{A vector of minimum ages (in years) to disaggregate incidence 
 statistics by}
 
-\item{prev_max_ages, }{A vector of maximum ages to disaggregate prevalence
-statistics by}
-
-\item{incidence_min_ages, }{A vector of minimum ages to disaggregate incidence 
-statistics by}
-
-\item{incidence_max_ages, }{A vector of maximum ages to disaggregate incidence
-statistics by}
+\item{incidence_max_ages, }{A vector of maximum ages (in years) to disaggregate incidence
+statistics by. Individuals will be summarised by the interval:
+[incidence_min_ages[i], incidence_max_ages[i])}
 }
 \description{
 parameterises and runs the model. A table with the simulation
