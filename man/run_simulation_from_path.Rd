@@ -10,7 +10,10 @@ run_simulation_from_path(
   punc_param_path,
   koli_param_path,
   coverage_param_path,
-  output_path
+  prev_max_ages,
+  prev_min_ages,
+  incidence_max_ages,
+  incidence_min_ages
 )
 }
 \arguments{
@@ -24,7 +27,17 @@ run_simulation_from_path(
 
 \item{coverage_param_path, }{the path of the coverage parameter file}
 
-\item{output_path, }{the path to write the results to}
+\item{prev_max_ages, }{A vector of maximum ages to disaggregate prevalence
+statistics by}
+
+\item{prev_min_ages, }{A vector of minimum ages to disaggregate prevalence
+statistics by}
+
+\item{incidence_max_ages, }{A vector of maximum ages to disaggregate incidence
+statistics by}
+
+\item{incidence_min_ages, }{A vector of minimum ages to disaggregate incidence
+statistics by}
 }
 \description{
 Entrypoint for the simulation

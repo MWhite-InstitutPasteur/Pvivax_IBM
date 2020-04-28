@@ -9,7 +9,11 @@ run_simulation(
   farauti = NULL,
   punctulatus = NULL,
   koliensis = NULL,
-  interventions = list()
+  interventions = list(),
+  prev_min_ages = 2,
+  prev_max_ages = 10,
+  incidence_min_ages = c(0, 5, 15),
+  incidence_max_ages = c(5, 15, 80)
 )
 }
 \arguments{
@@ -26,6 +30,20 @@ run_simulation(
 "koliensis_parameters.txt" file}
 
 \item{interventions, }{A named list of intervention parameters}
+
+\item{prev_min_ages, }{A vector of minimum ages (in years) to disaggregate prevalence
+statistics by.}
+
+\item{prev_max_ages, }{A vector of maximum ages (in years) to disaggregate prevalence
+statistics by. Individuals will be summarised by the interval:
+[prev_min_ages[i], prev_max_ages[i])}
+
+\item{incidence_min_ages, }{A vector of minimum ages (in years) to disaggregate incidence 
+statistics by}
+
+\item{incidence_max_ages, }{A vector of maximum ages (in years) to disaggregate incidence
+statistics by. Individuals will be summarised by the interval:
+[incidence_min_ages[i], incidence_max_ages[i])}
 }
 \description{
 parameterises and runs the model. A table with the simulation
