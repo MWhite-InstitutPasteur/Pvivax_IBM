@@ -13,7 +13,10 @@ run_simulation(
   prev_min_ages = 2,
   prev_max_ages = 10,
   incidence_min_ages = c(0, 5, 15),
-  incidence_max_ages = c(5, 15, 80)
+  incidence_max_ages = c(5, 15, 80),
+  a0 = NULL,
+  a_seasonality = NULL,
+  b_seasonality = NULL
 )
 }
 \arguments{
@@ -44,6 +47,13 @@ statistics by}
 \item{incidence_max_ages, }{A vector of maximum ages (in years) to disaggregate incidence
 statistics by. Individuals will be summarised by the interval:
 [incidence_min_ages[i], incidence_max_ages[i])}
+
+\item{a0}{If set, the seasonality will be modelled with the fourier method and
+a0 will be the first parameter}
+
+\item{a_seasonality}{the a parameters for the fourier model of seasonality}
+
+\item{b_seasonality}{the b parameters for the fourier model of seasonality}
 }
 \description{
 parameterises and runs the model. A table with the simulation
