@@ -8,9 +8,20 @@
 #' @param punc_param_path, the path to the punctulatus mosquito parameter files.
 #' @param koli_param_path, the path to the koliensis mosquito parameter files.
 #' @param coverage_param_path, the path of the coverage parameter file
-#' @param output_path, the path to write the results to
+#' @param prev_min_ages, A vector of minimum ages to disaggregate prevalence
+#' statistics by
+#' @param prev_max_ages, A vector of maximum ages to disaggregate prevalence
+#' statistics by
+#' @param incidence_min_ages, A vector of minimum ages to disaggregate incidence
+#' statistics by
+#' @param incidence_max_ages, A vector of maximum ages to disaggregate incidence
+#' statistics by
+#' @param use_fourier boolean switch for using the fourier method for modelling seasonality
+#' @param a0 the a0 parameter for the fourier model of seasonality
+#' @param a_seasonality the a parameters for the fourier model of seasonality
+#' @param b_seasonality the b parameters for the fourier model of seasonality
 #' @export
-run_simulation_from_path <- function(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path) {
-    .Call(`_vivax_run_simulation_from_path`, model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path)
+run_simulation_from_path <- function(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, prev_max_ages, prev_min_ages, incidence_max_ages, incidence_min_ages, use_fourier, a0, a_seasonality, b_seasonality) {
+    .Call(`_vivax_run_simulation_from_path`, model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, prev_max_ages, prev_min_ages, incidence_max_ages, incidence_min_ages, use_fourier, a0, a_seasonality, b_seasonality)
 }
 

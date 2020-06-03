@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // run_simulation_from_path
-int run_simulation_from_path(std::string model_param_path, std::string fara_param_path, std::string punc_param_path, std::string koli_param_path, std::string coverage_param_path, std::string output_path);
-RcppExport SEXP _vivax_run_simulation_from_path(SEXP model_param_pathSEXP, SEXP fara_param_pathSEXP, SEXP punc_param_pathSEXP, SEXP koli_param_pathSEXP, SEXP coverage_param_pathSEXP, SEXP output_pathSEXP) {
+Rcpp::DataFrame run_simulation_from_path(std::string model_param_path, std::string fara_param_path, std::string punc_param_path, std::string koli_param_path, std::string coverage_param_path, std::vector<int> prev_max_ages, std::vector<int> prev_min_ages, std::vector<int> incidence_max_ages, std::vector<int> incidence_min_ages, bool use_fourier, double a0, std::vector<double> a_seasonality, std::vector<double> b_seasonality);
+RcppExport SEXP _vivax_run_simulation_from_path(SEXP model_param_pathSEXP, SEXP fara_param_pathSEXP, SEXP punc_param_pathSEXP, SEXP koli_param_pathSEXP, SEXP coverage_param_pathSEXP, SEXP prev_max_agesSEXP, SEXP prev_min_agesSEXP, SEXP incidence_max_agesSEXP, SEXP incidence_min_agesSEXP, SEXP use_fourierSEXP, SEXP a0SEXP, SEXP a_seasonalitySEXP, SEXP b_seasonalitySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,8 +16,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type punc_param_path(punc_param_pathSEXP);
     Rcpp::traits::input_parameter< std::string >::type koli_param_path(koli_param_pathSEXP);
     Rcpp::traits::input_parameter< std::string >::type coverage_param_path(coverage_param_pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type output_path(output_pathSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_simulation_from_path(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, output_path));
+    Rcpp::traits::input_parameter< std::vector<int> >::type prev_max_ages(prev_max_agesSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type prev_min_ages(prev_min_agesSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type incidence_max_ages(incidence_max_agesSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type incidence_min_ages(incidence_min_agesSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_fourier(use_fourierSEXP);
+    Rcpp::traits::input_parameter< double >::type a0(a0SEXP);
+    Rcpp::traits::input_parameter< std::vector<double> >::type a_seasonality(a_seasonalitySEXP);
+    Rcpp::traits::input_parameter< std::vector<double> >::type b_seasonality(b_seasonalitySEXP);
+    rcpp_result_gen = Rcpp::wrap(run_simulation_from_path(model_param_path, fara_param_path, punc_param_path, koli_param_path, coverage_param_path, prev_max_ages, prev_min_ages, incidence_max_ages, incidence_min_ages, use_fourier, a0, a_seasonality, b_seasonality));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -25,7 +32,7 @@ END_RCPP
 RcppExport SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_vivax_run_simulation_from_path", (DL_FUNC) &_vivax_run_simulation_from_path, 6},
+    {"_vivax_run_simulation_from_path", (DL_FUNC) &_vivax_run_simulation_from_path, 13},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
     {NULL, NULL, 0}
 };
