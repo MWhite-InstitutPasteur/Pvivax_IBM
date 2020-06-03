@@ -117,3 +117,32 @@ test_that("intervention file generator errors on bad coverage", {
   )
 })
 
+test_that("mismatching summary arrays error", {
+  expect_error(
+    run_simulation(
+      incidence_min_ages = c(0, 5),
+      incidence_min_ages = c(5)
+    ),
+    '*'
+  )
+})
+
+test_that("mismatching seasonality arrays error", {
+  expect_error(
+    run_simulation(
+      a0 = 5,
+      a_seasonality = c(0, 5),
+      b_seasonality = c(5)
+    ),
+    '*'
+  )
+})
+
+test_that("empty seasonality arrays error", {
+  expect_error(
+    run_simulation(
+      a0 = 5
+    ),
+    '*'
+  )
+})

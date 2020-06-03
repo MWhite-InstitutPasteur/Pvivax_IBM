@@ -27,7 +27,7 @@ using namespace std;
 #define N_spec_max 3
 #define N_spec 3
 
-#define log2 0.69314718056
+#define LOG2 0.69314718056
 
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
@@ -180,8 +180,6 @@ struct params
     double dry_seas[N_spec];        // Proportion of dry season transmission compared to mean
     double kappa_seas[N_spec];      // Shape parameter for seasonality
     double t_peak_seas[N_spec];     // Offset for seasonal transmission
-    double denom_seas[N_spec];      // Denominator for seasonality
-
 
     /////////////////////////////////
     // Larval paramters
@@ -335,6 +333,11 @@ struct params
     double K_MAT[K_max + 1][K_max + 1];
     double L_MAT[K_max + 1][K_max + 1];
     double H_MAT[K_max + 1][K_max + 1];
+
+    bool use_fourier;
+    double a0;
+    std::vector<double> a_seasonality;
+    std::vector<double> b_seasonality;
 };
 
 
@@ -726,6 +729,7 @@ void model_simulator(params* theta, population* POP, intervention* INTVEN, simul
 int CH_sample(double *xx, int nn);
 double phi_inv(double pp, double mu, double sigma);
 double gammln(const double xx);
+
 Rcpp::DataFrame run_simulation(
     const char*,
     const char**,
@@ -733,18 +737,27 @@ Rcpp::DataFrame run_simulation(
     std::vector<int>,
     std::vector<int>,
     std::vector<int>,
-    std::vector<int>
+    std::vector<int>,
+    bool,
+    double,
+    std::vector<double>,
+    std::vector<double>
 );
+
 Rcpp::DataFrame run_simulation_from_path(
-    string,
-    string,
-    string,
-    string,
-    string,
+    std::string,
+    std::string,
+    std::string,
+    std::string,
+    std::string,
     std::vector<int>,
     std::vector<int>,
     std::vector<int>,
-    std::vector<int>
+    std::vector<int>,
+    bool,
+    double,
+    std::vector<double>,
+    std::vector<double>
 );
 
 

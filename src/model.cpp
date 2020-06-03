@@ -60,6 +60,7 @@
 #include "rng.h"
 #include "model.h"
 #include "output.h"
+#include "seasonality.h"
 #include <omp.h>
 #include <vector>
 #include <algorithm>
@@ -95,6 +96,10 @@ using namespace std;
 //' statistics by
 //' @param incidence_max_ages, A vector of maximum ages to disaggregate incidence
 //' statistics by
+//' @param use_fourier boolean switch for using the fourier method for modelling seasonality
+//' @param a0 the a0 parameter for the fourier model of seasonality
+//' @param a_seasonality the a parameters for the fourier model of seasonality
+//' @param b_seasonality the b parameters for the fourier model of seasonality
 //' @export
 // [[Rcpp::export]]
 Rcpp::DataFrame run_simulation_from_path(
@@ -106,7 +111,11 @@ Rcpp::DataFrame run_simulation_from_path(
     std::vector<int> prev_max_ages,
     std::vector<int> prev_min_ages,
     std::vector<int> incidence_max_ages,
-    std::vector<int> incidence_min_ages
+    std::vector<int> incidence_min_ages,
+    bool use_fourier,
+    double a0,
+    std::vector<double> a_seasonality,
+    std::vector<double> b_seasonality
 ) {
 
   const char* mosquito_File[N_spec_max] = {
@@ -122,7 +131,11 @@ Rcpp::DataFrame run_simulation_from_path(
     prev_max_ages,
     prev_min_ages,
     incidence_max_ages,
-    incidence_min_ages
+    incidence_min_ages,
+    use_fourier,
+    a0,
+    a_seasonality,
+    b_seasonality
   );
 }
 
@@ -133,7 +146,11 @@ Rcpp::DataFrame run_simulation(
     std::vector<int> prev_max_ages,
     std::vector<int> prev_min_ages,
     std::vector<int> incidence_max_ages,
-    std::vector<int> incidence_min_ages
+    std::vector<int> incidence_min_ages,
+    bool use_fourier,
+    double a0,
+    std::vector<double> a_seasonality,
+    std::vector<double> b_seasonality
 ) {
 
 	clock_t clock_time;
@@ -171,6 +188,14 @@ Rcpp::DataFrame run_simulation(
 	        std::pair<int, int>(incidence_min_ages[g], incidence_max_ages[g])
         );
 	}
+
+	//set up fourier parameters
+    Pv_mod_par.use_fourier = use_fourier;
+    if (Pv_mod_par.use_fourier) {
+        Pv_mod_par.a0 = a0;
+        Pv_mod_par.a_seasonality = move(a_seasonality);
+        Pv_mod_par.b_seasonality = move(b_seasonality);
+    }
 
 	Rcpp::Rcout << "Reading in parameter file............." << endl;
 	Rcpp::Rcout << endl;
@@ -453,9 +478,6 @@ Rcpp::DataFrame run_simulation(
 		mosquito_Stream >> discard >> Pv_mod_par.kappa_seas[g] >> discard;    // Shape parameter for seasonality
 		mosquito_Stream >> discard >> Pv_mod_par.t_peak_seas[g] >> discard;   // Timing of peak for seasonal transmission
 
-		Pv_mod_par.denom_seas[g] = exp(gammln(0.5) + gammln(Pv_mod_par.kappa_seas[g] + 0.5) - gammln(Pv_mod_par.kappa_seas[g] + 1.0)) / 3.14159265359;
-
-
 		//////////////////////////////////////////////
 		// Entomology paramters
 
@@ -541,7 +563,7 @@ Rcpp::DataFrame run_simulation(
 
 	Pv_mod_par.age_0_inv = 1.0 / Pv_mod_par.age_0;                 // Inverse of age-dependent biting parameter
 
-	Pv_mod_par.A_PCR_50pc_inv = log2 / Pv_mod_par.A_PCR_50pc;      // Immune scalar for clearance of infection
+	Pv_mod_par.A_PCR_50pc_inv = LOG2 / Pv_mod_par.A_PCR_50pc;      // Immune scalar for clearance of infection
 	Pv_mod_par.A_LM_50pc_inv = 1.0 / Pv_mod_par.A_LM_50pc;        // Immune scalar for BS infection
 	Pv_mod_par.A_D_50pc_inv = 1.0 / Pv_mod_par.A_D_50pc;         // Immune scalar for clinical disease
 
@@ -850,7 +872,7 @@ void mosq_derivs(const double t, double (&yM)[N_spec][N_M_comp], double (&dyMdt)
 
 	for (int g = 0; g < N_spec; g++)
 	{
-		Karry_seas_inv[g] = 1.0 / (theta->Karry[g] * ( theta->dry_seas[g] + (1 - theta->dry_seas[g])*pow(0.5 + 0.5*cos(0.01721421*(t - theta->t_peak_seas[g])), theta->kappa_seas[g])/ theta->denom_seas[g] ) );
+		Karry_seas_inv[g] = 1.0 / (theta->Karry[g] * seasonality(*theta, g, t));
 
 		//Karry_seas_inv[g] = 1.0/theta->Karry[g];
 

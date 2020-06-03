@@ -13,7 +13,11 @@ run_simulation_from_path(
   prev_max_ages,
   prev_min_ages,
   incidence_max_ages,
-  incidence_min_ages
+  incidence_min_ages,
+  use_fourier,
+  a0,
+  a_seasonality,
+  b_seasonality
 )
 }
 \arguments{
@@ -38,6 +42,14 @@ statistics by}
 
 \item{incidence_min_ages, }{A vector of minimum ages to disaggregate incidence
 statistics by}
+
+\item{use_fourier}{boolean switch for using the fourier method for modelling seasonality}
+
+\item{a0}{the a0 parameter for the fourier model of seasonality}
+
+\item{a_seasonality}{the a parameters for the fourier model of seasonality}
+
+\item{b_seasonality}{the b parameters for the fourier model of seasonality}
 }
 \description{
 Entrypoint for the simulation
