@@ -33,7 +33,7 @@ void expect_dataframes_equal(Rcpp::DataFrame observed, Rcpp::DataFrame expected)
 
 context("Model outputs") {
 
-    test_that("Summary disaggregates population correctly") {
+    test_that("Summary disaggregates population counts correctly") {
         simulation sim;
         population pop;
         pop.people = {
@@ -58,6 +58,67 @@ context("Model outputs") {
         CATCH_CHECK(pop.prev_summaries[0][0] == 5);
         CATCH_CHECK(pop.prev_summaries[1][0] == 4);
         CATCH_CHECK(pop.prev_summaries[2][0] == 1);
+    }
+
+    test_that("Summary disaggregates incidence counts correctly") {
+        simulation sim;
+        population pop;
+        pop.people = {
+            individual(52., 1.), //U5
+            individual(29., 1.), //U5
+            individual(1352., 1.), //U5
+            individual(235., 1.), //U5
+            individual(4262., 1.) //5 - 15
+        };
+        pop.prev_groups = {};
+        pop.incidence_groups = {
+            std::pair<int,int>(-1, -1),
+            std::pair<int,int>(0, 5),
+            std::pair<int,int>(5, 15)
+        };
+
+        pop.N_pop = 5;
+        //initialise people
+        for (auto i = 0u; i < pop.N_pop; ++i) {
+            pop.people[i].I_PCR_new = 0;
+            pop.people[i].I_LM_new = 0;
+            pop.people[i].I_D_new = 0;
+            pop.people[i].ACT_new = 0;
+            pop.people[i].PQ_new = 0;
+        }
+
+        //set up test case
+        pop.people[0].I_PCR_new = 1;
+        pop.people[1].I_PCR_new = 1;
+        pop.people[2].I_PCR_new = 1;
+        pop.people[3].ACT_new = 1;
+        pop.people[4].ACT_new = 1;
+
+        //initialise summaries
+        pop.incidence_summaries = {
+            vector<int>(0, 5),
+            vector<int>(0, 5),
+            vector<int>(0, 5)
+        };
+        POP_summary(&pop, &sim);
+        //All
+        CATCH_CHECK(pop.incidence_summaries[0][0] == 3);
+        CATCH_CHECK(pop.incidence_summaries[0][1] == 0);
+        CATCH_CHECK(pop.incidence_summaries[0][2] == 0);
+        CATCH_CHECK(pop.incidence_summaries[0][3] == 2);
+        CATCH_CHECK(pop.incidence_summaries[0][4] == 0);
+        //U5
+        CATCH_CHECK(pop.incidence_summaries[1][0] == 3);
+        CATCH_CHECK(pop.incidence_summaries[1][1] == 0);
+        CATCH_CHECK(pop.incidence_summaries[1][2] == 0);
+        CATCH_CHECK(pop.incidence_summaries[1][3] == 1);
+        CATCH_CHECK(pop.incidence_summaries[1][4] == 0);
+        //5-15
+        CATCH_CHECK(pop.incidence_summaries[2][0] == 0);
+        CATCH_CHECK(pop.incidence_summaries[2][1] == 0);
+        CATCH_CHECK(pop.incidence_summaries[2][2] == 0);
+        CATCH_CHECK(pop.incidence_summaries[2][3] == 1);
+        CATCH_CHECK(pop.incidence_summaries[2][4] == 0);
     }
 
     test_that("Default model output has correct columns") {

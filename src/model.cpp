@@ -1498,10 +1498,10 @@ void POP_summary(population* pop, simulation* SIM)
                 ////////////////////////////////////////
                 // Incidence
                 pop->incidence_summaries[i][0] += pop->people[n].I_PCR_new;
-                pop->incidence_summaries[i][0] += pop->people[n].I_LM_new;
-                pop->incidence_summaries[i][0] += pop->people[n].I_D_new;
-                pop->incidence_summaries[i][0] += pop->people[n].ACT_new;
-                pop->incidence_summaries[i][0] += pop->people[n].PQ_new;
+                pop->incidence_summaries[i][1] += pop->people[n].I_LM_new;
+                pop->incidence_summaries[i][2] += pop->people[n].I_D_new;
+                pop->incidence_summaries[i][3] += pop->people[n].ACT_new;
+                pop->incidence_summaries[i][4] += pop->people[n].PQ_new;
             }
         }
 	}
